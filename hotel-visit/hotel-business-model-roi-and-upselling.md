@@ -264,13 +264,28 @@ Deposits and cancellation terms could also affect cash flow and risk, but these 
 
 A long banquet can consume more labour and block the next event. These are plausible links to the learning manager's reported overrun problem; their size and frequency remain unknown.
 
-### 7.7 Academic evidence: function space is its own revenue-management problem
+### 7.7 What published studies actually show
 
-Kimes and McGuire's **“Function-space Revenue Management: A Case Study from Singapore”** (2001) addresses revenue management for hotel function spaces. Its repository abstract supports treating function space as a revenue source that can be managed systematically. The full paper could not be retrieved reliably in this review, so no numerical effects or detailed methods are attributed to it. Its age also prevents its use as a current Singapore margin benchmark. [Cornell research record](https://ecommons.cornell.edu/entities/publication/64bb0714-8afd-4bc1-bf01-843083c8f409)
+The direct research base is small. The studies below support narrower conclusions about sales, revenue, service quality or space management. None reports a representative net wedding margin or investment ROI for Singapore hotels.
 
-Kimes' 2017 survey of approximately 400 revenue-management professionals found that extending revenue management across hotel income streams remained incomplete. It provides historical organisational context, not evidence of present-day adoption or wedding profitability. [Cornell, 2017 research record and abstract](https://ecommons.cornell.edu/entities/publication/c033523d-5aa9-4c64-b2a3-531573c084bb)
+| Study | Data and method | Result relevant to this project | What it cannot establish |
+|---|---|---|---|
+| Yin, Fang and Cheng (2022), *Frontiers in Psychology* | Logistic regression using 763 banquet enquiries at one five-star Hilton in Quanzhou, China, from August 2018 to January 2019; 44 cases were weddings | Product type, price and promotion were associated with whether a banquet enquiry converted. Weddings recorded 18 successes and 26 failures. The adjusted odds ratio for weddings relative to pure catering was 2.032, but its 95% CI was 0.947–4.362 and p=0.069 | At the conventional 5% level, the wedding-specific coefficient was not statistically significant. It measures sales conversion at one hotel, not wedding profit, ROI or Singapore performance |
+| Utama, Tuwi and Mareni (2026), *Journal of Tourism Economics and Policy* | Multiple regression using 36 monthly observations from one anonymised Indonesian resort for 2022–2024: counts of weddings and MICE events versus F&B revenue | Weddings and MICE together accounted for a reported 44.5% of variation in monthly F&B revenue; the authors report that weddings generated more revenue per occasion, whereas MICE was more frequent | The 44.5% is combined explanatory power, not “44.5% of revenue caused by weddings.” Event size, pricing, seasonality and other omitted factors may confound the relationship. It measures revenue, not cost, profit or ROI |
+| Kimes and McGuire (2001), *Cornell Hotel and Restaurant Administration Quarterly* | Singapore function-space case study | Establishes function-space revenue management as a hotel problem and argues that function spaces can be managed to increase their revenue contribution | It is not a current wedding-margin benchmark; the repository record does not establish a general effect size |
+| Noone, Enz and Glassmire (2017), Cornell Center for Hospitality Research | Semi-structured interviews with 16 senior hotel leaders, revenue-management vendors and solution providers | Participants said revenue management should move from room revenue towards strategic profit across F&B, spas and function space; they also described these streams as more complex than rooms | Expert interviews do not quantify wedding profitability or prove that a particular system increases profit |
+| Yi and Kang (2026), *Sustainability* | Scale development with 216 US respondents who had attended a hotel banquet in the prior 36 months | Identified four banquet service-quality dimensions: facilities and operations, service performance, guest care and venue quality. This supports analysing banquets as coordinated event systems | Respondent perceptions do not measure revenue, labour productivity, weddings alone or ROI |
+| Sanches Cartas, Guerreiro and Barreira (2025), *Journal of Tourism, Sustainability and Well-being* | Thematic analysis of 173 TripAdvisor comments about weddings at one five-star resort in Portugal | Reviews were positive about venue conditions, location, staff and cleanliness, while price and styling attracted negative comments; the study links these attributes with experience and recommendation intentions | Online reviews are self-selected and do not establish financial returns or causal effects |
 
-**Our analytical implication:** evaluate the ballroom's usable area and occupied time, including setup and teardown, alongside total event contribution. A larger bill may involve more space, longer occupation or greater cost.
+Sources: [Yin et al., 2022](https://doi.org/10.3389/fpsyg.2022.973904); [Utama et al., 2026](https://doi.org/10.38142/jtep.v6i1.1676); [Kimes and McGuire, 2001](https://ecommons.cornell.edu/entities/publication/64bb0714-8afd-4bc1-bf01-843083c8f409); [Noone et al., 2017](https://ecommons.cornell.edu/entities/publication/bc445799-c6ce-4168-b86a-d87bbc25f81a/full); [Yi and Kang, 2026](https://doi.org/10.3390/su18052622); [Sanches Cartas et al., 2025](https://doi.org/10.34623/8k33-zc57).
+
+#### Interpretation
+
+The safest conclusion is that weddings are a commercially meaningful banquet product, but the research does not support a universal claim that they are the most profitable hotel activity.
+
+The Quanzhou sales study is useful for understanding conversion. The Indonesian resort study is the only direct revenue analysis found, but its 36 observations and combined wedding/MICE model make it unsuitable for estimating wedding ROI. The service studies support the operational concern from the visits: outcomes depend on coordinated delivery, facilities, staff performance and guest care.
+
+**Our analytical implication:** evaluate contribution per occupied ballroom-hour or square-metre-hour, including setup and teardown, alongside total event contribution. Also record service failures, overtime and recovery costs. A larger bill may involve more space, longer occupation and greater delivery cost.
 
 ### 7.8 How to compare weddings, conferences and rooms fairly
 
@@ -353,6 +368,6 @@ For both visits, upselling is one possible financial consequence of operational 
 - Portfolio averages cannot establish the profitability of Novotel or PARKROYAL.
 - The financial benchmarks are industry disclosures and practitioner studies. The wedding section also includes historical academic research records; none establishes a causal effect of upselling on satisfaction or loyalty.
 - No representative cross-industry upsell adoption rate was established.
-- No universal investment ROI or reliable net-margin ranking for weddings, conferences, restaurants and bars was established.
+- No universal investment ROI or reliable net-margin ranking for weddings, conferences, restaurants and bars was established. The direct wedding studies found are single-property or perception studies and do not report net margins.
 - Hypothetical examples are explicitly labelled and must not be presented as visit findings.
 - This document provides financial context; it does not endorse a particular technology or intervention.
