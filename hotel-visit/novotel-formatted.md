@@ -110,8 +110,8 @@
 
 ### Workload and quotas
 
-- Room attendants work approximately 9 a.m. to 9 p.m. using room quotas.
-- Work beyond the quota may be treated as overtime or paid per room.
+- Outsourced room attendants were described as working within an approximately 9 a.m.–9 p.m. window and receiving a daily quota of around 20 rooms.
+- The strongest group recollection is that the 21st room, or any room beyond the assigned quota, is treated as overtime. The exact relationship between the working hours, room quota and overtime payment remains unverified.
 - A fixed number of rooms is assigned daily.
 - A room displaying “do not clean” may still count within the assigned quota.
 - Cleaning time varies according to:
@@ -160,13 +160,14 @@
 
 - Front-of-house employees need broad guest information to serve guests effectively.
 - Not every employee should have access to all guest information.
+- ACDC guest profiles are available across Accor properties worldwide, while access within a hotel is restricted according to an employee’s role and operational need.
 - Guest data may include:
   - Preferences
   - Favourite fruit
   - Allergies
   - Previous stays
   - Negative or concerning guest behaviour
-- The discussion highlighted a tension between giving staff useful information and protecting guest information.
+- The discussion highlighted a tension between making profiles available across Accor properties and restricting information to employees who require it for their work.
 
 ## Guest Expectations and Conflict
 
@@ -190,6 +191,8 @@
 - Billing may use cash, credit cards or virtual credit cards.
 - Cash-paying guests may create financial exposure if payment is not secured.
 - Some guests extend their stays day by day and pay in cash (suspected vice activity).
+- The Learning Manager directly described behavioural indicators used to identify possible vice-related activity. These include paying in cash, extending a stay one day at a time and reviewing relevant behavioural notes already recorded in ACDC.
+- These indicators may prompt additional attention but do not, by themselves, confirm misconduct.
 - Billing instructions are entered into the hotel system.
 
 ## Guest Personalisation and Loyalty
@@ -197,10 +200,14 @@
 ### Accor Customer Digital Card
 
 - The Accor Customer Digital Card (ACDC) is a global guest-information system.
+- The Learning Manager demonstrated the ACDC website during the visit.
+- Its interface was described as a text-based list of guest information and observations entered by employees.
 - It records guest preferences and interests.
 - The hotel and guest can both update information.
 - The system includes a satisfaction tab.
 - Guest profiles may be reviewed approximately three days before arrival.
+- The General Manager and relevant guest-experience managers manually review guest profiles and use the recorded observations to make decisions about the guest’s stay, including room-level arrangements.
+- For some of the hotel’s highest-priority VIP arrivals, the General Manager may begin planning approximately three days in advance.
 - Platinum-tier and higher members receive particular attention before arrival.
 - Silver-tier and higher members may receive priority.
 - Approximately 15% of arrivals were described as members with usable preference information.
@@ -220,6 +227,7 @@
   - Sweetener
   - Turndown preferences
   - Sleeping position or which side of the bed is used
+- The level of detail can therefore extend to observations such as which side of the bed a returning guest prefers.
 - Consistency is important when applying recorded preferences.
 - Higher-tier loyalty members were described as more likely to be highly satisfied.
 - Repeat visits and a lack of complaints were mentioned as signs that personalisation may be helping.
@@ -228,7 +236,7 @@
 
 - Food-and-beverage employees often recognise repeat guests from memory.
 - Employees may not have time to check ACDC during service.
-- A physical VIP wall may show guest preferences, such as the way a guest prefers eggs at breakfast.
+- The Learning Manager stated that staff use a physical VIP board containing guest photographs and preferences, such as the way a guest prefers eggs at breakfast. The group did not view the board during the visit.
 - Preference information may not transfer consistently between shifts.
 
 ## Upselling and Revenue Pressure
@@ -313,6 +321,11 @@
 - A delivery robot for in-room dining was mentioned.
 - The manager expressed concern that excessive bot use could reduce customer satisfaction because guests still value human interaction.
 - A comparison with highly automated service in Japan was mentioned.
+
+### Back-office work observed during the visit
+
+- During the back-office tour, the group observed approximately three employees working with spreadsheets and responding to emails.
+- This suggests that some administrative work still depends on manual review and communication even though the hotel’s main systems are cloud-based and relatively well integrated.
 
 ## Training, Job Design and Service Consistency
 
