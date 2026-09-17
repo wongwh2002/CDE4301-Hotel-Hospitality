@@ -373,3 +373,20 @@ fnb
 kitchen is ok
 may-july more quiet
 back of house had to do breakfast
+
+## Post-Visit Group Summary
+
+The group later reviewed and clarified several points from the Learning Manager’s explanation. This section is an anonymous, professionally worded summary of that discussion rather than a verbatim record of the messages.
+
+- The Learning Manager demonstrated the ACDC website. It appeared to present guest information and employee observations as a text-based list.
+- Employees add observations about loyalty members to ACDC. The General Manager and relevant guest-experience managers manually review these entries and use them to make decisions about a guest’s stay, including room-level arrangements.
+- For some of the highest-priority VIP guests, the General Manager may begin planning approximately three days before arrival.
+- The preference information can be highly detailed, including observations such as which side of the bed a guest prefers.
+- ACDC profiles are shared across Accor properties worldwide, while access within an individual hotel is restricted according to the employee’s role and operational need.
+- The Learning Manager stated that staff use a physical board containing VIP photographs and preferences to support guest recognition. The group did not view this board during the visit.
+- Food-and-beverage recognition still relies substantially on staff memory, and there may be no explicit handover between shifts to inform incoming employees that a returning guest is present.
+- The hotel’s main operational problem was described as insufficient manpower. There are not enough employees to complete all required work consistently, particularly during busy periods.
+- Outsourced housekeeping attendants were recalled as receiving a quota of approximately 20 rooms within an approximately 9 a.m.–9 p.m. working window. The strongest recollection is that the 21st room, or work beyond the daily room quota, is treated as overtime; however, the precise relationship between working hours, quotas and overtime payment remains unverified.
+- The Learning Manager directly described behavioural indicators used to identify possible vice-related activity. These include cash payment, extending a stay one day at a time and checking previous behavioural observations stored in ACDC. These indicators may prompt attention but do not independently confirm misconduct.
+- During the back-office tour, the group observed approximately three employees working with spreadsheets and replying to emails.
+- The group noted a question about how worldwide sharing of ACDC profiles is reconciled with role-based access and guest-data privacy. The manager’s explanation was that profiles can be used across Accor properties, while individual employees should receive only the information necessary for their duties.
