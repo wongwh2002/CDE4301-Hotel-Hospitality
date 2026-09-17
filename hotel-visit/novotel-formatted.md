@@ -378,6 +378,7 @@
 - Exact name and purpose of the “Ariea” billing system
 - Exact expansions of `VD`, `VC` and `VCI`
 - Exact meaning of the STB reference
+
 ## Main Problems Highlighted
 
 1. **Insufficient manpower and recruitment constraints:** The hotel faces difficulty recruiting enough employees, while foreign-worker quotas and limited local interest restrict the available workforce. Shortages affect front office, housekeeping, guest requests and other daily operations.
