@@ -179,7 +179,142 @@ A programme's economic value is:
 
 Compare matched periods or controlled groups where feasible. A before/after increase can reflect occupancy, guest mix, seasonality or room-category availability rather than better selling.
 
-## 7. Implications for the Two Visits
+## 7. Weddings: Revenue, Costs and Commercial Importance
+
+### 7.1 What the evidence establishes
+
+Weddings can generate substantial contracted sales for a ballroom hotel, but the available sources do not establish a representative Singapore wedding profit margin or prove that weddings outperform rooms annually. Published packages reveal pricing and inclusions; they do not reveal labour costs, negotiated discounts, utilisation or investment returns.
+
+Wedding catering overlaps with F&B reporting. Associated bedrooms belong to the rooms business, and venue income depends on accounting policy. Analyse the wedding across departments without adding its total to the same departmental sales twice.
+
+### 7.2 Singapore examples from official hotel packages
+
+Advertised 2026 prices below were checked on 17 September 2026. They are published terms, not evidence of realised average selling prices. “++” denotes additional service charge and GST under the packages; calculations below exclude both, extras and special-date surcharges.
+
+**PARKROYAL COLLECTION Pickering — banquet**
+
+| Item | Published terms / calculation |
+|---|---|
+| Monday–Thursday package | S$1,588++ per table of ten |
+| Saturday package | S$2,298++ per table of ten |
+| William Pickering Ballroom | Minimum 20 tables; maximum 24 |
+| Minimum-size weekday example | 20 × S$1,588 = S$31,760 before additions |
+| Minimum-size Saturday example | 20 × S$2,298 = S$45,960 before additions |
+
+Packages include accommodation, beverages and event benefits; Saturday inclusions differ. Therefore, the S$14,200 difference is not pure profit or a clean estimate of willingness to pay for Saturday. [Official 2026 banquet package, p. 1](https://www.panpacific.com/content/dam/pphg-revamp/en/prsps/prc-2-0/celebration/PRSPS_2026_Wedding_Banquet_Package.pdf)
+
+This is a named secondary-research example. The visit notes do not establish which PARKROYAL property the group visited.
+
+**Pan Pacific Singapore — larger ballroom and paid enhancements**
+
+Its Pacific Ballroom accommodates 28–50 tables. Published weekend dinner pricing is S$2,308 per table of ten, before service charge, GST and applicable surcharges. At 30 tables, base sales calculate to S$69,240.
+
+The same brochure lists paid food enhancements, including a S$1,099 charcuterie offering for 100 people and S$1,088 late-night food for 50 people. These demonstrate actual add-on offers, not uptake or profit. Bundled suites and beverages must also be costed. [Official 2026 wedding brochure, pp. 1–4](https://www.panpacific.com/content/dam/pphg-revamp/en/ppsin/celebrations/landing/ppain-celebrations-wedding-packages-2026.pdf)
+
+**PARKROYAL COLLECTION Pickering — smaller solemnisation**
+
+The published outdoor package is S$5,288++ for a minimum of 40 people, with S$98++ for each additional person. It includes two hours of terrace use, one hour of canapés and a room night. The Alexander Room buffet lunch is S$138.80++ per person with an 80-person minimum: S$11,104 before additions. These are different formats and inclusions, not directly comparable prices per guest. [Official 2026 solemnisation package](https://www.panpacific.com/content/dam/pphg-revamp/en/prsps/prc-2-0/celebration/PRSPS_2026_Solemnisation_Package.pdf)
+
+### 7.3 Relevance to Novotel Singapore on Stevens
+
+Novotel's official site advertises three banquet tiers—Nova, Constellation and Galactical—alongside solemnisation and Indian wedding offerings. This establishes product segmentation, not which tier sells best. [Novotel weddings](https://www.novotel-singapore-stevens.com/weddings/)
+
+Its FAQ states that minimum requirements depend on date, season and venue; typical service windows are noon–4pm and 6pm–11pm. It offers multiple banquet formats, AV upgrades and scheduled vendor loading/setup. Peak-date bookings are recommended 10–12 months ahead. These facts identify planning, space allocation and coordination requirements beyond food service. [Novotel wedding FAQ](https://www.novotel-singapore-stevens.com/weddings/wedding-faqs/)
+
+### 7.4 Different wedding formats create different operational demands
+
+The following implications are analytical hypotheses to test, not measured comparative margins.
+
+| Format | Commercial structure | Possible pressure points |
+|---|---|---|
+| Small solemnisation | Venue/time package with light catering | Coordination cost spread over fewer guests; weather contingencies |
+| Seated banquet | Per-table or per-person menu with minimum attendance | Simultaneous service, dietary exceptions, table assignment and course timing |
+| Buffet or cocktail reception | Per-person catering and defined service window | Replenishment, consumption uncertainty and waste |
+| Multi-session cultural celebration | Several ceremonies, meals or spaces | More handovers, room resets and schedule dependencies |
+| Wedding with overnight guest group | Banquet plus additional room bookings | Cross-department coordination and competition for bedrooms |
+
+Do not infer that every cultural wedding is multi-day or requires the same service format.
+
+### 7.5 Why weddings can be commercially attractive
+
+**Evidence:** CBRE's analysis of 2,600 US hotels associates a greater buffet/banquet share with lower food-cost ratios. However, 2024 F&B labour and operating-supply expenses rose 4.5% and 9.4%. Lower ingredient cost ratios therefore do not guarantee higher net profit. [CBRE cost study](https://www.cbre.com/insights/articles/all-eyes-on-operating-costs-in-2025-lessons-learned-in-2024)
+
+**Economic interpretation of the package evidence:**
+
+- Minimum table commitments create a contracted sales floor, subject to the actual contract.
+- Pre-agreed menus and attendance allow advance production planning.
+- One booking can purchase catering, space and related services.
+- Date and package tiers support different price points.
+- Paid enhancements can increase contribution from an already-won booking.
+
+Deposits and cancellation terms could also affect cash flow and risk, but these were not verified in the reviewed packages. A deposit should not be treated as evidence of earned profit.
+
+### 7.6 Where apparent profit can disappear
+
+| Cost or constraint | What to investigate |
+|---|---|
+| Ingredients and drinks | Guaranteed versus actual attendance; consumption of unlimited drinks |
+| Labour | Planning, kitchen, service, setup, teardown, agency premiums and overtime |
+| Package inclusions | Rooms, tastings, décor, equipment, parking and other promised benefits |
+| Coordination | Revisions, dietary lists, suppliers and information reaching temporary staff |
+| Recovery/rework | Remade meals, substitutions, refunds or complimentary items |
+| Space/time | Setup and teardown blocking other bookings |
+| Shared costs | Sales teams, maintenance, utilities and allocated hotel overhead |
+| Capital | Ballroom fit-out, kitchen capacity and periodic refurbishment |
+
+A long banquet can consume more labour and block the next event. These are plausible links to the learning manager's reported overrun problem; their size and frequency remain unknown.
+
+### 7.7 Academic evidence: function space is its own revenue-management problem
+
+Kimes and McGuire's **“Function-space Revenue Management: A Case Study from Singapore”** (2001) addresses revenue management for hotel function spaces. Its repository abstract supports treating function space as a revenue source that can be managed systematically. The full paper could not be retrieved reliably in this review, so no numerical effects or detailed methods are attributed to it. Its age also prevents its use as a current Singapore margin benchmark. [Cornell research record](https://ecommons.cornell.edu/entities/publication/64bb0714-8afd-4bc1-bf01-843083c8f409)
+
+Kimes' 2017 survey of approximately 400 revenue-management professionals found that extending revenue management across hotel income streams remained incomplete. It provides historical organisational context, not evidence of present-day adoption or wedding profitability. [Cornell, 2017 research record and abstract](https://ecommons.cornell.edu/entities/publication/c033523d-5aa9-4c64-b2a3-531573c084bb)
+
+**Our analytical implication:** evaluate the ballroom's usable area and occupied time, including setup and teardown, alongside total event contribution. A larger bill may involve more space, longer occupation or greater cost.
+
+### 7.8 How to compare weddings, conferences and rooms fairly
+
+Use the same period, avoid duplicate revenue and state the included expenses:
+
+**Event contribution = event revenue excluding GST − event-attributable delivery costs.**
+
+For an accept/reject decision, also consider contribution displaced from alternative bookings. For annual profitability, deduct the relevant shared/fixed costs; for investment ROI, include capital expenditure and the timing of cash flows.
+
+An included suite has servicing cost even when it would otherwise be empty. If it would otherwise sell, it can additionally carry an opportunity cost. Its published retail price is neither automatically its delivery cost nor guaranteed foregone revenue.
+
+A S$60,000 wedding bill cannot be fairly compared with one day's bedroom revenue without considering event frequency, room inventory, delivery costs and shared expenses. A busy Saturday does not establish annual ballroom utilisation.
+
+### 7.9 Wedding upselling: available offers versus proven returns
+
+The official packages demonstrate real menu tiers and add-ons. They do not disclose conversion rates or incremental margins.
+
+| Offer | What determines incremental value |
+|---|---|
+| Higher menu tier | Price difference less extra ingredients and preparation |
+| Food station or late-night food | Additional sales less equipment, staffing and food |
+| Premium drinks | Paid spending beyond included beverages |
+| AV enhancement | Whether income belongs to the hotel or an external vendor; related costs |
+| Additional accommodation | Room contribution and displaced higher-value bookings |
+| Extra event time | Added fees versus overtime and blocked venue availability |
+
+The relevant sales interaction is with the couple/planner during event planning. This differs from room upgrades offered to arriving guests. Vendor-provided services must not be counted as hotel revenue unless the hotel actually earns a fee or operates the service.
+
+### 7.10 Questions that would establish the actual business case
+
+1. How many weddings occur annually, and what is their share of banquet and total hotel contribution?
+2. What percentage of ballroom sessions are sold, including quieter dates?
+3. What is the average realised package price after negotiated concessions?
+4. Which inclusions and changes most often exceed their cost allowance?
+5. What are actual labour hours, agency costs and overtime per wedding?
+6. How frequently do overruns, dietary-information errors or service failures occur?
+7. What information do part-time staff lack at the start of service?
+8. Which enhancements are purchased most often, and what contribution remains after fulfilment?
+9. What profitable bookings are rejected because space, staff or kitchen capacity is unavailable?
+10. Are sales teams assessed on contracted revenue, realised revenue or realised contribution?
+
+The defensible problem hypothesis is: **wedding revenue may be weakened by gaps between what sales teams promise, what operations plan and what event staff can deliver under time pressure.** The visits suggest relevant staffing and overrun issues; follow-up evidence is needed before treating this as a confirmed shared problem.
+
+## 8. Implications for the Two Visits
 
 ### Novotel/Mercure on Stevens
 
@@ -197,7 +332,7 @@ Part-time event staffing may affect event contribution through overtime, rework 
 
 For both visits, upselling is one possible financial consequence of operational problems—not proof that a sales problem should replace the established manpower and service-consistency problem.
 
-## 8. Questions for Follow-up Interviews
+## 9. Questions for Follow-up Interviews
 
 1. What share of revenue and departmental profit comes from rooms, outlets and banqueting?
 2. Where are venue hire, service charges and event-related room bookings recorded?
@@ -212,11 +347,11 @@ For both visits, upselling is one possible financial consequence of operational 
 11. Is staff time released by a change actually converted into lower overtime, avoided recruitment or additional profitable service?
 12. What return measure and payback threshold does the decision-maker use?
 
-## 9. Evidence Limits
+## 10. Evidence Limits
 
 - Most quantitative departmental evidence here is from US hotels, not Singapore.
 - Portfolio averages cannot establish the profitability of Novotel or PARKROYAL.
-- These are industry financial disclosures and practitioner studies, not causal academic evidence that upselling improves satisfaction or loyalty.
+- The financial benchmarks are industry disclosures and practitioner studies. The wedding section also includes historical academic research records; none establishes a causal effect of upselling on satisfaction or loyalty.
 - No representative cross-industry upsell adoption rate was established.
 - No universal investment ROI or reliable net-margin ranking for weddings, conferences, restaurants and bars was established.
 - Hypothetical examples are explicitly labelled and must not be presented as visit findings.
