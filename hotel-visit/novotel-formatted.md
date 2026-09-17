@@ -91,7 +91,7 @@
 ### Cleaning workflow
 
 - A supervisor coordinates the housekeeping workflow.
-- A room may first be stripped before a room attendant cleans it.
+- A linens may first be stripped by supervisor (takes the longest time) before a room attendant cleans it.
 - Room cleaning includes making the bed, which was described as one of the longest tasks.
 - Checked-out rooms require full cleaning.
 - Occupied rooms are serviced according to a different standard operating procedure.
@@ -135,7 +135,7 @@
 
 ### Room changes and repeated work
 
-- Novotel rooms are generally the same size.
+- Novotel rooms are generally the same size (in stevens)
 - Guests may be unhappy with:
   - Room size
   - Assigned floor
@@ -189,7 +189,7 @@
 - Payment arrangements include prepaid bookings, payment on arrival, flexible rates and non-refundable rates.
 - Billing may use cash, credit cards or virtual credit cards.
 - Cash-paying guests may create financial exposure if payment is not secured.
-- Some guests extend their stays day by day and pay in cash.
+- Some guests extend their stays day by day and pay in cash (suspected vice activity).
 - Billing instructions are entered into the hotel system.
 
 ## Guest Personalisation and Loyalty
@@ -236,10 +236,10 @@
 - Main revenue sources were ranked as:
   1. Rooms
   2. Food and beverage
-- The property does not have a gym or spa as additional revenue sources. [Verify whether this refers to the specific hotel or the shared complex.]
+- The property does not have a gym or spa as additional revenue sources. (Stevens Novotel only)
 - Vacant rooms represent inventory that cannot be recovered after the night passes.
 - When revenue is below forecast, upselling targets may increase.
-- Upsell prices may be lowered during periods of low occupancy.
+- Upsell prices may be lowered during periods of low occupancy -- Dynamic upselling!?
 - Common upsells include:
   - Room upgrades
   - Better views
