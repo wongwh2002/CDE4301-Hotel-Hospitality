@@ -1,0 +1,460 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Proposed local Docker architecture for the hotel lounge smart-glasses proof of concept.">
+  <title>Hotel Lounge Smart-Glasses POC Architecture</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --ink: #17243a;
+      --muted: #53647b;
+      --paper: #f4f7fb;
+      --surface: #ffffff;
+      --line: #c7d2e0;
+      --blue: #2563eb;
+      --blue-soft: #eaf1ff;
+      --violet: #7047c8;
+      --violet-soft: #f0ebff;
+      --teal: #117c83;
+      --teal-soft: #e5f7f6;
+      --green: #1e8754;
+      --green-soft: #e8f7ef;
+      --amber: #9b6412;
+      --amber-soft: #fff5dd;
+      --shadow: 0 18px 48px rgba(27, 50, 82, .09);
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      background: var(--paper);
+      color: var(--ink);
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      line-height: 1.45;
+    }
+
+    .page {
+      width: min(1480px, 100%);
+      margin: 0 auto;
+      padding: 42px clamp(18px, 4vw, 56px) 56px;
+    }
+
+    .eyebrow {
+      margin: 0 0 10px;
+      color: var(--blue);
+      font-size: .76rem;
+      font-weight: 800;
+      letter-spacing: .13em;
+      text-transform: uppercase;
+    }
+
+    h1 {
+      max-width: 900px;
+      margin: 0;
+      font-size: clamp(2rem, 4vw, 3.25rem);
+      letter-spacing: -.045em;
+      line-height: 1.06;
+    }
+
+    .intro {
+      max-width: 900px;
+      margin: 16px 0 22px;
+      color: var(--muted);
+      font-size: 1.05rem;
+    }
+
+    .badges, .legend, .decisions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 9px;
+      align-items: center;
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      min-height: 28px;
+      padding: 4px 10px;
+      border: 1px solid #d5deea;
+      border-radius: 999px;
+      background: var(--surface);
+      color: #3f5067;
+      font-size: .78rem;
+      font-weight: 700;
+    }
+
+    .badge.proposal {
+      border-color: #eccd86;
+      background: var(--amber-soft);
+      color: #78500d;
+    }
+
+    .toolbar {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      align-items: center;
+      margin: 32px 0 12px;
+    }
+
+    .toolbar-label {
+      margin-right: 5px;
+      color: var(--muted);
+      font-size: .83rem;
+      font-weight: 750;
+    }
+
+    .toolbar button {
+      appearance: none;
+      min-height: 38px;
+      padding: 8px 13px;
+      border: 1px solid #ccd6e3;
+      border-radius: 10px;
+      background: var(--surface);
+      color: #34445a;
+      cursor: pointer;
+      font: inherit;
+      font-size: .85rem;
+      font-weight: 700;
+      transition: background-color .15s ease, border-color .15s ease, color .15s ease;
+    }
+
+    .toolbar button:hover { border-color: #8ea7c5; }
+    .toolbar button[aria-pressed="true"] {
+      border-color: #1f4fb4;
+      background: #1f4fb4;
+      color: #fff;
+    }
+
+    .mode-caption {
+      min-height: 24px;
+      margin: 0 0 12px;
+      color: var(--muted);
+      font-size: .88rem;
+    }
+
+    .diagram-shell {
+      overflow-x: auto;
+      border: 1px solid #d9e1eb;
+      border-radius: 18px;
+      background: #fbfcfe;
+      box-shadow: var(--shadow);
+      scrollbar-color: #9eafc4 #edf1f6;
+    }
+
+    .architecture {
+      display: block;
+      width: 100%;
+      min-width: 1000px;
+      height: auto;
+    }
+
+    .architecture text {
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      fill: var(--ink);
+    }
+
+    .zone-title { font-size: 13px; font-weight: 800; letter-spacing: .11em; fill: #718096 !important; }
+    .docker-boundary { fill: #f7f9fd; stroke: #9dacc0; stroke-width: 1.7; stroke-dasharray: 8 7; }
+    .docker-label-bg { fill: #fbfcfe; }
+    .docker-label { font-size: 15px; font-weight: 800; fill: #41536d !important; }
+    .node-bg { stroke-width: 1.6; }
+    .node-blue .node-bg { fill: var(--blue-soft); stroke: #87a9ef; }
+    .node-violet .node-bg { fill: var(--violet-soft); stroke: #b5a1ed; }
+    .node-teal .node-bg { fill: var(--teal-soft); stroke: #83c6c5; }
+    .node-neutral .node-bg { fill: #fff; stroke: #b9c6d5; }
+    .node-title { font-size: 17px; font-weight: 800; }
+    .node-subtitle { font-size: 12px; font-weight: 650; fill: #52637a !important; }
+    .node-copy { font-size: 12.2px; fill: #40516a !important; }
+    .node-small { font-size: 10.5px; fill: #596a80 !important; }
+    .node-code { font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace !important; font-size: 10.2px; fill: #32445c !important; }
+    .node-code-long { font-size: 9px; }
+    .pill { fill: #fff; stroke: #d6dfeb; stroke-width: 1; }
+    .pill-text { font-size: 10.5px; font-weight: 750; fill: #41536d !important; }
+    .sqlite-box { fill: #fff; stroke: #bcb0e4; stroke-width: 1.2; }
+    .sqlite-title { font-size: 12px; font-weight: 800; fill: #563b9e !important; }
+    .sqlite-copy { font-size: 10.5px; fill: #675b82 !important; }
+    .screen { fill: #152237; stroke: #91a2b9; stroke-width: 1.2; }
+    .screen-text { font-size: 11.5px; font-weight: 750; fill: #f9fbff !important; }
+    .screen-critical { font-size: 10.4px; font-weight: 700; fill: #ffc4bb !important; }
+    .flow { fill: none; stroke-width: 2.5; transition: opacity .18s ease; }
+    .flow-tap { stroke: var(--teal); }
+    .flow-frame { stroke: var(--blue); }
+    .flow-cue { stroke: var(--green); }
+    .flow-internal { stroke: var(--violet); }
+    .flow-device { stroke: #687a91; stroke-dasharray: 5 5; }
+    .flow-label-bg { fill: #fbfcfe; stroke: #dce4ee; stroke-width: 1; }
+    .flow-label { font-size: 10.5px; font-weight: 750; fill: #34465e !important; }
+    .flow-label-small { font-size: 9.8px; font-weight: 700; fill: #34465e !important; }
+    .flow-note { font-size: 11px; font-weight: 700; fill: #53647b !important; }
+    .flow-arrow-blue { fill: var(--blue); }
+    .flow-arrow-green { fill: var(--green); }
+    .flow-arrow-teal { fill: var(--teal); }
+    .flow-arrow-violet { fill: var(--violet); }
+    .flow-arrow-grey { fill: #687a91; }
+    .architecture[data-focus="tap"] .node-recognition,
+    .architecture[data-focus="recognition"] .flow-tap-only { opacity: .13; }
+    .architecture[data-focus="recognition"] .node-tap-only { opacity: .2; }
+    .node-recognition, .node-tap-only, .flow-tap-only { transition: opacity .18s ease; }
+
+    .legend {
+      gap: 12px 20px;
+      margin: 15px 2px 0;
+      color: #4b5d74;
+      font-size: .8rem;
+    }
+
+    .legend-item { display: inline-flex; gap: 7px; align-items: center; }
+    .swatch { display: inline-block; width: 22px; height: 3px; border-radius: 3px; }
+    .swatch.tap { background: var(--teal); }
+    .swatch.frame { background: var(--blue); }
+    .swatch.cue { background: var(--green); }
+    .swatch.internal { background: var(--violet); }
+    .swatch.device { height: 0; border-top: 2px dashed #687a91; }
+
+    .validation {
+      display: grid;
+      grid-template-columns: auto 1fr;
+      gap: 12px;
+      align-items: start;
+      margin-top: 24px;
+      padding: 16px 18px;
+      border: 1px solid #edcf8f;
+      border-radius: 14px;
+      background: #fff8e8;
+      color: #624b1d;
+    }
+
+    .validation-icon { font-size: 1.2rem; line-height: 1.35; }
+    .validation strong { display: block; margin-bottom: 2px; color: #573d0c; }
+    .validation p { margin: 0; font-size: .9rem; }
+    .validation a { color: #285dbb; text-underline-offset: 2px; }
+
+    .decisions { margin-top: 18px; gap: 8px; }
+    .decisions .badge { background: #eef3f8; border-color: #dce4ed; color: #4b5d74; }
+
+    .footer-note {
+      margin: 18px 2px 0;
+      color: #65758a;
+      font-size: .82rem;
+    }
+
+    @media (max-width: 700px) {
+      .page { padding: 28px 14px 38px; }
+      .intro { font-size: .97rem; }
+      .toolbar { margin-top: 25px; }
+      .toolbar-label { flex-basis: 100%; }
+      .validation { grid-template-columns: 1fr; gap: 4px; }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after { scroll-behavior: auto !important; transition-duration: .01ms !important; }
+    }
+  </style>
+</head>
+<body>
+  <main class="page">
+    <p class="eyebrow">Hotel lounge · Smart-glasses proof of concept</p>
+    <h1>From lounge entry to a useful guest cue</h1>
+    <p class="intro">A local laptop handles profile lookup and face matching. The phone bridges the Rokid RV101 to the Docker stack, then returns a short cue to the worker.</p>
+    <div class="badges" aria-label="Architecture status">
+      <span class="badge proposal">Proposed architecture</span>
+      <span class="badge">RV101 → Android phone → local laptop</span>
+      <span class="badge">Synthetic profiles for development</span>
+    </div>
+
+    <section aria-labelledby="diagram-heading">
+      <h2 id="diagram-heading" class="toolbar-label" style="margin:32px 0 0;font-size:.9rem;color:#53647b">Explore the data flow</h2>
+      <div class="toolbar" role="group" aria-label="Highlight an architecture flow">
+        <button type="button" data-mode="all" aria-pressed="true">All flows</button>
+        <button type="button" data-mode="tap" aria-pressed="false">Tap &amp; profile</button>
+        <button type="button" data-mode="recognition" aria-pressed="false">Frames &amp; cue</button>
+      </div>
+      <p class="mode-caption" id="mode-caption" aria-live="polite">Entry creates an expiring candidate; the recognition loop matches only against current lounge candidates.</p>
+
+      <div class="diagram-shell">
+        <svg class="architecture" id="architecture" viewBox="0 0 1380 820" role="img" aria-labelledby="svg-title svg-desc" data-focus="all" xmlns="http://www.w3.org/2000/svg">
+          <title id="svg-title">Hotel lounge smart-glasses proposed architecture</title>
+          <desc id="svg-desc">A card reader sends entry events through an adapter to FastAPI lounge-control inside Docker. The control service looks up synthetic guest profiles from a SQLite-backed mock-hotel API and keeps active guest context in memory. Rokid RV101 glasses send camera frames through an Android phone to lounge-control and a Python face-worker. Matches return through the control service and phone as compact cues on the glasses.</desc>
+          <defs>
+            <marker id="arrow-teal" viewBox="0 0 10 10" refX="8.4" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" class="flow-arrow-teal"/></marker>
+            <marker id="arrow-blue" viewBox="0 0 10 10" refX="8.4" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" class="flow-arrow-blue"/></marker>
+            <marker id="arrow-green" viewBox="0 0 10 10" refX="8.4" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" class="flow-arrow-green"/></marker>
+            <marker id="arrow-violet" viewBox="0 0 10 10" refX="8.4" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" class="flow-arrow-violet"/></marker>
+            <marker id="arrow-grey" viewBox="0 0 10 10" refX="8.4" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" class="flow-arrow-grey"/></marker>
+          </defs>
+
+          <text x="35" y="78" class="zone-title">LOUNGE EDGE · OUTSIDE DOCKER</text>
+          <rect x="590" y="55" width="760" height="735" rx="22" class="docker-boundary"/>
+          <rect x="620" y="40" width="318" height="31" rx="9" class="docker-label-bg"/>
+          <text x="635" y="61" class="docker-label">Local laptop · Docker Compose</text>
+
+          <!-- Access path -->
+          <g class="node node-neutral flow-tap-only" aria-label="Card reader">
+            <rect x="35" y="145" width="205" height="140" rx="16" class="node-bg"/>
+            <text x="56" y="180" class="node-title">Card reader</text>
+            <text x="56" y="204" class="node-subtitle">Lounge entry / exit</text>
+            <rect x="56" y="226" width="127" height="27" rx="8" class="pill"/>
+            <text x="68" y="244" class="pill-text">Guest reference only</text>
+            <text x="56" y="271" class="node-small">Never forward raw card credentials</text>
+          </g>
+
+          <g class="node node-teal flow-tap-only" aria-label="Tap event adapter">
+            <rect x="300" y="145" width="220" height="140" rx="16" class="node-bg"/>
+            <text x="321" y="180" class="node-title">Tap-event adapter</text>
+            <text x="321" y="204" class="node-subtitle">Reader integration or simulator</text>
+            <text x="321" y="235" class="node-code">event_id · guest_ref</text>
+            <text x="321" y="254" class="node-code">entry / exit · occurred_at</text>
+            <text x="321" y="273" class="node-small">Idempotent tap events</text>
+          </g>
+
+          <path d="M240 215 H300" class="flow flow-tap flow-tap-only" marker-end="url(#arrow-teal)"/>
+          <path d="M520 215 H625" class="flow flow-tap flow-tap-only" marker-end="url(#arrow-teal)"/>
+          <rect x="523" y="177" width="100" height="24" rx="7" class="flow-label-bg"/>
+          <text x="533" y="193" class="flow-label">POST tap event</text>
+
+          <!-- Docker services -->
+          <g class="node node-blue" aria-label="FastAPI lounge-control service">
+            <rect x="625" y="130" width="330" height="265" rx="17" class="node-bg"/>
+            <text x="649" y="166" class="node-title">lounge-control</text>
+            <text x="649" y="189" class="node-subtitle">FastAPI · control plane</text>
+            <line x1="649" y1="203" x2="931" y2="203" stroke="#c6d7f5"/>
+            <text x="649" y="227" class="node-code">POST /v1/lounge/taps</text>
+            <text x="649" y="249" class="node-copy">Profile adapter + active guest context</text>
+            <text x="649" y="270" class="node-copy">In-memory cohort with expiry (TTL)</text>
+            <text x="649" y="291" class="node-copy">Device WebSocket + cue composer</text>
+            <rect x="649" y="312" width="282" height="55" rx="10" fill="#fff" stroke="#c6d7f5"/>
+            <text x="663" y="335" class="node-code">/v1/devices/{id}/stream</text>
+            <text x="663" y="354" class="node-small">Frames in · cues and clear events out</text>
+            <text x="649" y="384" class="node-small">Guest context stays here; frames are transient</text>
+          </g>
+
+          <g class="node node-violet node-tap-only" aria-label="Mock hotel profile API backed by SQLite">
+            <rect x="1055" y="130" width="270" height="245" rx="17" class="node-bg"/>
+            <text x="1078" y="166" class="node-title">mock-hotel</text>
+            <text x="1078" y="189" class="node-subtitle">FastAPI profile API</text>
+            <text x="1078" y="218" class="node-code node-code-long">GET /v1/guests/{ref}/lounge-profile</text>
+            <text x="1078" y="240" class="node-copy">Synthetic lounge profile</text>
+            <text x="1078" y="260" class="node-copy">Preferences + reference photo</text>
+            <rect x="1078" y="280" width="224" height="72" rx="10" class="sqlite-box"/>
+            <text x="1092" y="304" class="sqlite-title">SQLite file · named volume</text>
+            <text x="1092" y="324" class="sqlite-copy">Embedded in this service</text>
+            <text x="1092" y="341" class="sqlite-copy">No separate DB server</text>
+          </g>
+
+          <path d="M955 230 H1055" class="flow flow-tap flow-tap-only" marker-start="url(#arrow-teal)" marker-end="url(#arrow-teal)"/>
+          <rect x="962" y="191" width="88" height="24" rx="7" class="flow-label-bg"/>
+          <text x="971" y="207" class="flow-label-small">profile lookup</text>
+
+          <g class="node node-violet node-recognition" aria-label="Python face worker">
+            <rect x="625" y="505" width="330" height="220" rx="17" class="node-bg"/>
+            <text x="649" y="541" class="node-title">face-worker</text>
+            <text x="649" y="564" class="node-subtitle">Python · independent container</text>
+            <line x1="649" y1="578" x2="931" y2="578" stroke="#d5c9f2"/>
+            <text x="649" y="601" class="node-copy">Bounded latest-frame queue</text>
+            <text x="649" y="622" class="node-copy">Detect → track → compare active cohort</text>
+            <text x="649" y="643" class="node-copy">Opaque candidate IDs + RAM templates</text>
+            <text x="649" y="668" class="node-code">POST /internal/v1/matches</text>
+            <text x="649" y="698" class="node-small">Drops stale frames; does not persist images</text>
+          </g>
+
+          <path d="M715 395 V505" class="flow flow-internal node-recognition" marker-end="url(#arrow-violet)"/>
+          <path d="M765 505 V395" class="flow flow-cue node-recognition" marker-end="url(#arrow-green)"/>
+          <rect x="778" y="410" width="164" height="26" rx="7" class="flow-label-bg node-recognition"/>
+          <text x="788" y="427" class="flow-label-small node-recognition">candidate updates + frames ↓</text>
+          <rect x="778" y="453" width="144" height="26" rx="7" class="flow-label-bg node-recognition"/>
+          <text x="788" y="470" class="flow-label-small node-recognition">match callback ↑</text>
+
+          <!-- Glasses and companion phone -->
+          <text x="35" y="545" class="zone-title">WORKER DEVICE</text>
+          <g class="node node-neutral node-recognition" aria-label="Rokid RV101 smart glasses">
+            <rect x="35" y="565" width="205" height="185" rx="16" class="node-bg"/>
+            <text x="55" y="598" class="node-title">Rokid RV101</text>
+            <text x="55" y="620" class="node-subtitle">Smart glasses</text>
+            <text x="55" y="643" class="node-small">Camera capture · compact display</text>
+            <rect x="55" y="659" width="165" height="72" rx="10" class="screen"/>
+            <text x="68" y="681" class="screen-text">🟢 ✅ ALEX</text>
+            <text x="68" y="703" class="screen-critical">🔴 ⚠️ PEANUT ALLERGY</text>
+            <text x="68" y="721" class="screen-text" style="font-size:9px;fill:#ced8e8!important">Example cue · text + icon + color</text>
+          </g>
+
+          <g class="node node-neutral node-recognition" aria-label="Android phone companion bridge">
+            <rect x="300" y="565" width="220" height="185" rx="16" class="node-bg"/>
+            <text x="321" y="598" class="node-title">Android phone</text>
+            <text x="321" y="620" class="node-subtitle">Rokid app / CXR-L bridge</text>
+            <text x="321" y="650" class="node-copy">Receives camera data</text>
+            <text x="321" y="671" class="node-copy">Sends sampled JPEG frames</text>
+            <text x="321" y="692" class="node-copy">Receives cue / clear updates</text>
+            <rect x="321" y="708" width="172" height="25" rx="8" class="pill"/>
+            <text x="331" y="725" class="pill-text">Vendor-specific boundary</text>
+          </g>
+
+          <path d="M240 664 H300" class="flow flow-device node-recognition" marker-start="url(#arrow-grey)" marker-end="url(#arrow-grey)"/>
+          <rect x="232" y="625" width="76" height="24" rx="7" class="flow-label-bg node-recognition"/>
+          <text x="239" y="641" class="flow-label-small node-recognition">camera ↔ cue</text>
+
+          <path d="M520 615 H565 V375 H625" class="flow flow-frame node-recognition" marker-end="url(#arrow-blue)"/>
+          <path d="M625 385 H580 V681 H520" class="flow flow-cue node-recognition" marker-end="url(#arrow-green)"/>
+          <rect x="528" y="454" width="143" height="43" rx="8" class="flow-label-bg node-recognition"/>
+          <text x="539" y="472" class="flow-label-small node-recognition">Authenticated device WS</text>
+          <text x="539" y="488" class="flow-label-small node-recognition">JPEG in · cue / clear out</text>
+
+          <text x="622" y="766" class="flow-note">No broker in the live path · direct HTTP / WebSocket · each module can run independently</text>
+        </svg>
+      </div>
+
+      <div class="legend" aria-label="Connection legend">
+        <span class="legend-item"><i class="swatch tap" aria-hidden="true"></i>Tap / profile lookup</span>
+        <span class="legend-item"><i class="swatch frame" aria-hidden="true"></i>Sampled camera frames</span>
+        <span class="legend-item"><i class="swatch cue" aria-hidden="true"></i>Match result / worker cue</span>
+        <span class="legend-item"><i class="swatch internal" aria-hidden="true"></i>Candidate enrollment / internal handoff</span>
+        <span class="legend-item"><i class="swatch device" aria-hidden="true"></i>Glasses ↔ phone</span>
+      </div>
+    </section>
+
+    <aside class="validation" aria-label="RV101 validation gate">
+      <span class="validation-icon" aria-hidden="true">📷</span>
+      <div>
+        <strong>RV101 camera delivery is still a validation gate</strong>
+        <p>The public <a href="https://github.com/e7naq3y/CXR-L-SDK">CXR-L sample mirror</a> shows still-photo capture. Prove that the exact RV101 setup can deliver continuous or sufficiently frequent frames through the phone before treating the end-to-end recognition loop as confirmed.</p>
+      </div>
+    </aside>
+
+    <div class="decisions" aria-label="Architecture decisions">
+      <span class="badge">SQLite file, no DB server</span>
+      <span class="badge">No Kafka or PySpark in the live POC path</span>
+      <span class="badge">Frames and face templates stay transient</span>
+      <span class="badge">Uncertain match → no personal cue</span>
+    </div>
+
+    <p class="footer-note">Development data should be synthetic. Treat this drawing as a proposal until the team adopts it; card-reader integration, camera cadence, recognition accuracy, and on-lens cue readability remain to be validated.</p>
+  </main>
+
+  <script>
+    (() => {
+      const diagram = document.getElementById("architecture");
+      const caption = document.getElementById("mode-caption");
+      const buttons = Array.from(document.querySelectorAll("[data-mode]"));
+      const captions = {
+        all: "Entry creates an expiring candidate; the recognition loop matches only against current lounge candidates.",
+        tap: "A card tap resolves a synthetic profile and creates or clears temporary lounge presence.",
+        recognition: "The phone relays sampled frames; stable matches return as short cues on the glasses."
+      };
+
+      for (const button of buttons) {
+        button.addEventListener("click", () => {
+          const mode = button.dataset.mode;
+          diagram.dataset.focus = mode;
+          caption.textContent = captions[mode];
+          for (const candidate of buttons) {
+            candidate.setAttribute("aria-pressed", String(candidate === button));
+          }
+        });
+      }
+    })();
+  </script>
+</body>
+</html>
