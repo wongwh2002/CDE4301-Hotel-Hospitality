@@ -109,3 +109,18 @@ class CandidateEnrollment(ContractModel):
     candidate_id: Identifier
     expires_at: str
     photo_b64: Optional[str] = None
+
+
+class GuestRegistrationRequest(ContractModel):
+    """Guest registration request for mock-hotel."""
+    display_name: str = Field(..., min_length=1, max_length=100)
+    room_number: Optional[str] = None
+    vip_tier: Optional[str] = None
+    allergies: List[str] = Field(default_factory=list)
+    preferences: List[str] = Field(default_factory=list)
+
+
+class RosterEntry(ContractModel):
+    """Active lounge roster entry displaying name and admitted time only."""
+    display_name: str
+    admitted_at: str

@@ -8,7 +8,7 @@ import sys
 from contextlib import asynccontextmanager
 from pathlib import Path
 from typing import List
-from fastapi import FastAPI, HTTPException, Response
+from fastapi import FastAPI, HTTPException, Response, status
 
 # Ensure local module directory is in python path
 MODULE_DIR = Path(__file__).resolve().parent
@@ -18,12 +18,13 @@ if str(MODULE_DIR) not in sys.path:
 if str(REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(REPO_ROOT))
 
-from contracts.models import LoungeProfile
+from contracts.models import GuestRegistrationRequest, LoungeProfile
 from db import (
     get_guest_photo_bytes,
     get_guest_profile,
     init_db,
     list_all_guests,
+    register_guest,
 )
 
 
@@ -74,3 +75,24 @@ async def get_guest_photo(guest_ref: str):
 async def list_guests():
     """List all synthetic test guest profiles."""
     return list_all_guests()
+
+
+@app.post(
+    "/v1/guests",
+    response_model=LoungeProfile,
+    status_code=status.HTTP_201_CREATED,
+    tags=["Lounge Profiles"],
+)
+async def register_new_guest(request: GuestRegistrationRequest):
+    """Register a new synthetic guest with synthetic photo fixture."""
+    clean_display_name = request.display_name.strip()
+    if not clean_display_name:
+        raise HTTPException(status_code=422, detail="display_name cannot be empty")
+    profile = register_guest(
+        display_name=clean_display_name,
+        allergies=request.allergies,
+        preferences=request.preferences,
+        room_number=request.room_number,
+        vip_tier=request.vip_tier,
+    )
+    return profile

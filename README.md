@@ -23,6 +23,7 @@ Docker Compose
 │   ├── Card tap ingestion (POST /v1/lounge/taps, idempotent)
 │   ├── In-memory active lounge cohort (TTL expiry, zero image persistence)
 │   ├── Multi-device authenticated WebSocket hub (/v1/devices/{device_id}/stream)
+│   ├── Laptop dashboard (guest registration, entry/exit taps, live roster)
 │   └── Compact glanceable cue composer (🟢 ✅ ALEX / 🔴 ⚠️ PEANUT ALLERGY)
 ├── face-worker (port 8001)
 │   ├── Candidate enrollment (PUT /internal/v1/candidates/{id}, RAM only, photo discarded)
@@ -79,7 +80,11 @@ docker compose up --build --wait
 
 The three core services (`lounge-control`, `face-worker`, `mock-hotel`) start and await healthcheck readiness before completing startup.
 
-#### 3. Verify Health
+#### 3. Open the Laptop Dashboard
+
+Open `http://127.0.0.1:8000/` on the laptop. The dashboard starts with a seeded guest selected, lets you edit the guest reference, register mock guests, send entry/exit taps, and view the active roster. For phone or other laptop access on the trusted Wi-Fi, use `http://<laptop-lan-ip>:8000/` after setting `HOST_BIND_ADDRESS` as described below.
+
+#### 4. Verify Health
 
 - `lounge-control`: `curl http://127.0.0.1:8000/health`
 - `face-worker`: `curl http://127.0.0.1:8001/health`

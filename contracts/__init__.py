@@ -5,8 +5,10 @@ from contracts.models import (
     CueMessage,
     CuePayload,
     DeviceStreamMessage,
+    GuestRegistrationRequest,
     LoungeProfile,
     MatchEvent,
+    RosterEntry,
     TapEvent,
     utc_now_iso,
 )
@@ -16,8 +18,10 @@ __all__ = [
     "CueMessage",
     "CuePayload",
     "DeviceStreamMessage",
+    "GuestRegistrationRequest",
     "LoungeProfile",
     "MatchEvent",
+    "RosterEntry",
     "TapEvent",
     "utc_now_iso",
 ]

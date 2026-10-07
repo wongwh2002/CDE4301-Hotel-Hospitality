@@ -6,7 +6,9 @@ Contains no real guest photographs, identity records, or personal data.
 
 import json
 import os
+import re
 import sqlite3
+import uuid
 from pathlib import Path
 from typing import Any, Dict, List, Optional
 from fixtures.synthetic_data import SYNTHETIC_JPEG_BYTES
@@ -184,5 +186,66 @@ def list_all_guests() -> List[Dict[str, Any]]:
                 }
             )
         return results
+    finally:
+        conn.close()
+
+
+def register_guest(
+    display_name: str,
+    allergies: Optional[List[str]] = None,
+    preferences: Optional[List[str]] = None,
+    room_number: Optional[str] = None,
+    vip_tier: Optional[str] = None,
+    photo_bytes: Optional[bytes] = None,
+    guest_ref: Optional[str] = None,
+) -> Dict[str, Any]:
+    """Register a new synthetic guest into SQLite.
+
+    Generates a unique guest_ref if not provided, stores optional allergies/preferences,
+    and attaches synthetic photo fixture.
+    """
+    clean_name = re.sub(r"[^a-z0-9]", "", display_name.lower())[:16] or "guest"
+    conn = get_connection()
+    try:
+        if not guest_ref:
+            while True:
+                candidate_ref = f"guest-{clean_name}-{uuid.uuid4().hex[:6]}"
+                cursor = conn.execute("SELECT 1 FROM guests WHERE guest_ref = ?", (candidate_ref,))
+                if not cursor.fetchone():
+                    guest_ref = candidate_ref
+                    break
+
+        allergies_list = list(allergies) if allergies else []
+        preferences_list = list(preferences) if preferences else []
+        final_photo_bytes = photo_bytes if photo_bytes is not None else SYNTHETIC_JPEG_BYTES
+
+        with conn:
+            conn.execute(
+                """
+                INSERT INTO guests (
+                    guest_ref, display_name, room_number, vip_tier,
+                    allergies_json, preferences_json, photo_bytes
+                ) VALUES (?, ?, ?, ?, ?, ?, ?)
+                """,
+                (
+                    guest_ref,
+                    display_name,
+                    room_number,
+                    vip_tier,
+                    json.dumps(allergies_list),
+                    json.dumps(preferences_list),
+                    final_photo_bytes,
+                ),
+            )
+
+        return {
+            "guest_ref": guest_ref,
+            "display_name": display_name,
+            "room_number": room_number,
+            "vip_tier": vip_tier,
+            "allergies": allergies_list,
+            "preferences": preferences_list,
+            "photo_url": f"/v1/guests/{guest_ref}/photo",
+        }
     finally:
         conn.close()

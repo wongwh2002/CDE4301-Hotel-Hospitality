@@ -48,3 +48,68 @@ def test_list_synthetic_guests(mock_hotel_client):
     refs = [g["guest_ref"] for g in guests]
     assert "guest-alex-101" in refs
     assert "guest-jordan-102" in refs
+
+
+def test_register_guest_success(mock_hotel_client):
+    """Test registering a new synthetic guest profile."""
+    payload = {
+        "display_name": "Taylor",
+        "room_number": "702",
+        "vip_tier": "Diamond",
+        "allergies": ["Dairy allergy"],
+        "preferences": ["Still water", "Corner table"],
+    }
+    resp = mock_hotel_client.post("/v1/guests", json=payload)
+    assert resp.status_code == 201
+    data = resp.json()
+
+    assert data["display_name"] == "Taylor"
+    assert data["room_number"] == "702"
+    assert data["vip_tier"] == "Diamond"
+    assert data["allergies"] == ["Dairy allergy"]
+    assert data["preferences"] == ["Still water", "Corner table"]
+    assert "guest_ref" in data
+    assert data["guest_ref"].startswith("guest-taylor-")
+    assert data["photo_url"] == f"/v1/guests/{data['guest_ref']}/photo"
+
+    guest_ref = data["guest_ref"]
+
+    # Verify guest profile can be fetched
+    profile_resp = mock_hotel_client.get(f"/v1/guests/{guest_ref}/lounge-profile")
+    assert profile_resp.status_code == 200
+    profile = profile_resp.json()
+    assert profile["guest_ref"] == guest_ref
+    assert profile["display_name"] == "Taylor"
+
+    # Verify synthetic photo can be fetched
+    photo_resp = mock_hotel_client.get(f"/v1/guests/{guest_ref}/photo")
+    assert photo_resp.status_code == 200
+    assert photo_resp.headers["content-type"] == "image/jpeg"
+    assert len(photo_resp.content) > 0
+
+    # Verify guest appears in list
+    list_resp = mock_hotel_client.get("/v1/guests")
+    assert list_resp.status_code == 200
+    all_refs = [g["guest_ref"] for g in list_resp.json()]
+    assert guest_ref in all_refs
+
+
+def test_register_guest_validation(mock_hotel_client):
+    """Test validation errors for required display_name and optional fields."""
+    # Missing display_name
+    resp = mock_hotel_client.post("/v1/guests", json={"room_number": "101"})
+    assert resp.status_code == 422
+
+    # Empty display_name
+    resp_empty = mock_hotel_client.post("/v1/guests", json={"display_name": "   "})
+    assert resp_empty.status_code == 422
+
+    # Minimal registration with only required display_name
+    minimal_resp = mock_hotel_client.post("/v1/guests", json={"display_name": "Morgan"})
+    assert minimal_resp.status_code == 201
+    minimal_data = minimal_resp.json()
+    assert minimal_data["display_name"] == "Morgan"
+    assert minimal_data["allergies"] == []
+    assert minimal_data["preferences"] == []
+    assert minimal_data["room_number"] is None
+    assert minimal_data["guest_ref"].startswith("guest-morgan-")

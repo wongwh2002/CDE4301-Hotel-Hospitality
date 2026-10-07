@@ -25,6 +25,18 @@ class ActiveCohortManager:
     def record_event_processed(self, event_id: str, outcome: Dict[str, Any]) -> None:
         self._processed_events[event_id] = outcome
 
+    def get_candidate_for_guest(self, guest_ref: str) -> Optional[str]:
+        """Return active candidate ID for guest_ref if present."""
+        self.clean_expired()
+        cids = self._guest_to_candidates.get(guest_ref)
+        if cids:
+            return next(iter(cids))
+        return None
+
+    def has_guest(self, guest_ref: str) -> bool:
+        """Return whether guest_ref has an active presence in the lounge."""
+        return self.get_candidate_for_guest(guest_ref) is not None
+
     def admit_candidate(
         self,
         candidate_id: str,
@@ -35,7 +47,17 @@ class ActiveCohortManager:
         preferences: List[str],
         expires_at: str,
     ) -> Dict[str, Any]:
-        """Admit a guest into the active lounge cohort."""
+        """Admit a guest into the active lounge cohort.
+
+        Enforces at most one active presence per guest_ref.
+        """
+        self.clean_expired()
+        # Enforce at most one active presence per guest_ref
+        if guest_ref in self._guest_to_candidates:
+            for old_cid in list(self._guest_to_candidates[guest_ref]):
+                self._cohort.pop(old_cid, None)
+            self._guest_to_candidates[guest_ref].clear()
+
         now_iso = datetime.now(timezone.utc).isoformat()
         record = {
             "candidate_id": candidate_id,
@@ -83,6 +105,21 @@ class ActiveCohortManager:
                 if not self._guest_to_candidates[rec["guest_ref"]]:
                     del self._guest_to_candidates[rec["guest_ref"]]
         return expired_ids
+
+    def get_roster(self) -> List[Dict[str, str]]:
+        """Return active roster with display_name and admitted_at only."""
+        self.clean_expired()
+        sorted_records = sorted(
+            self._cohort.values(),
+            key=lambda rec: rec.get("admitted_at", ""),
+        )
+        return [
+            {
+                "display_name": rec["display_name"],
+                "admitted_at": rec["admitted_at"],
+            }
+            for rec in sorted_records
+        ]
 
     def get_summary(self) -> List[Dict[str, Any]]:
         """Return non-sensitive summary of active cohort."""

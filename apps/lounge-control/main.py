@@ -4,6 +4,7 @@ Orchestrates access events, active guest cohort, device WebSockets,
 and cue delivery for the Hotel Smart-Glasses POC.
 """
 
+import asyncio
 import base64
 import json
 import logging
@@ -13,7 +14,7 @@ import uuid
 from contextlib import asynccontextmanager
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
-from typing import Optional
+from typing import Dict, Optional
 import httpx
 from pydantic import ValidationError
 from fastapi import (
@@ -26,6 +27,7 @@ from fastapi import (
     WebSocketDisconnect,
     status,
 )
+from fastapi.responses import HTMLResponse, StreamingResponse
 
 # Ensure local module directory and repo root are in path
 MODULE_DIR = Path(__file__).resolve().parent
@@ -40,17 +42,21 @@ from contracts.models import (
     CueMessage,
     CuePayload,
     DeviceStreamMessage,
+    GuestRegistrationRequest,
+    LoungeProfile,
     MatchEvent,
     TapEvent,
     utc_now_iso,
 )
 from cohort import ActiveCohortManager
+from dashboard import DASHBOARD_HTML
 from devices import (
     DeviceSessionManager,
     is_valid_identifier,
     verify_internal_token,
     verify_token,
 )
+from sse import RosterSSENotifier, format_keepalive, format_sse
 
 logger = logging.getLogger("lounge_control")
 
@@ -62,6 +68,8 @@ MAX_FRAME_SIZE_BYTES = int(os.environ.get("MAX_FRAME_SIZE_BYTES", 5 * 1024 * 102
 
 cohort_manager = ActiveCohortManager()
 device_manager = DeviceSessionManager()
+sse_notifier = RosterSSENotifier()
+tap_locks: Dict[str, asyncio.Lock] = {}
 http_client: Optional[httpx.AsyncClient] = None
 
 
@@ -102,13 +110,114 @@ async def get_active_cohort():
     }
 
 
+@app.get("/v1/lounge/roster", tags=["Lounge Operations"])
+async def get_active_roster():
+    """Summary of active lounge roster (display_name and admitted_at only)."""
+    return cohort_manager.get_roster()
+
+
+@app.get("/v1/lounge/events", tags=["Lounge Operations"])
+@app.get("/v1/lounge/sse", tags=["Lounge Operations"])
+async def sse_roster_events(request: Request):
+    """Server-Sent Events signaling active roster changes with keepalives."""
+    q = sse_notifier.subscribe()
+
+    async def event_generator():
+        try:
+            yield format_sse("connected", {"status": "ok"})
+            while True:
+                if await request.is_disconnected():
+                    break
+                try:
+                    msg = await asyncio.wait_for(q.get(), timeout=15.0)
+                    yield format_sse(msg["event"], msg["data"])
+                except asyncio.TimeoutError:
+                    yield format_keepalive()
+        except asyncio.CancelledError:
+            pass
+        finally:
+            sse_notifier.unsubscribe(q)
+
+    return StreamingResponse(
+        event_generator(),
+        media_type="text/event-stream",
+        headers={
+            "Cache-Control": "no-cache",
+            "Connection": "keep-alive",
+            "X-Accel-Buffering": "no",
+        },
+    )
+
+
+@app.get("/", response_class=HTMLResponse, tags=["Dashboard"])
+@app.get("/dashboard", response_class=HTMLResponse, tags=["Dashboard"])
+async def get_dashboard():
+    """Laptop dashboard for staff access control and active roster."""
+    return HTMLResponse(content=DASHBOARD_HTML, media_type="text/html")
+
+
+@app.get("/v1/dashboard/guests", tags=["Dashboard"])
+@app.get("/v1/lounge/guests", tags=["Dashboard"])
+async def list_hotel_guests_for_dashboard():
+    """List registered hotel guests for staff dashboard dropdown."""
+    if not http_client:
+        return []
+    try:
+        resp = await http_client.get(f"{MOCK_HOTEL_URL}/v1/guests")
+        if resp.status_code == 200:
+            return resp.json()
+        return []
+    except Exception as e:
+        logger.warning("Failed to fetch hotel guests from mock-hotel: %s", e)
+        return []
+
+
+@app.post(
+    "/v1/dashboard/guests",
+    response_model=LoungeProfile,
+    status_code=status.HTTP_201_CREATED,
+    tags=["Dashboard"],
+)
+async def register_dashboard_guest(request: GuestRegistrationRequest):
+    """Register a mock hotel guest through the same-origin dashboard API."""
+    if not http_client:
+        raise HTTPException(status_code=503, detail="mock-hotel client is unavailable")
+    try:
+        resp = await http_client.post(
+            f"{MOCK_HOTEL_URL}/v1/guests",
+            json=request.model_dump(),
+        )
+    except Exception as e:
+        logger.warning("Failed to register guest through mock-hotel: %s", e)
+        raise HTTPException(status_code=502, detail="Failed to connect to mock-hotel")
+
+    try:
+        result = resp.json()
+    except ValueError:
+        result = {}
+    if resp.status_code >= 400:
+        error_detail = result.get("detail", "mock-hotel guest registration failed")
+        status_code = resp.status_code if resp.status_code < 500 else 502
+        raise HTTPException(status_code=status_code, detail=error_detail)
+    return result
+
+
 @app.post("/v1/lounge/taps", status_code=status.HTTP_200_OK, tags=["Lounge Operations"])
 async def post_tap(event: TapEvent):
+    """Serialize taps for each guest while allowing different guests in parallel."""
+    lock = tap_locks.setdefault(event.guest_ref, asyncio.Lock())
+    async with lock:
+        return await _process_tap(event)
+
+
+async def _process_tap(event: TapEvent):
     """Handle card-reader tap events idempotently.
 
-    - On entry: resolves guest profile from mock-hotel, enrolls candidate in
-      face-worker, and places display fields in active cohort.
-    - On exit: removes candidate from face-worker and clears active cohort.
+    - On entry: enforces at most one active presence per guest_ref,
+      resolves guest profile, enrolls candidate in face-worker, places display
+      fields in active cohort, and notifies SSE listeners on roster change.
+    - On exit: removes active presence from face-worker and cohort,
+      and notifies SSE listeners on roster change.
     """
     # Check idempotency
     existing_outcome = cohort_manager.is_event_processed(event.event_id)
@@ -120,6 +229,17 @@ async def post_tap(event: TapEvent):
         }
 
     if event.event_type == "entry":
+        # Enforce at most one active presence per guest_ref, even across new event_ids
+        existing_candidate_id = cohort_manager.get_candidate_for_guest(event.guest_ref)
+        if existing_candidate_id:
+            outcome = {
+                "action": "already_admitted",
+                "candidate_id": existing_candidate_id,
+                "status": "acknowledged",
+            }
+            cohort_manager.record_event_processed(event.event_id, outcome)
+            return outcome
+
         # 1. Resolve minimal profile from mock-hotel
         assert http_client is not None
         try:
@@ -187,6 +307,7 @@ async def post_tap(event: TapEvent):
             "candidate_id": candidate_id,
         }
         cohort_manager.record_event_processed(event.event_id, outcome)
+        sse_notifier.notify("roster_change", {"action": "admitted", "timestamp": utc_now_iso()})
         return outcome
 
     elif event.event_type == "exit":
@@ -208,6 +329,8 @@ async def post_tap(event: TapEvent):
             "removed_candidates": removed_candidates,
         }
         cohort_manager.record_event_processed(event.event_id, outcome)
+        if removed_candidates:
+            sse_notifier.notify("roster_change", {"action": "departed", "timestamp": utc_now_iso()})
         return outcome
 
     raise HTTPException(status_code=400, detail="Invalid event_type")

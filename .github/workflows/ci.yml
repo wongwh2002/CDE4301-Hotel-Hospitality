@@ -1,0 +1,65 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  tests:
+    name: Python tests
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v6
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.14"
+          cache: pip
+          cache-dependency-path: requirements-test.txt
+
+      - name: Install test dependencies
+        run: python -m pip install -r requirements-test.txt
+
+      - name: Run tests
+        run: python -m pytest -q
+
+  compose:
+    name: Docker Compose build and smoke check
+    runs-on: ubuntu-latest
+    env:
+      HOST_BIND_ADDRESS: 127.0.0.1
+      INTERNAL_API_TOKEN: ci-only-internal-token
+      DEVICE_AUTH_TOKEN: ci-only-device-token
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v6
+
+      - name: Validate Compose configuration
+        run: docker compose config --quiet
+
+      - name: Build all service images
+        run: docker compose --profile sim build
+
+      - name: Start core services and wait for health checks
+        run: docker compose up --detach --wait
+
+      - name: Smoke check services and dashboard
+        run: |
+          curl --fail --silent http://127.0.0.1:8000/health
+          curl --fail --silent http://127.0.0.1:8001/health
+          curl --fail --silent http://127.0.0.1:8002/health
+          curl --fail --silent --output /tmp/dashboard.html http://127.0.0.1:8000/
+          grep -q 'guest-registration-form' /tmp/dashboard.html
+          curl --fail --silent http://127.0.0.1:8000/v1/lounge/roster
+
+      - name: Stop services and remove test data
+        if: always()
+        run: docker compose down --volumes --remove-orphans
