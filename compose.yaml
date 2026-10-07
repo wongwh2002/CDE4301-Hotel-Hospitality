@@ -1,0 +1,117 @@
+name: hotel-smart-glasses-poc
+
+# Default stack: lounge-control, face-worker, mock-hotel
+# Opt-in simulator services: tap-simulator, frame-replay under 'sim' profile
+
+services:
+  mock-hotel:
+    build:
+      context: .
+      dockerfile: apps/mock-hotel/Dockerfile
+    ports:
+      - "${HOST_BIND_ADDRESS:-127.0.0.1}:${MOCK_HOTEL_PORT:-8002}:8002"
+    environment:
+      - SQLITE_PATH=/data/mock-hotel.db
+      - PORT=8002
+    volumes:
+      - mock-hotel-data:/data
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8002/health')"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+      start_period: 2s
+    restart: unless-stopped
+    networks:
+      - lounge-net
+
+  face-worker:
+    build:
+      context: .
+      dockerfile: apps/face-worker/Dockerfile
+    ports:
+      - "${HOST_BIND_ADDRESS:-127.0.0.1}:${FACE_WORKER_PORT:-8001}:8001"
+    environment:
+      - PORT=8001
+      - LOUNGE_CONTROL_URL=http://lounge-control:8000
+      - INTERNAL_API_TOKEN=${INTERNAL_API_TOKEN:?Set INTERNAL_API_TOKEN in .env}
+      - MAX_FRAME_SIZE_BYTES=${MAX_FRAME_SIZE_BYTES:-5242880}
+      - QUEUE_MAXSIZE=${QUEUE_MAXSIZE:-5}
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8001/health')"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+      start_period: 2s
+    restart: unless-stopped
+    networks:
+      - lounge-net
+
+  lounge-control:
+    build:
+      context: .
+      dockerfile: apps/lounge-control/Dockerfile
+    ports:
+      - "${HOST_BIND_ADDRESS:-127.0.0.1}:${LOUNGE_CONTROL_PORT:-8000}:8000"
+    environment:
+      - PORT=8000
+      - MOCK_HOTEL_URL=http://mock-hotel:8002
+      - FACE_WORKER_URL=http://face-worker:8001
+      - DEVICE_AUTH_TOKEN=${DEVICE_AUTH_TOKEN:?Set DEVICE_AUTH_TOKEN in .env}
+      - INTERNAL_API_TOKEN=${INTERNAL_API_TOKEN:?Set INTERNAL_API_TOKEN in .env}
+      - MAX_FRAME_SIZE_BYTES=${MAX_FRAME_SIZE_BYTES:-5242880}
+      - COHORT_EXPIRY_SECONDS=${COHORT_EXPIRY_SECONDS:-7200}
+    depends_on:
+      mock-hotel:
+        condition: service_healthy
+      face-worker:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/health')"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+      start_period: 2s
+    restart: unless-stopped
+    networks:
+      - lounge-net
+
+  tap-simulator:
+    profiles: ["sim"]
+    build:
+      context: .
+      dockerfile: apps/tap-simulator/Dockerfile
+    environment:
+      - TARGET_URL=http://lounge-control:8000/v1/lounge/taps
+      - READER_ID=lounge-entry-1
+      - GUEST_REFS=guest-alex-101,guest-jordan-102,guest-casey-103,guest-samira-104
+      - INTERVAL_SECONDS=5
+      - MODE=loop
+    depends_on:
+      lounge-control:
+        condition: service_healthy
+    networks:
+      - lounge-net
+
+  frame-replay:
+    profiles: ["sim"]
+    build:
+      context: .
+      dockerfile: apps/frame-replay/Dockerfile
+    environment:
+      - WS_URL=ws://lounge-control:8000
+      - DEVICE_ID=device-replay-1
+      - STREAM_ID=stream-replay-1
+      - DEVICE_AUTH_TOKEN=${DEVICE_AUTH_TOKEN:?Set DEVICE_AUTH_TOKEN in .env}
+    depends_on:
+      lounge-control:
+        condition: service_healthy
+    networks:
+      - lounge-net
+
+volumes:
+  mock-hotel-data:
+
+networks:
+  lounge-net:
+    driver: bridge

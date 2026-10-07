@@ -1,0 +1,1 @@
+"""mock-hotel service package."""

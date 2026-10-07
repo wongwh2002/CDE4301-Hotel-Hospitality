@@ -1,0 +1,17 @@
+.git
+.agents
+skills-lock.json
+__pycache__
+*.pyc
+*.pyo
+*.pyd
+.pytest_cache
+.coverage
+htmlcov
+.env
+.venv
+venv
+node_modules
+*.swp
+*.swo
+.DS_Store

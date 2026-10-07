@@ -1,0 +1,30 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://hotel-hospitality.internal/contracts/v1/candidate.schema.json",
+  "title": "CandidateEnrollment",
+  "description": "Enrollment payload for transient candidate cohort in face-worker",
+  "type": "object",
+  "required": [
+    "candidate_id",
+    "expires_at"
+  ],
+  "properties": {
+    "candidate_id": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 64,
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]{0,63}$",
+      "description": "Opaque candidate identifier (strictly no PII)"
+    },
+    "expires_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "ISO-8601 timestamp when candidate recognition expires"
+    },
+    "photo_b64": {
+      "type": "string",
+      "description": "Base64 encoded synthetic/consented JPEG; current scaffold validates and discards it without creating a face template"
+    }
+  },
+  "additionalProperties": false
+}

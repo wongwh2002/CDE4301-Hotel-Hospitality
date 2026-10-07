@@ -1,7 +1,7 @@
 # Hotel Lounge Smart-Glasses POC Architecture
 
 **Status:** Proposed architecture for the proof of concept; the RV101 phone-bridge path is the current working hypothesis. Camera streaming and card-reader integration still need validation.
-**Last researched:** 2026-10-06
+**Last researched:** 2026-10-07
 
 ## Goal
 
@@ -16,7 +16,7 @@ The design separates access events, guest context, image processing, and display
 - Run `lounge-control` and `face-worker` as separate containers, with small versioned HTTP interfaces between them. Keep inference inside a bounded worker loop in `face-worker`; do not run it in an async request handler.
 - For the RV101 working path, pair the glasses to an Android phone running the Rokid app/CXR-L integration. The phone sends camera data over the lounge network to the laptop and receives cues for display on the glasses. Keep this bridge behind a vendor-specific interface.
 - Keep the camera transport as a validation gate: the public CXR-L sample currently demonstrates still-photo capture, not a continuous frame stream. Do not claim the end-to-end CV flow is viable until continuous or sufficiently frequent image delivery is proven on the RV101. ([CXR-L sample mirror](https://github.com/e7naq3y/CXR-L-SDK), [photo sample source](https://github.com/e7naq3y/CXR-L-SDK/blob/main/cxrlsample101/app/src/main/java/com/rokid/cxrlsample/activities/photo/PhotoUsageViewModel.kt))
-- Send discrete tap events over HTTP; use one device WebSocket to `lounge-control` for sampled JPEG frames and cue updates. `lounge-control` forwards frames to `face-worker` over an internal interface. Use WebRTC or the glasses SDK's native stream if continuous video is needed and supported by the selected device.
+- Send discrete tap events over HTTP; give each paired phone its own authenticated WebSocket to `lounge-control` for sampled JPEG frames and cue updates. One `lounge-control` instance can manage multiple phone connections; do not start one control container per phone. `lounge-control` forwards frames to `face-worker` over an internal HTTP interface. Use WebRTC or the glasses SDK's native stream if continuous video is needed and supported by the selected device.
 - Do not add Kafka for the POC. Keep frames transient and use a bounded in-memory queue inside `face-worker` that drops old frames when recognition is busy.
 - Keep guest display context and active guest references in `lounge-control`; keep only opaque candidate IDs and derived face templates in `face-worker`. Both are memory-only and expire. Do not persist camera frames or face crops.
 - Run a `mock-hotel` API container backed by a seeded SQLite file for synthetic guest profiles and lounge test data. SQLite is embedded, so this is an API service with a database file, not a separate database server. Active lounge presence and face templates remain in memory with expiry.
@@ -80,7 +80,7 @@ Docker Compose
 │   ├── frame intake and validation
 │   ├── bounded per-stream queue: keep latest, discard stale
 │   └── CV loop: detect, track, compare, post match callback
-└── mock-hotel (dev profile)
+└── mock-hotel
     ├── FastAPI profile API
     └── SQLite file on a named Docker volume
         └── synthetic guest profiles and reference photos
@@ -98,12 +98,12 @@ Use a small number of deep modules with narrow interfaces. A teammate can change
 
 | Module | Owns | Stable interface | Data it receives |
 |---|---|---|---|
-| `lounge-control` | Tap handling, profile lookup, active guest state, device sessions, cue composition | `POST /v1/lounge/taps`; device WebSocket; internal match callback | Guest reference, permitted profile fields, device and stream IDs, recognition results |
+| `lounge-control` | Tap handling, profile lookup, active guest state, device sessions, cue composition | `POST /v1/lounge/taps`; one device WebSocket per paired phone; internal match callback | Guest reference, permitted profile fields, device and stream IDs, recognition results |
 | `face-worker` | Face detection/tracking, template enrollment, matching, temporal stability, frame backpressure | `PUT /internal/v1/candidates/{id}`; `DELETE /internal/v1/candidates/{id}`; `POST /internal/v1/frames`; `POST /internal/v1/matches` callback | Reference photo at enrollment, opaque candidate IDs, lounge/stream IDs, transient frames; no names, preferences, or allergies |
 | `mock-hotel` | Development profiles and synthetic guest photos; SQLite persistence and profile API | `GET /v1/guests/{guest_ref}/lounge-profile` | Synthetic records only |
 | `glasses-bridge` | Vendor SDK integration, camera access, display rendering, reconnect behavior | Device WebSocket contract and cue payload schema | Frames from camera; short cue payloads |
 | `tap-simulator` | Simulated entry/exit events | Same tap-event interface as the reader adapter | Synthetic guest references |
-| `frame-replay` | Deterministic CV integration input | Same device-frame interface as the bridge | Consented/synthetic test images; never real guest data in source control |
+| `frame-replay` | One-shot deterministic CV integration input | Sends a prepared frame fixture once through the same device-frame interface as the bridge | Consented/synthetic test images; never real guest data in source control |
 
 Suggested source layout:
 
@@ -149,19 +149,25 @@ The HTTP route names are proposed contracts. Store their request/response schema
 
 This keeps the most privacy-sensitive recognition logic and the worker-facing guest data in separate modules. It also lets the control module run against a fake recognizer, and the vision module run against a fake control callback.
 
-### Compose startup and local isolation
+### Compose startup and local network
 
 Provide `compose.yaml`, `.env.example`, one Dockerfile per container, and a small `scripts/dev-up.sh` wrapper. Its normal path can run:
 
 ```sh
-docker compose --profile dev up --build --wait
+docker compose up --build --wait
 ```
 
-The `dev` profile starts `lounge-control`, `face-worker`, and `mock-hotel`. An optional `sim` profile adds `tap-simulator` and `frame-replay`. Health checks plus Compose's `depends_on: condition: service_healthy` make startup wait for dependencies; a `--watch` mode can be used for edits where supported. Pin a minimum Docker Compose version of 2.22 if using Compose Watch. ([Compose startup order and health checks](https://docs.docker.com/compose/how-tos/startup-order/), [Compose profiles](https://docs.docker.com/reference/compose-file/profiles/), [Compose Watch](https://docs.docker.com/compose/how-tos/file-watch/))
+The three core services have no Compose profile, so they start by default. The optional `sim` profile makes `tap-simulator` and `frame-replay` available. Start the core services with the tap simulator using `docker compose --profile sim up --build --wait lounge-control face-worker mock-hotel tap-simulator`. Run frame replay separately as a one-shot command, for example `docker compose --profile sim run --rm frame-replay --fixture <path>`; it sends a prepared synthetic or consented frame fixture once through the device-frame interface, then exits. Health checks plus Compose's `depends_on: condition: service_healthy` make startup wait for dependencies; a `--watch` mode can be used for edits where supported. Pin a minimum Docker Compose version of 2.22 if using Compose Watch. ([Compose startup order and health checks](https://docs.docker.com/compose/how-tos/startup-order/), [Compose profiles](https://docs.docker.com/reference/compose-file/profiles/), [Compose Watch](https://docs.docker.com/compose/how-tos/file-watch/))
 
 Each developer can clone the repo or use a separate Git worktree, build their own Compose project, and use local ports, volumes, fixtures, and environment settings. With their local stack already running, a developer changing `face-worker` can rebuild or watch only that container without restarting the other modules, for example with `docker compose up --build -d --no-deps face-worker`. Keep the interface schemas under a shared `contracts/` directory and require each module's tests to validate them. Use separate Compose project names for multiple checkouts on the same laptop; different laptops already have separate Docker daemons.
 
-Compose project names isolate containers, networks, and volumes on a shared development host. The startup script should accept a developer-supplied project name, or derive one from the checkout, so parallel worktrees do not collide. Publish `lounge-control` on loopback by default for simulation; for a physical phone or reader, allow a developer to bind it to the laptop's lounge-network address and provide that address to the bridge. Keep `face-worker` and `mock-hotel` internal to the Compose network. ([Docker Compose project names](https://docs.docker.com/compose/how-tos/project-name/))
+Compose project names isolate containers, networks, and volumes on a shared development host. The startup script should accept a developer-supplied project name, or derive one from the checkout, so parallel worktrees do not collide. For this POC, publish the host ports for `lounge-control`, `face-worker`, and `mock-hotel` on the laptop's lounge-network interface so they are reachable by clients on the same private router or phone hotspot. Bind to the selected laptop LAN address; do not forward these ports to the public internet. Verify that the router or hotspot allows its clients to reach the laptop; client isolation can block that path. Phones use the laptop LAN address and the published `lounge-control` port, not Docker's internal service names. The phone's normal data path goes through `lounge-control`; the other published ports are available for development and debugging. Container-to-container calls use Compose service names. ([Docker Compose project names](https://docs.docker.com/compose/how-tos/project-name/), [Compose networking](https://docs.docker.com/compose/how-tos/networking/), [Compose port mappings](https://docs.docker.com/reference/compose-file/services/))
+
+### Multiple phone connections and scale-out
+
+One `lounge-control` instance can hold multiple authenticated phone WebSockets at once. Give each phone a distinct device ID and each camera session a stream ID; keep frame queues and cue routing separate per stream. Do not create a control container per phone. A single `face-worker` can process frames from multiple streams using bounded queues that discard stale frames. Measure aggregate frame rate, frame size, and capture-to-cue latency on the target laptop before adding replicas.
+
+If `lounge-control` later needs multiple replicas, put a WebSocket-capable load balancer in front and define how active device sessions are routed or shared; the current session state is in memory. Scaling `face-worker` also requires a plan to make active candidate templates available to whichever worker receives a stream. Compose can start service replicas, but scaled published ports may receive different dynamic host ports, so use a stable front door if clients need one address. ([Docker Compose networking and scaled ports](https://docs.docker.com/compose/how-tos/networking/), [FastAPI in containers](https://fastapi.tiangolo.com/deployment/docker/))
 
 Build and pin Linux images for both `linux/amd64` and `linux/arm64`, with CPU inference as the portable baseline. Treat GPU/NPU acceleration as a machine-specific option, not a requirement for the shared dev stack. A Mac, an NVIDIA laptop, and a CPU-only laptop can run the same Compose interfaces, although recognition speed may differ.
 
@@ -169,7 +175,7 @@ Docker provides runtime isolation, but it does not prevent Git edits from confli
 
 ### What Docker can and cannot start
 
-The backend, mock hotel data, tap simulator, and frame replay tool can all start from one script. The actual glasses SDK app generally runs on its paired phone, and a physical card reader remains external hardware. Those parts need a companion-app build/install or a device connection step; Docker can start their local backend interfaces and simulators, but it cannot replace the vendor SDK or hardware. Meta's toolkit targets iOS/Android companion apps, and Rokid's SDK is specific to its device family. ([Meta Device Access Toolkit](https://developers.meta.com/wearables/device-access-toolkit/), [Rokid Glass3 SDK](https://x-docs.rokid.com/docs/en/terminal-sdk/glasses/))
+The backend and mock hotel data start with the default Compose command. The `sim` profile makes the tap simulator available; frame replay is run explicitly as a one-shot command. The actual glasses SDK app generally runs on its paired phone, and a physical card reader remains external hardware. Those parts need a companion-app build/install or a device connection step; Docker can start their local backend interfaces and simulators, but it cannot replace the vendor SDK or hardware. Meta's toolkit targets iOS/Android companion apps, and Rokid's SDK is specific to its device family. ([Meta Device Access Toolkit](https://developers.meta.com/wearables/device-access-toolkit/), [Rokid Glass3 SDK](https://x-docs.rokid.com/docs/en/terminal-sdk/glasses/))
 
 This repo currently has documentation but no app modules or Dockerfiles, so the proposed startup command is a target workflow rather than a runnable script today. The architecture is viable; implement it after the module skeletons and contracts exist.
 

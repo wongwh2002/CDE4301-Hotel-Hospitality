@@ -1,0 +1,44 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://hotel-hospitality.internal/contracts/v1/lounge-profile.schema.json",
+  "title": "LoungeProfile",
+  "description": "Minimal permitted guest profile fields exposed for lounge operations",
+  "type": "object",
+  "required": [
+    "guest_ref",
+    "display_name"
+  ],
+  "properties": {
+    "guest_ref": {
+      "type": "string",
+      "description": "Hotel-internal opaque guest reference identifier"
+    },
+    "display_name": {
+      "type": "string",
+      "description": "Short preferred name for glanceable display"
+    },
+    "room_number": {
+      "type": "string",
+      "description": "Assigned room number"
+    },
+    "vip_tier": {
+      "type": "string",
+      "description": "Hotel loyalty or lounge entitlement tier"
+    },
+    "allergies": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "Critical food or medical allergies"
+    },
+    "preferences": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "Service preferences"
+    },
+    "photo_url": {
+      "type": "string",
+      "description": "Relative URL to retrieve synthetic reference photo"
+    }
+  },
+  "additionalProperties": false
+}

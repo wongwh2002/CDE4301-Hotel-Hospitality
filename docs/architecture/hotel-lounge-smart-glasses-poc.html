@@ -278,7 +278,7 @@
       <div class="diagram-shell">
         <svg class="architecture" id="architecture" viewBox="0 0 1380 820" role="img" aria-labelledby="svg-title svg-desc" data-focus="all" xmlns="http://www.w3.org/2000/svg">
           <title id="svg-title">Hotel lounge smart-glasses proposed architecture</title>
-          <desc id="svg-desc">A card reader sends entry events through an adapter to FastAPI lounge-control inside Docker. The control service looks up synthetic guest profiles from a SQLite-backed mock-hotel API and keeps active guest context in memory. Rokid RV101 glasses send camera frames through an Android phone to lounge-control and a Python face-worker. Matches return through the control service and phone as compact cues on the glasses.</desc>
+          <desc id="svg-desc">A card reader sends entry events through an adapter to FastAPI lounge-control inside Docker. The control service looks up synthetic guest profiles from a SQLite-backed mock-hotel API and keeps active guest context in memory. One or more Android companion phones connect over the private lounge network, each using its own authenticated WebSocket to send camera frames and receive cues. The control service forwards frames to a Python face-worker. All three service ports are published only on the private local network for this proof of concept.</desc>
           <defs>
             <marker id="arrow-teal" viewBox="0 0 10 10" refX="8.4" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" class="flow-arrow-teal"/></marker>
             <marker id="arrow-blue" viewBox="0 0 10 10" refX="8.4" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" class="flow-arrow-blue"/></marker>
@@ -287,7 +287,7 @@
             <marker id="arrow-grey" viewBox="0 0 10 10" refX="8.4" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" class="flow-arrow-grey"/></marker>
           </defs>
 
-          <text x="35" y="78" class="zone-title">LOUNGE EDGE · OUTSIDE DOCKER</text>
+          <text x="35" y="78" class="zone-title">PRIVATE LOUNGE LAN · OUTSIDE DOCKER</text>
           <rect x="590" y="55" width="760" height="735" rx="22" class="docker-boundary"/>
           <rect x="620" y="40" width="318" height="31" rx="9" class="docker-label-bg"/>
           <text x="635" y="61" class="docker-label">Local laptop · Docker Compose</text>
@@ -383,7 +383,7 @@
 
           <g class="node node-neutral node-recognition" aria-label="Android phone companion bridge">
             <rect x="300" y="565" width="220" height="185" rx="16" class="node-bg"/>
-            <text x="321" y="598" class="node-title">Android phone</text>
+            <text x="321" y="598" class="node-title">Android phone(s)</text>
             <text x="321" y="620" class="node-subtitle">Rokid app / CXR-L bridge</text>
             <text x="321" y="650" class="node-copy">Receives camera data</text>
             <text x="321" y="671" class="node-copy">Sends sampled JPEG frames</text>
@@ -399,10 +399,10 @@
           <path d="M520 615 H565 V375 H625" class="flow flow-frame node-recognition" marker-end="url(#arrow-blue)"/>
           <path d="M625 385 H580 V681 H520" class="flow flow-cue node-recognition" marker-end="url(#arrow-green)"/>
           <rect x="528" y="454" width="143" height="43" rx="8" class="flow-label-bg node-recognition"/>
-          <text x="539" y="472" class="flow-label-small node-recognition">Authenticated device WS</text>
+          <text x="539" y="472" class="flow-label-small node-recognition">One WS per phone</text>
           <text x="539" y="488" class="flow-label-small node-recognition">JPEG in · cue / clear out</text>
 
-          <text x="622" y="766" class="flow-note">No broker in the live path · direct HTTP / WebSocket · each module can run independently</text>
+          <text x="622" y="766" class="flow-note">Private LAN ports · one WebSocket per phone · no broker in the live path</text>
         </svg>
       </div>
 

@@ -1,0 +1,67 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://hotel-hospitality.internal/contracts/v1/cue.schema.json",
+  "title": "CueMessage",
+  "description": "Glanceable cue payload sent over WebSocket to the companion app for display on smart glasses",
+  "type": "object",
+  "required": [
+    "type",
+    "stream_id",
+    "status",
+    "emitted_at"
+  ],
+  "properties": {
+    "type": {
+      "type": "string",
+      "enum": ["cue", "clear", "error"],
+      "description": "Message type"
+    },
+    "stream_id": {
+      "type": "string",
+      "description": "Stream identifier associated with this cue"
+    },
+    "track_id": {
+      "type": "string",
+      "description": "Face track identifier"
+    },
+    "status": {
+      "type": "string",
+      "enum": ["active", "cleared", "suppressed"],
+      "description": "Cue display status"
+    },
+    "cue": {
+      "type": "object",
+      "description": "Glanceable display payload",
+      "required": ["headline"],
+      "properties": {
+        "headline": {
+          "type": "string",
+          "description": "Top line: status icon, check, display name (e.g. '🟢 ✅ ALEX')"
+        },
+        "alert": {
+          "type": "string",
+          "description": "Second line: warning icon, explicit critical note (e.g. '🔴 ⚠️ PEANUT ALLERGY')"
+        },
+        "guest_ref": {
+          "type": "string",
+          "description": "Internal guest reference token"
+        },
+        "color": {
+          "type": "string",
+          "description": "Primary status color indicator (e.g. 'green')"
+        },
+        "secondary_color": {
+          "type": "string",
+          "description": "Secondary alert color indicator (e.g. 'red')"
+        }
+      },
+      "additionalProperties": false
+    },
+    "emitted_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "ISO-8601 timestamp when cue was composed and emitted"
+    }
+  },
+  "additionalProperties": false
+}

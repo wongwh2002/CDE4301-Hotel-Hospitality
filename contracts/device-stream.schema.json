@@ -1,0 +1,64 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://hotel-hospitality.internal/contracts/v1/device-stream.schema.json",
+  "title": "DeviceStreamMessage",
+  "description": "Messages exchanged over the authenticated phone/device WebSocket to lounge-control",
+  "type": "object",
+  "required": ["type"],
+  "properties": {
+    "type": {
+      "type": "string",
+      "enum": ["auth", "frame_meta", "frame", "ping", "pong", "session_ack", "error"],
+      "description": "Message type discriminator"
+    },
+    "stream_id": {
+      "type": "string",
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]{0,63}$",
+      "description": "Identifier of the camera/session stream"
+    },
+    "device_id": {
+      "type": "string",
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]{0,63}$",
+      "description": "Identifier of the companion phone / glasses device"
+    },
+    "sequence": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "Monotonically increasing frame sequence number"
+    },
+    "captured_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "ISO-8601 capture timestamp at device"
+    },
+    "format": {
+      "type": "string",
+      "enum": ["image/jpeg"],
+      "default": "image/jpeg",
+      "description": "MIME type of frame encoding"
+    },
+    "token": {
+      "type": "string",
+      "description": "Authentication token for auth message"
+    },
+    "payload_b64": {
+      "type": "string",
+      "description": "Optional base64 encoded frame if not sending raw binary immediately following frame_meta"
+    },
+    "message": {
+      "type": "string",
+      "description": "Optional status or error description"
+    }
+  },
+  "allOf": [
+    {
+      "if": {"properties": {"type": {"const": "frame_meta"}}, "required": ["type"]},
+      "then": {"required": ["stream_id", "sequence", "captured_at"]}
+    },
+    {
+      "if": {"properties": {"type": {"const": "frame"}}, "required": ["type"]},
+      "then": {"required": ["stream_id", "sequence", "payload_b64"]}
+    }
+  ],
+  "additionalProperties": false
+}
