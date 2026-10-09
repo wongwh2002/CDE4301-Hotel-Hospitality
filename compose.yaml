@@ -37,12 +37,19 @@ services:
       - INTERNAL_API_TOKEN=${INTERNAL_API_TOKEN:?Set INTERNAL_API_TOKEN in .env}
       - MAX_FRAME_SIZE_BYTES=${MAX_FRAME_SIZE_BYTES:-5242880}
       - QUEUE_MAXSIZE=${QUEUE_MAXSIZE:-5}
+      - FACE_RECOGNITION_ENABLED=${FACE_RECOGNITION_ENABLED:-true}
+      - FACE_MODELS_DIR=/models
+      - FACE_MATCH_THRESHOLD=${FACE_MATCH_THRESHOLD:-0.50}
+      - FACE_MATCH_MARGIN=${FACE_MATCH_MARGIN:-0.10}
+      - FACE_STABLE_FRAMES=${FACE_STABLE_FRAMES:-3}
+    volumes:
+      - face-model-cache:/models
     healthcheck:
       test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8001/health')"]
       interval: 5s
       timeout: 3s
       retries: 5
-      start_period: 2s
+      start_period: 90s
     restart: unless-stopped
     networks:
       - lounge-net
@@ -111,6 +118,7 @@ services:
 
 volumes:
   mock-hotel-data:
+  face-model-cache:
 
 networks:
   lounge-net:

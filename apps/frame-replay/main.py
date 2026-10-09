@@ -24,7 +24,7 @@ if str(REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(REPO_ROOT))
 
 from contracts.models import DeviceStreamMessage, utc_now_iso
-from fixtures.synthetic_data import SYNTHETIC_JPEG_BYTES
+from fixtures.synthetic_data import SYNTHETIC_FACE_JPEG_BYTES
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s] %(message)s")
 logger = logging.getLogger("frame_replay")
@@ -45,7 +45,7 @@ def load_fixture(fixture_path: Optional[str]) -> bytes:
         if not data:
             raise ValueError(f"Fixture is empty: {p}")
         return data
-    return SYNTHETIC_JPEG_BYTES
+    return SYNTHETIC_FACE_JPEG_BYTES
 
 
 async def run_replay(
@@ -121,7 +121,12 @@ def main():
     parser.add_argument("--stream-id", default=DEFAULT_STREAM_ID, help="Camera stream ID")
     parser.add_argument("--token", default=DEFAULT_TOKEN, help="Device auth token")
     parser.add_argument("--fixture", default=None, help="Path to synthetic/consented JPEG fixture")
-    parser.add_argument("--frames", type=int, default=1, help="Number of frames to send")
+    parser.add_argument(
+        "--frames",
+        type=int,
+        default=3,
+        help="Number of frames to send (default: 3 for stable-match confirmation)",
+    )
     parser.add_argument("--interval", type=float, default=0.1, help="Interval between frames (s)")
     parser.add_argument("--wait-response", type=float, default=1.0, help="Seconds to listen before exit")
 

@@ -18,6 +18,7 @@ os.environ["INTERNAL_API_TOKEN"] = "test-internal-token"
 os.environ["COHORT_EXPIRY_SECONDS"] = "3600"
 os.environ["MAX_FRAME_SIZE_BYTES"] = "1048576"  # 1 MB for testing
 os.environ["QUEUE_MAXSIZE"] = "3"
+os.environ["FACE_RECOGNITION_ENABLED"] = "false"
 
 
 def load_app(app_name: str):

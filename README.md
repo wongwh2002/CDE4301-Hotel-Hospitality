@@ -79,6 +79,7 @@ docker compose up --build --wait
 ```
 
 The three core services (`lounge-control`, `face-worker`, `mock-hotel`) start and await healthcheck readiness before completing startup.
+On first startup, `face-worker` downloads the YuNet and SFace model weights into the `face-model-cache` Compose volume and verifies their SHA-256 digests. This one-time download needs internet access. Alex's seeded profile uses a fictional, generated test face so the optional frame replay can exercise a local stable match; other seeded profiles keep person-free placeholder images. See the [mobile-friendly architecture and demo guide](docs/architecture/face-recognition-demo.md) and [`apps/face-worker/MODELS.md`](apps/face-worker/MODELS.md) for more detail.
 
 #### 3. Open the Laptop Dashboard
 
@@ -137,7 +138,7 @@ docker compose --profile sim up --build --wait lounge-control face-worker mock-h
 
 #### One-Shot Frame Replay
 
-Run a one-shot replay of a prepared synthetic JPEG fixture through the real device WebSocket interface:
+Admit Alex in the dashboard first, then run the one-shot replay. It sends three frames of the fictional synthetic face through the real device WebSocket interface and waits for the recognition cue. The image is a local test fixture, not a real guest photo:
 
 ```bash
 docker compose --profile sim run --rm frame-replay
@@ -149,7 +150,7 @@ To specify custom options or a custom fixture:
 docker compose --profile sim run --rm frame-replay --fixture /path/to/consented_frame.jpg --frames 5
 ```
 
-The replay client connects, transmits the frame fixture, logs transmission metrics (without logging frame payloads), listens for cues, and cleanly exits.
+The replay client connects, transmits three frames by default, logs transmission metrics (without logging frame payloads), listens for cues, and cleanly exits. This confirms that the same synthetic reference and replay image produce a stable match in the local POC; it is not an accuracy or real-world performance evaluation.
 
 ---
 

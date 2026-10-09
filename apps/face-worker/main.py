@@ -1,11 +1,4 @@
-"""FastAPI face-worker service.
-
-CV interface and validation skeleton for Hotel Smart-Glasses POC:
-- Bounded latest-frame per-stream queue
-- Rejection of malformed/oversized frames
-- Transient candidate enrollment in RAM (zero disk persistence)
-- Never fabricates matches
-"""
+"""FastAPI service for transient face detection and candidate matching."""
 
 import base64
 import hmac
@@ -26,6 +19,8 @@ if str(REPO_ROOT) not in sys.path:
 
 import asyncio
 from contracts.models import CandidateEnrollment, is_valid_identifier
+from download_models import ensure_models
+from vision import InvalidImage, OpenCVFaceEngine
 from worker import (
     MAX_FRAME_SIZE_BYTES,
     cv_worker_loop,
@@ -34,13 +29,27 @@ from worker import (
     get_stats,
     list_candidate_ids,
     remove_candidate,
+    set_face_engine,
     validate_frame,
 )
+
+FACE_RECOGNITION_ENABLED = os.environ.get("FACE_RECOGNITION_ENABLED", "false").lower() in {
+    "1", "true", "yes", "on"
+}
+FACE_MODELS_DIR = os.environ.get("FACE_MODELS_DIR", "/models")
 
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    # Start bounded CV worker loop in background
+    if FACE_RECOGNITION_ENABLED:
+        model_paths = await asyncio.to_thread(ensure_models, FACE_MODELS_DIR)
+        engine = await asyncio.to_thread(
+            OpenCVFaceEngine,
+            model_paths["yunet.onnx"],
+            model_paths["sface.onnx"],
+        )
+        set_face_engine(engine)
+
     worker_task = asyncio.create_task(cv_worker_loop())
     yield
     worker_task.cancel()
@@ -48,6 +57,7 @@ async def lifespan(app: FastAPI):
         await worker_task
     except asyncio.CancelledError:
         pass
+    set_face_engine(None)
 
 
 app = FastAPI(
@@ -76,6 +86,7 @@ async def health():
     return {
         "status": "ok",
         "service": "face-worker",
+        "recognition_enabled": FACE_RECOGNITION_ENABLED,
         **stats,
     }
 
@@ -90,12 +101,7 @@ async def put_candidate(
     payload: CandidateEnrollment,
     _: None = Depends(require_internal_token),
 ):
-    """Enroll an opaque candidate into in-memory cohort.
-
-    Validates the reference photo input, then discards it. This scaffold has no
-    CV model and deliberately creates no face template or match.
-    Repeated PUT is safe (idempotent).
-    """
+    """Derive and retain a face template for an opaque active candidate."""
     if not is_valid_identifier(candidate_id):
         raise HTTPException(status_code=400, detail="Invalid candidate_id")
     if payload.candidate_id != candidate_id:
@@ -115,15 +121,19 @@ async def put_candidate(
             status_code = 413 if "exceeds maximum limit" in (error_msg or "") else 400
             raise HTTPException(status_code=status_code, detail=error_msg)
 
-    enroll_candidate(
-        candidate_id=candidate_id,
-        photo_bytes=photo_bytes,
-        expires_at=payload.expires_at,
-    )
+    try:
+        template_status = enroll_candidate(
+            candidate_id=candidate_id,
+            photo_bytes=photo_bytes,
+            expires_at=payload.expires_at,
+        )
+    except InvalidImage as exc:
+        raise HTTPException(status_code=400, detail=str(exc)) from exc
     return {
         "status": "enrolled",
         "candidate_id": candidate_id,
         "expires_at": payload.expires_at,
+        "template_status": template_status,
     }
 
 

@@ -5,16 +5,23 @@ Contains no real guest photographs, identity records, or personal data.
 """
 
 import json
+import hashlib
 import os
 import re
 import sqlite3
 import uuid
 from pathlib import Path
 from typing import Any, Dict, List, Optional
-from fixtures.synthetic_data import SYNTHETIC_JPEG_BYTES
+from fixtures.synthetic_data import SYNTHETIC_FACE_JPEG_BYTES, SYNTHETIC_JPEG_BYTES
 
 
 DEFAULT_DB_PATH = os.environ.get("SQLITE_PATH", "/data/mock-hotel.db")
+LEGACY_SYNTHETIC_PHOTO_SHA256 = "d1154dd16490a3e7328288d0e6847576455f8b0f9f4ec59a5421f58505edd309"
+PERSON_FREE_SYNTHETIC_PHOTO_SHA256 = hashlib.sha256(SYNTHETIC_JPEG_BYTES).hexdigest()
+SYNTHETIC_PLACEHOLDER_HASHES = {
+    LEGACY_SYNTHETIC_PHOTO_SHA256,
+    PERSON_FREE_SYNTHETIC_PHOTO_SHA256,
+}
 
 
 def get_db_path() -> Path:
@@ -55,6 +62,22 @@ def init_db() -> None:
                 """
             )
 
+            # Upgrade only known placeholder bytes in existing demo databases.
+            # Alex gets the fictional face fixture; all other placeholder photos
+            # remain person-free. Digest checks leave custom photos untouched.
+            for row in conn.execute("SELECT guest_ref, photo_bytes FROM guests"):
+                photo_bytes = bytes(row["photo_bytes"] or b"")
+                if hashlib.sha256(photo_bytes).hexdigest() in SYNTHETIC_PLACEHOLDER_HASHES:
+                    replacement = (
+                        SYNTHETIC_FACE_JPEG_BYTES
+                        if row["guest_ref"] == "guest-alex-101"
+                        else SYNTHETIC_JPEG_BYTES
+                    )
+                    conn.execute(
+                        "UPDATE guests SET photo_bytes = ? WHERE guest_ref = ?",
+                        (replacement, row["guest_ref"]),
+                    )
+
             cursor = conn.execute("SELECT COUNT(*) AS cnt FROM guests")
             row = cursor.fetchone()
             if row and row["cnt"] == 0:
@@ -73,7 +96,7 @@ def seed_synthetic_data(conn: sqlite3.Connection) -> None:
             "Diamond",
             json.dumps(["Peanut allergy"]),
             json.dumps(["Sparkling water", "Window seat"]),
-            SYNTHETIC_JPEG_BYTES,
+            SYNTHETIC_FACE_JPEG_BYTES,
         ),
         (
             "guest-jordan-102",

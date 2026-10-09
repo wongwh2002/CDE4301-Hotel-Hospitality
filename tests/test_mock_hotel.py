@@ -1,5 +1,7 @@
 """Tests for mock-hotel service."""
 
+from fixtures.synthetic_data import SYNTHETIC_FACE_JPEG_BYTES, SYNTHETIC_JPEG_BYTES
+
 
 def test_mock_hotel_health(mock_hotel_client):
     """Test healthcheck endpoint."""
@@ -31,6 +33,15 @@ def test_get_guest_photo(mock_hotel_client):
     # Must have JPEG SOI and EOI markers
     assert content[0] == 0xFF and content[1] == 0xD8
     assert content[-2] == 0xFF and content[-1] == 0xD9
+
+
+def test_seeded_face_fixture_is_limited_to_alex(mock_hotel_client):
+    """Keep one fictional face for the local recognition smoke demo only."""
+    alex_photo = mock_hotel_client.get("/v1/guests/guest-alex-101/photo")
+    jordan_photo = mock_hotel_client.get("/v1/guests/guest-jordan-102/photo")
+
+    assert alex_photo.content == SYNTHETIC_FACE_JPEG_BYTES
+    assert jordan_photo.content == SYNTHETIC_JPEG_BYTES
 
 
 def test_get_unknown_guest_profile_404(mock_hotel_client):

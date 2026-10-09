@@ -3,6 +3,7 @@ FROM python:3.14-slim
 ENV PYTHONUNBUFFERED=1 \
     PYTHONDONTWRITEBYTECODE=1 \
     PYTHONPATH="/app:/app/apps/face-worker" \
+    FACE_MODELS_DIR="/models" \
     PORT=8001
 
 WORKDIR /app
@@ -10,6 +11,10 @@ WORKDIR /app
 # Install dependencies
 COPY apps/face-worker/requirements.txt /app/apps/face-worker/
 RUN pip install --no-cache-dir -r /app/apps/face-worker/requirements.txt
+
+# Model weights are downloaded and SHA-256 verified on first startup into a
+# dedicated Compose volume; they are not copied into the source tree or image.
+RUN mkdir -p /models
 
 # Copy shared contracts, fixtures, and application code
 COPY contracts/ /app/contracts/

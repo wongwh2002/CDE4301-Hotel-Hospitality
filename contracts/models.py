@@ -65,13 +65,21 @@ class DeviceStreamMessage(ContractModel):
 
 class MatchEvent(ContractModel):
     """Match callback sent from face-worker to lounge-control (opaque candidate ID only)."""
-    candidate_id: Identifier = Field(..., description="Opaque candidate ID, strictly no PII")
+    candidate_id: Optional[Identifier] = Field(
+        None, description="Opaque candidate ID; absent for a no_match cue clear"
+    )
     stream_id: Identifier
     track_id: Identifier
     status: Literal["stable_match", "unconfirmed", "no_match"]
     device_id: Optional[Identifier] = None
     confidence: Optional[float] = Field(None, ge=0.0, le=1.0)
     matched_at: str
+
+    @model_validator(mode="after")
+    def require_candidate_for_stable_match(self):
+        if self.status == "stable_match" and self.candidate_id is None:
+            raise ValueError("stable_match requires candidate_id")
+        return self
 
 
 class CuePayload(ContractModel):

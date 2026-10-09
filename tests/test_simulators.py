@@ -8,7 +8,11 @@ import pytest
 REPO_ROOT = Path(__file__).resolve().parent.parent
 
 # Import simulator helpers
-from fixtures.synthetic_data import SYNTHETIC_JPEG_BYTES, ensure_fixture_frame
+from fixtures.synthetic_data import (
+    SYNTHETIC_FACE_JPEG_BYTES,
+    SYNTHETIC_JPEG_BYTES,
+    ensure_fixture_frame,
+)
 
 
 def test_ensure_synthetic_fixture(tmp_path):
@@ -61,3 +65,4 @@ async def test_frame_replay_load_fixture():
     fixture_bytes = replay_main.load_fixture(None)
     assert len(fixture_bytes) > 0
     assert fixture_bytes[0] == 0xFF and fixture_bytes[1] == 0xD8
+    assert fixture_bytes == SYNTHETIC_FACE_JPEG_BYTES
