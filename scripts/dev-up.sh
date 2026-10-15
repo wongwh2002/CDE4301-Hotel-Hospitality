@@ -36,7 +36,7 @@ for line in lines:
 path.write_text("\n".join(updated) + "\n")
 path.chmod(0o600)
 if generated:
-    print("==> Generated local device and service tokens; .env is excluded from Git.")
+    print("==> Generated missing local token(s); .env is excluded from Git.")
 PY
 
 echo "==> HOST_BIND_ADDRESS defaults to 127.0.0.1. Set it to the laptop's private LAN IP for phone testing."

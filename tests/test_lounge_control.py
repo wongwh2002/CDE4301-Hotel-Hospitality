@@ -609,6 +609,7 @@ def test_dashboard_routes(lounge_control_client):
                 "vip_tier": None,
                 "allergies": ["Dairy"],
                 "preferences": ["Still water"],
+                "photos_b64": [],
             },
         )
 

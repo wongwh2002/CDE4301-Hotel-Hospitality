@@ -59,13 +59,12 @@ Shared Pydantic models are defined in [`contracts/models.py`](contracts/models.p
 
 #### 1. Setup Environment Configuration
 
-On first run, `./scripts/dev-up.sh` creates a private `.env` file and generates unique device and internal service tokens. To configure Compose manually, copy `.env.example` to `.env`, set both tokens to separate random values, and then start the stack. Keep `.env` private; it is excluded from Git.
+On first run, `./scripts/dev-up.sh` creates a private `.env` file and generates the internal service token. The temporary POC device token is `gedi-4301`. To configure Compose manually, copy `.env.example` to `.env`, generate a value for `INTERNAL_API_TOKEN`, and then start the stack. Keep `.env` private; it is excluded from Git.
 
 ```bash
 cp .env.example .env
 openssl rand -hex 32
-openssl rand -hex 32
-# Copy the two outputs into DEVICE_AUTH_TOKEN and INTERNAL_API_TOKEN in .env.
+# Copy the output into INTERNAL_API_TOKEN in .env; DEVICE_AUTH_TOKEN is already set.
 ```
 
 #### 2. Start Core Stack
@@ -119,12 +118,12 @@ Each paired phone companion app opens one authenticated WebSocket per phone. Use
 
 ```text
 ws://<laptop-lan-ip>:8003/v1/video/stream/<device_id>
-WebSocket subprotocols: device-stream-v1, device-token.<DEVICE_AUTH_TOKEN>
+WebSocket subprotocols: device-stream-v1, device-token.gedi-4301
 ```
 
 Port `8003` is another published port for the existing `lounge-control` container, not a separate service. The compatibility route `ws://<laptop-lan-ip>:8000/v1/devices/<device_id>/stream` reaches the same handler and service.
 
-- **Authentication:** Token credentials are configured via `DEVICE_AUTH_TOKEN` in `.env` (never hardcoded in source). Authentication is verified on connection; unauthorized connections are rejected with WebSocket close code `1008` (Policy Violation).
+- **Authentication:** The temporary POC token is `gedi-4301`, configured as `DEVICE_AUTH_TOKEN` in `.env`. Send it as the `device-token.gedi-4301` WebSocket subprotocol; unauthorized connections are rejected with WebSocket close code `1008` (Policy Violation).
 - **Service authentication:** Internal face-worker routes require the separate `INTERNAL_API_TOKEN`. Compose passes it between services in an HTTP header; phone clients do not use it.
 - **Multi-Phone Support:** A single `lounge-control` container manages multiple concurrent phone WebSockets, keeping sessions, stream mappings, and frame metadata distinct per device.
 - **Disconnect Cleanup:** Disconnected devices are automatically deregistered, clearing active stream associations and preventing stale cue delivery.
@@ -134,7 +133,7 @@ Port `8003` is another published port for the existing `lounge-control` containe
 
 The phone app is the bridge between the glasses camera/display and the laptop. For the first POC, run a small **face-presence trigger on the paired phone** when the glasses SDK exposes preview frames. Keep identity matching on the laptop in `face-worker`; the phone detector only decides whether a frame should be uploaded. Meta's toolkit connects a phone app to compatible glasses. For the physical Rokid RV101, the CXR-L sample currently documented in this repo demonstrates still-photo capture, but does not prove a continuous preview stream or custom model execution on the glasses. Treat that camera capability as a device-validation gate. ([Meta Device Access Toolkit](https://developers.meta.com/wearables/device-access-toolkit/), [RV101 CXR-L photo sample](https://github.com/e7naq3y/CXR-L-SDK/blob/main/cxrlsample101/app/src/main/java/com/rokid/cxrlsample/activities/photo/PhotoUsageViewModel.kt))
 
-The phone sends sampled JPEG frames to `lounge-control` over the WebSocket on host port `8003`. Lounge-control forwards them to `face-worker` for detection and active-cohort matching. This is a sequence of JPEG frames over WebSocket, not an RTSP or H.264 endpoint. Start with 1–5 frames per second for this POC. The repo contains the server endpoint and a replay client, but does not yet include an Android companion app that captures from the glasses and sends frames.
+The phone sends JPEG frame messages to `lounge-control` over the WebSocket on host port `8003`. It can send one frame or a short burst, then close the connection; it does not need to continuously stream video. For the current default stable-match rule, send three distinct frames in the same short session because a single frame may not produce an identified match. Lounge-control forwards frames to `face-worker`. This is a sequence of JPEG frames over WebSocket, not an RTSP or H.264 endpoint. Start with 1–5 frames per second for a burst. The repo contains the server endpoint and a replay client, but does not yet include an Android companion app that captures from the glasses and sends frames.
 
 #### Recommended capture flow
 
@@ -147,7 +146,7 @@ If the SDK only provides still-photo capture, there is no preview frame on which
 
 #### WebSocket frame format
 
-Pass `device-stream-v1` and `device-token.<DEVICE_AUTH_TOKEN>` as WebSocket subprotocols. Do not put the token in the URL. The server selects `device-stream-v1` for the connection; the token subprotocol is used only to authenticate it. `INTERNAL_API_TOKEN` is a separate service-to-service credential and must not be sent by the phone.
+Pass `device-stream-v1` and `device-token.gedi-4301` as WebSocket subprotocols. Do not put the token in the URL. The server selects `device-stream-v1` for the connection; the token subprotocol is used only to authenticate it. `INTERNAL_API_TOKEN` is a separate service-to-service credential and must not be sent by the phone.
 
 After the server replies with `session_ack`, send this JSON text message immediately before each frame's binary JPEG message:
 
