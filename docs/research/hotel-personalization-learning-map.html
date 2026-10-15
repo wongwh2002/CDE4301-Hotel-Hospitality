@@ -1,0 +1,1218 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#f4f3ee">
+  <title>From Guest Data to a Better Stay — Project Learning Map</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --ink: #172624;
+      --muted: #5e6e69;
+      --paper: #f4f3ee;
+      --surface: #fffefa;
+      --line: #d9ded6;
+      --teal: #12675e;
+      --teal-soft: #e5f1ed;
+      --coral: #c26148;
+      --coral-soft: #f8ebe5;
+      --gold: #a87318;
+      --gold-soft: #f7f0dc;
+      --blue: #3e6381;
+      --blue-soft: #eaf0f5;
+      --shadow: 0 16px 42px rgba(23, 38, 36, .07);
+      --radius: 18px;
+      --serif: Georgia, "Times New Roman", serif;
+      --sans: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; scroll-padding-top: 88px; }
+    body {
+      margin: 0;
+      color: var(--ink);
+      background:
+        radial-gradient(ellipse at 88% 0%, rgba(18, 103, 94, .08), transparent 34rem),
+        var(--paper);
+      font-family: var(--sans);
+      line-height: 1.58;
+    }
+    a { color: var(--teal); text-underline-offset: 3px; }
+    a:hover { color: #08483f; }
+    button, summary { font: inherit; }
+    .topbar {
+      position: sticky;
+      inset: 0 0 auto;
+      z-index: 5;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+      padding: .75rem clamp(1rem, 4vw, 3rem);
+      border-bottom: 1px solid rgba(217, 222, 214, .82);
+      background: rgba(244, 243, 238, .92);
+      backdrop-filter: blur(14px);
+    }
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: .65rem;
+      color: var(--ink);
+      font-size: .82rem;
+      font-weight: 750;
+      letter-spacing: .04em;
+      text-decoration: none;
+      white-space: nowrap;
+    }
+    .brand-mark {
+      display: grid;
+      width: 1.85rem;
+      aspect-ratio: 1;
+      place-items: center;
+      border-radius: 50% 50% 50% 8px;
+      color: white;
+      background: var(--teal);
+      font-family: var(--serif);
+      font-size: 1.1rem;
+      transform: rotate(-10deg);
+    }
+    .nav {
+      display: flex;
+      gap: .25rem;
+      overflow-x: auto;
+      scrollbar-width: none;
+    }
+    .nav::-webkit-scrollbar { display: none; }
+    .nav a {
+      padding: .45rem .65rem;
+      border-radius: 999px;
+      color: var(--muted);
+      font-size: .75rem;
+      text-decoration: none;
+      white-space: nowrap;
+    }
+    .nav a:hover, .nav a:focus-visible { color: var(--ink); background: var(--surface); }
+    main { width: min(1160px, calc(100% - 2rem)); margin: auto; }
+    .hero {
+      position: relative;
+      overflow: hidden;
+      margin: 2rem 0 1.25rem;
+      padding: clamp(1.6rem, 5vw, 4.2rem);
+      border: 1px solid rgba(217, 222, 214, .9);
+      border-radius: 28px;
+      background: var(--surface);
+      box-shadow: var(--shadow);
+    }
+    .hero::after {
+      position: absolute;
+      right: -3rem;
+      bottom: -8rem;
+      width: 23rem;
+      height: 23rem;
+      border: 1px solid rgba(18, 103, 94, .16);
+      border-radius: 50%;
+      box-shadow: 0 0 0 2.3rem rgba(18, 103, 94, .035), 0 0 0 4.8rem rgba(18, 103, 94, .025);
+      content: "";
+      pointer-events: none;
+    }
+    .eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: .5rem;
+      margin: 0 0 .8rem;
+      color: var(--teal);
+      font-size: .73rem;
+      font-weight: 800;
+      letter-spacing: .13em;
+      text-transform: uppercase;
+    }
+    .eyebrow::before { width: 1.55rem; height: 2px; background: currentColor; content: ""; }
+    h1, h2, h3, h4, p { margin-top: 0; }
+    h1, h2, h3 { line-height: 1.13; }
+    h1 {
+      max-width: 780px;
+      margin-bottom: 1rem;
+      font-family: var(--serif);
+      font-size: clamp(2.7rem, 7vw, 5.7rem);
+      font-weight: 500;
+      letter-spacing: -.055em;
+    }
+    .hero-intro { max-width: 720px; color: var(--muted); font-size: clamp(1rem, 1.7vw, 1.25rem); }
+    .thesis {
+      position: relative;
+      z-index: 1;
+      max-width: 820px;
+      margin: 2rem 0 1.35rem;
+      padding: 1.2rem 1.35rem;
+      border-left: 4px solid var(--teal);
+      border-radius: 0 12px 12px 0;
+      background: var(--teal-soft);
+      font-family: var(--serif);
+      font-size: clamp(1.15rem, 2.3vw, 1.7rem);
+      line-height: 1.42;
+    }
+    .hero-meta, .pills { display: flex; flex-wrap: wrap; gap: .5rem; }
+    .pill, .tag {
+      display: inline-flex;
+      align-items: center;
+      gap: .35rem;
+      padding: .32rem .63rem;
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      color: var(--muted);
+      background: var(--surface);
+      font-size: .72rem;
+      font-weight: 700;
+    }
+    .pill.hypothesis, .tag.hypothesis { border-color: #e4c68c; color: #76520e; background: var(--gold-soft); }
+    .pill.local, .tag.local { border-color: #e6bdb0; color: #8c422d; background: var(--coral-soft); }
+    .pill.supported, .tag.supported { border-color: #a8d0c4; color: #105b50; background: var(--teal-soft); }
+    .pill.untested, .tag.untested { border-color: #c5d3df; color: #385a76; background: var(--blue-soft); }
+    .section {
+      margin: 1.25rem 0;
+      padding: clamp(1.35rem, 3.5vw, 2.5rem);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: var(--surface);
+      box-shadow: 0 8px 26px rgba(23, 38, 36, .035);
+    }
+    .section-head {
+      display: flex;
+      align-items: end;
+      justify-content: space-between;
+      gap: 1.5rem;
+      margin-bottom: 1.5rem;
+    }
+    .section-num { color: var(--coral); font-size: .72rem; font-weight: 850; letter-spacing: .12em; text-transform: uppercase; }
+    h2 { margin: .35rem 0 .55rem; font-family: var(--serif); font-size: clamp(1.8rem, 4vw, 3rem); font-weight: 500; letter-spacing: -.035em; }
+    .section-head p { max-width: 590px; margin-bottom: 0; color: var(--muted); }
+    h3 { margin: 0 0 .65rem; font-size: 1.05rem; }
+    h4 { margin: 0 0 .45rem; font-size: .88rem; }
+    .small { color: var(--muted); font-size: .88rem; }
+    .muted { color: var(--muted); }
+    .grid-2, .grid-3, .grid-4 { display: grid; gap: .85rem; }
+    .grid-2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .grid-3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+    .grid-4 { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+    .card {
+      padding: 1.05rem;
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      background: #fff;
+    }
+    .card p:last-child { margin-bottom: 0; }
+    .card-number {
+      display: inline-grid;
+      width: 1.85rem;
+      aspect-ratio: 1;
+      margin-bottom: .8rem;
+      place-items: center;
+      border-radius: 50%;
+      color: var(--teal);
+      background: var(--teal-soft);
+      font-size: .78rem;
+      font-weight: 800;
+    }
+    .callout {
+      margin: 1rem 0 0;
+      padding: 1rem 1.15rem;
+      border: 1px solid #ead7a7;
+      border-radius: 12px;
+      background: var(--gold-soft);
+    }
+    .callout p:last-child { margin-bottom: 0; }
+    .redline {
+      display: grid;
+      grid-template-columns: minmax(125px, .26fr) 1fr;
+      gap: 1rem;
+      align-items: start;
+      padding: .9rem 0;
+      border-bottom: 1px solid var(--line);
+    }
+    .redline:last-child { border-bottom: 0; }
+    .redline b { font-size: .84rem; }
+    .redline p { margin: 0; color: var(--muted); }
+    .timeline {
+      position: relative;
+      display: grid;
+      grid-template-columns: repeat(5, minmax(0, 1fr));
+      gap: .7rem;
+      margin-top: 1.2rem;
+    }
+    .timeline::before {
+      position: absolute;
+      top: .64rem;
+      right: 4%;
+      left: 4%;
+      height: 2px;
+      background: var(--line);
+      content: "";
+    }
+    .time-card { position: relative; padding-top: 1.8rem; }
+    .time-card::before {
+      position: absolute;
+      top: .27rem;
+      left: .2rem;
+      width: .78rem;
+      height: .78rem;
+      border: 3px solid var(--surface);
+      border-radius: 50%;
+      background: var(--coral);
+      box-shadow: 0 0 0 1px var(--coral);
+      content: "";
+    }
+    .time-card .time-label { color: var(--coral); font-size: .68rem; font-weight: 850; letter-spacing: .07em; text-transform: uppercase; }
+    .time-card h3 { margin: .3rem 0 .4rem; font-family: var(--serif); font-size: 1.1rem; font-weight: 500; }
+    .time-card p { margin-bottom: 0; color: var(--muted); font-size: .82rem; }
+    .evidence-timeline { display: grid; gap: .7rem; }
+    .evidence-row {
+      display: grid;
+      grid-template-columns: 88px minmax(0, 1fr) minmax(170px, .8fr);
+      gap: .8rem;
+      align-items: start;
+      padding: .95rem;
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      background: #fff;
+    }
+    .year { color: var(--teal); font-family: var(--serif); font-size: 1.4rem; }
+    .evidence-row strong { font-size: .9rem; }
+    .evidence-row p { margin: .18rem 0 0; color: var(--muted); font-size: .81rem; }
+    .evidence-row .read { font-size: .78rem; }
+    .definition {
+      padding: 1.15rem 1.25rem;
+      border: 1px solid #b8d9cf;
+      border-radius: 14px;
+      background: var(--teal-soft);
+      font-family: var(--serif);
+      font-size: 1.22rem;
+      line-height: 1.5;
+    }
+    .definition p { margin-bottom: 0; }
+    .four-part {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: .7rem;
+      margin: 1rem 0;
+    }
+    .stage {
+      position: relative;
+      min-height: 160px;
+      padding: 1rem;
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      background: #fff;
+    }
+    .stage:not(:last-child)::after {
+      position: absolute;
+      top: 1.5rem;
+      right: -.72rem;
+      z-index: 2;
+      width: 1rem;
+      height: 1rem;
+      color: var(--coral);
+      background: var(--surface);
+      content: "→";
+      font-weight: 900;
+      text-align: center;
+    }
+    .stage-index { color: var(--coral); font-size: .72rem; font-weight: 850; }
+    .stage h3 { margin: .55rem 0 .4rem; font-family: var(--serif); font-size: 1.18rem; font-weight: 500; }
+    .stage p { margin: 0; color: var(--muted); font-size: .81rem; }
+    .mindmap {
+      display: grid;
+      grid-template-columns: 1fr minmax(200px, .8fr) 1fr;
+      grid-template-rows: 1fr auto 1fr;
+      gap: .7rem;
+      align-items: stretch;
+    }
+    .mind-center {
+      grid-column: 2;
+      grid-row: 2;
+      display: grid;
+      min-height: 150px;
+      padding: 1.3rem;
+      place-items: center;
+      border: 2px solid var(--teal);
+      border-radius: 48% 52% 44% 56%;
+      color: white;
+      background: var(--teal);
+      font-family: var(--serif);
+      font-size: 1.35rem;
+      line-height: 1.2;
+      text-align: center;
+      box-shadow: 0 0 0 10px var(--teal-soft);
+    }
+    .mind-node { padding: 1rem; border: 1px solid var(--line); border-radius: 14px; background: #fff; }
+    .mind-node:nth-child(1) { grid-column: 1; grid-row: 1; }
+    .mind-node:nth-child(2) { grid-column: 3; grid-row: 1; }
+    .mind-node:nth-child(3) { grid-column: 1; grid-row: 2; }
+    .mind-node:nth-child(4) { grid-column: 3; grid-row: 2; }
+    .mind-node:nth-child(5) { grid-column: 1; grid-row: 3; }
+    .mind-node:nth-child(6) { grid-column: 3; grid-row: 3; }
+    .mind-node h3 { margin: 0 0 .45rem; font-size: .94rem; }
+    .mind-node p { margin: 0; color: var(--muted); font-size: .79rem; }
+    .mind-node .mini { display: block; margin-top: .55rem; color: var(--teal); font-size: .71rem; font-weight: 750; }
+    .chain { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: .5rem; align-items: stretch; }
+    .chain-step {
+      position: relative;
+      display: flex;
+      min-height: 180px;
+      flex-direction: column;
+      align-items: flex-start;
+      padding: .85rem;
+      border: 1px solid var(--line);
+      border-radius: 13px;
+      background: #fff;
+    }
+    .chain-step:not(:last-child)::after {
+      position: absolute;
+      top: 43%;
+      right: -.58rem;
+      z-index: 1;
+      display: grid;
+      width: .75rem;
+      height: .75rem;
+      place-items: center;
+      border-radius: 50%;
+      color: var(--coral);
+      background: var(--surface);
+      content: "›";
+      font-weight: 900;
+    }
+    .chain-step .tag { margin-bottom: .65rem; padding: .22rem .45rem; font-size: .61rem; }
+    .chain-step strong { font-size: .82rem; line-height: 1.3; }
+    .chain-step p { margin: .5rem 0 0; color: var(--muted); font-size: .72rem; }
+    .moderators { display: flex; flex-wrap: wrap; gap: .45rem; margin-top: .9rem; }
+    .moderators span { padding: .38rem .6rem; border-radius: 999px; color: #43534f; background: #edf0ea; font-size: .72rem; }
+    .two-col { display: grid; grid-template-columns: 1.15fr .85fr; gap: 1rem; }
+    .quote {
+      margin: 0;
+      padding: 1rem 1.1rem;
+      border-left: 3px solid var(--coral);
+      background: var(--coral-soft);
+      font-family: var(--serif);
+      font-size: 1.08rem;
+      line-height: 1.45;
+    }
+    .quote cite { display: block; margin-top: .7rem; color: var(--muted); font-family: var(--sans); font-size: .76rem; font-style: normal; }
+    .why-root { margin-bottom: .8rem; padding: .9rem 1rem; border-radius: 12px; color: white; background: var(--ink); }
+    .why-root strong { color: #c8e1d9; }
+    .why-list { display: grid; gap: .7rem; counter-reset: why; }
+    .why-item {
+      display: grid;
+      grid-template-columns: 2.3rem minmax(0, 1fr);
+      gap: .7rem;
+      padding: .9rem;
+      border: 1px solid var(--line);
+      border-radius: 13px;
+      background: #fff;
+      counter-increment: why;
+    }
+    .why-item::before {
+      display: grid;
+      width: 2rem;
+      height: 2rem;
+      place-items: center;
+      border-radius: 50%;
+      color: var(--teal);
+      background: var(--teal-soft);
+      content: counter(why);
+      font-weight: 850;
+    }
+    .why-item h3 { margin: .08rem 0 .3rem; font-size: .91rem; }
+    .why-item p { margin: 0; color: var(--muted); font-size: .81rem; }
+    .branches { display: flex; flex-wrap: wrap; gap: .38rem; margin-top: .55rem; }
+    .branches span { padding: .27rem .48rem; border-radius: 999px; color: #52615b; background: #eef0eb; font-size: .68rem; }
+    details {
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      background: #fff;
+    }
+    details + details { margin-top: .6rem; }
+    summary { cursor: pointer; list-style: none; }
+    summary::-webkit-details-marker { display: none; }
+    .disclosure {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: .8rem;
+      padding: .9rem 1rem;
+      font-size: .88rem;
+      font-weight: 750;
+    }
+    .disclosure::after { color: var(--teal); content: "+"; font-size: 1.2rem; }
+    details[open] > .disclosure::after { content: "−"; }
+    .details-body { padding: 0 1rem 1rem; color: var(--muted); font-size: .86rem; }
+    .details-body p:last-child, .details-body ul:last-child { margin-bottom: 0; }
+    .question-list { margin: .2rem 0 0; padding-left: 1.15rem; }
+    .question-list li { padding: .22rem 0; }
+    .stat {
+      padding: 1rem;
+      border-radius: 14px;
+      background: var(--blue-soft);
+    }
+    .stat .value { display: block; color: var(--blue); font-family: var(--serif); font-size: 2.4rem; line-height: 1; }
+    .stat p { margin: .45rem 0 0; color: #40586a; font-size: .78rem; }
+    .stat-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: .65rem; margin: 1rem 0; }
+    .metric-table { width: 100%; border-collapse: collapse; font-size: .83rem; }
+    .metric-table th, .metric-table td { padding: .8rem .65rem; border-bottom: 1px solid var(--line); text-align: left; vertical-align: top; }
+    .metric-table th { color: var(--muted); font-size: .7rem; letter-spacing: .07em; text-transform: uppercase; }
+    .metric-table td:first-child { width: 22%; font-weight: 750; }
+    .metric-table td:nth-child(2) { width: 37%; }
+    .formula {
+      overflow-wrap: anywhere;
+      padding: .9rem 1rem;
+      border-radius: 12px;
+      color: #eaf5f1;
+      background: #1e3934;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+      font-size: .83rem;
+    }
+    .choice-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: .7rem; }
+    .choice { padding: 1rem; border: 1px solid var(--line); border-radius: 13px; background: #fff; }
+    .choice .choice-type { color: var(--coral); font-size: .67rem; font-weight: 850; letter-spacing: .08em; text-transform: uppercase; }
+    .choice h3 { margin: .35rem 0; font-family: var(--serif); font-size: 1.12rem; font-weight: 500; }
+    .choice p { margin: 0; color: var(--muted); font-size: .8rem; }
+    .decision-list { display: grid; grid-template-columns: repeat(4, 1fr); gap: .65rem; counter-reset: gate; }
+    .decision {
+      padding: 1rem;
+      border-top: 3px solid var(--teal);
+      border-radius: 0 0 12px 12px;
+      background: #f3f6f1;
+      counter-increment: gate;
+    }
+    .decision::before { color: var(--coral); content: "0" counter(gate); font-size: .73rem; font-weight: 850; }
+    .decision h3 { margin: .4rem 0; font-size: .92rem; }
+    .decision p { margin: 0; color: var(--muted); font-size: .77rem; }
+    .source-list { columns: 2; column-gap: 2rem; padding-left: 1.2rem; }
+    .source-list li { break-inside: avoid; margin: 0 0 .6rem; color: var(--muted); font-size: .78rem; }
+    .source-list a { font-weight: 700; }
+    .internal-links { display: flex; flex-wrap: wrap; gap: .5rem; }
+    .internal-links a { padding: .45rem .65rem; border: 1px solid var(--line); border-radius: 999px; background: white; font-size: .75rem; font-weight: 700; }
+    .footer { padding: 2rem 0 3.5rem; color: var(--muted); font-size: .77rem; }
+    .footer p { max-width: 760px; }
+    .skip { position: absolute; left: -9999px; top: auto; }
+    .skip:focus { left: 1rem; top: 1rem; z-index: 99; padding: .6rem; color: white; background: var(--ink); }
+    @media (max-width: 900px) {
+      .grid-4, .four-part { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .chain { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+      .chain-step { min-height: 150px; }
+      .chain-step:nth-child(4)::after { display: none; }
+      .evidence-row { grid-template-columns: 70px 1fr; }
+      .evidence-row .read { grid-column: 2; }
+      .mindmap { grid-template-columns: 1fr 1fr; grid-template-rows: auto; }
+      .mind-center { grid-column: 1 / -1; grid-row: 1; min-height: 95px; border-radius: 14px; }
+      .mind-node:nth-child(n) { grid-column: auto; grid-row: auto; }
+      .stat-grid { grid-template-columns: repeat(2, 1fr); }
+    }
+    @media (max-width: 620px) {
+      .topbar { align-items: flex-start; flex-direction: column; gap: .35rem; padding-top: .55rem; padding-bottom: .55rem; }
+      .brand { font-size: .73rem; }
+      .nav { width: 100%; }
+      .nav a { padding: .35rem .55rem; font-size: .7rem; }
+      main { width: min(100% - 1rem, 1160px); }
+      .hero { margin-top: .65rem; border-radius: 19px; }
+      .hero::after { right: -13rem; }
+      .grid-2, .grid-3, .grid-4, .two-col, .choice-grid, .decision-list { grid-template-columns: 1fr; }
+      .timeline { grid-template-columns: 1fr; gap: .35rem; margin-left: .25rem; }
+      .timeline::before { top: .2rem; bottom: .2rem; left: .55rem; width: 2px; height: auto; }
+      .time-card { padding: .1rem 0 .8rem 2rem; }
+      .time-card::before { top: .35rem; left: .2rem; }
+      .four-part { grid-template-columns: 1fr 1fr; }
+      .stage { min-height: 0; }
+      .stage:not(:last-child)::after { display: none; }
+      .mindmap { grid-template-columns: 1fr; }
+      .mind-center { grid-column: 1; }
+      .chain { grid-template-columns: 1fr 1fr; }
+      .chain-step { min-height: 0; }
+      .chain-step:nth-child(even)::after { display: none; }
+      .evidence-row { grid-template-columns: 1fr; gap: .25rem; }
+      .evidence-row .read { grid-column: auto; }
+      .redline { grid-template-columns: 1fr; gap: .2rem; }
+      .metric-table, .metric-table tbody, .metric-table tr, .metric-table td { display: block; width: 100% !important; }
+      .metric-table thead { display: none; }
+      .metric-table tr { padding: .7rem 0; border-bottom: 1px solid var(--line); }
+      .metric-table td { padding: .2rem 0; border: 0; }
+      .metric-table td:first-child { color: var(--teal); }
+      .source-list { columns: 1; }
+      .stat-grid { grid-template-columns: 1fr 1fr; }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      html { scroll-behavior: auto; }
+      *, *::before, *::after { animation-duration: .01ms !important; transition-duration: .01ms !important; }
+    }
+    @media print {
+      body { background: white; }
+      .topbar { position: static; border: 0; }
+      .nav { display: none; }
+      .hero, .section { box-shadow: none; break-inside: avoid; }
+      details > * { display: block !important; }
+      details .details-body { display: block !important; }
+      a { color: inherit; }
+    }
+  </style>
+</head>
+<body>
+  <a class="skip" href="#main">Skip to content</a>
+  <header class="topbar">
+    <a class="brand" href="#top"><span class="brand-mark" aria-hidden="true">H</span> CDE4301 · HOTEL EXPERIENCE</a>
+    <nav class="nav" aria-label="Page sections">
+      <a href="#framing">Framing</a>
+      <a href="#definition">Personalisation</a>
+      <a href="#evidence">Evidence</a>
+      <a href="#reasoning">Problem analysis</a>
+      <a href="#research-plan">Research plan</a>
+      <a href="#sources">Sources</a>
+    </nav>
+  </header>
+
+  <main id="main">
+    <section class="hero" id="top">
+      <p class="eyebrow">Project learning map · 16 October 2026</p>
+      <h1>From guest data<br>to a better stay</h1>
+      <p class="hero-intro">A working synthesis of the hotel visits, research, and project discussions so far. It connects the business case to the service workflow, separates evidence from assumptions, and turns open questions into a field-research plan.</p>
+      <blockquote class="thesis">
+        Hotels may hold useful guest context, but the value appears only when the right employee can use accurate, relevant information in time to deliver service the guest welcomes.
+      </blockquote>
+      <div class="hero-meta" aria-label="Current project position">
+        <span class="pill hypothesis">Problem still a hypothesis</span>
+        <span class="pill supported">Hotel-wide ambition</span>
+        <span class="pill local">Lounge as first case to investigate</span>
+        <span class="pill untested">Solution remains open</span>
+      </div>
+    </section>
+
+    <section class="section" id="recommendation">
+      <div class="section-head">
+        <div>
+          <span class="section-num">01 · Current recommendation</span>
+          <h2>Define the service gap first</h2>
+        </div>
+        <p>The project can aim across the hotel while researching one real workflow deeply. A staffed lounge is a practical starting point, not yet the proven highest-value department.</p>
+      </div>
+      <div class="two-col">
+        <div>
+          <h3>Working problem statement</h3>
+          <blockquote class="quote">
+            At hotels that record guest preferences and service history, frontline staff may not consistently have the relevant, current context when they serve a guest. During busy periods and handovers, reliance on memory, manual profile checks, and informal communication may lead to repeated questions or uneven follow-through. This project will investigate how reliably hotels turn guest context into timely, useful service, beginning with one lounge workflow.
+            <cite>Problem hypothesis · to validate at a named property, role, and service moment</cite>
+          </blockquote>
+        </div>
+        <div class="card">
+          <h3>What this framing says—and does not say</h3>
+          <div class="redline"><b>Scope</b><p>Hotel-wide opportunity; lounge is the first bounded case. Each department needs its own workflow evidence.</p></div>
+          <div class="redline"><b>Target market</b><p>Upscale/luxury can be a deliberate initial market choice. The current hotel visits do not establish a luxury-industry prevalence rate.</p></div>
+          <div class="redline"><b>Business case</b><p>Personalisation may improve continuity or reduce effort. Direct effects on retention, revenue, or profit are not yet established.</p></div>
+          <div class="redline"><b>Technology</b><p>Smart glasses and face matching are solution candidates, not part of the problem definition.</p></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section" id="framing">
+      <div class="section-head">
+        <div>
+          <span class="section-num">02 · How the framing developed</span>
+          <h2>From “edge” to testable workflow</h2>
+        </div>
+        <p>This is the project’s reasoning sequence, not a dated history of decisions. The research timeline below shows when the cited studies appeared.</p>
+      </div>
+      <div class="timeline" aria-label="Project framing progression">
+        <article class="time-card">
+          <span class="time-label">Starting business lens</span>
+          <h3>Hotels need an edge</h3>
+          <p>Service, location, loyalty, revenue mix, cost control, and operations can all create advantage. “Luxury margins are especially thin” needs property- and segment-specific evidence.</p>
+        </article>
+        <article class="time-card">
+          <span class="time-label">Candidate lever</span>
+          <h3>Personal service</h3>
+          <p>Relevant attention may make a stay easier and more human. Recognition alone is not the same as adapting service to a guest’s need.</p>
+        </article>
+        <article class="time-card">
+          <span class="time-label">Possible segment</span>
+          <h3>Repeat business travel</h3>
+          <p>Trips recur, but location, employer rules, price, and booking authority often constrain the hotel choice. Return travel is an opportunity, not proof of loyalty.</p>
+        </article>
+        <article class="time-card">
+          <span class="time-label">Scope choice</span>
+          <h3>Hotel-wide, lounge first</h3>
+          <p>Keep the ambition general. Use one role and service moment in the lounge to see whether the context-to-service chain actually breaks.</p>
+        </article>
+        <article class="time-card">
+          <span class="time-label">Current question</span>
+          <h3>Can context become action?</h3>
+          <p>Find out what is known, who can use it, when it arrives, what staff do, what the guest experiences, and what measurable outcome follows.</p>
+        </article>
+      </div>
+      <div class="callout">
+        <p><strong>Important correction to the margin premise:</strong> a CBRE sample of U.S. full-service hotels reported a 33.8% GOP margin for 2024, down from 34.3% in 2023. This is not net profit, not a luxury-only estimate, and not Singapore data. CBRE’s H2 2025 U.S. outlook describes luxury as the strongest-performing chain scale, while also reporting broad labor and operating-cost pressure. A separate report says luxury-lodge margins rose 54% since 2018, but gives relative growth rather than an absolute margin and covers a narrow segment. These sources do not justify “high-end hotels have thin margins” as a general claim. They support measuring the chosen property’s own cost and contribution.</p>
+      </div>
+      <div class="callout">
+        <p><strong>Performance depends on the brand and period, too.</strong> In CBRE’s 2019–2024 U.S. public-brand KPI sample, upper-midscale brands led chain scales in RevPAR growth (2.3% CAGR), while the gap between the top- and bottom-performing luxury brands widened to nearly 7 percentage points. A separate 4,200-hotel fee sample found franchise-fee growth highest in luxury (+6.4%) and upper-upscale (+5.0%), but fee share of revenue highest in upscale and upper-midscale hotels. RevPAR and franchise fees are not net profit; use these figures to avoid assuming a chain-scale label predicts the target property’s economics.</p>
+      </div>
+    </section>
+
+    <section class="section" id="definition">
+      <div class="section-head">
+        <div>
+          <span class="section-num">03 · What “personalisation” means here</span>
+          <h2>Recognition is a doorway, not the outcome</h2>
+        </div>
+        <p>The research literature uses overlapping definitions. This operational definition is tailored to the project and lets the team observe the service, rather than count profile fields or greetings.</p>
+      </div>
+      <div class="definition">
+        <p><strong>Guest-context personalisation</strong> happens when a frontline employee uses relevant knowledge about an individual guest’s needs, preferences, or circumstances to adapt an interaction or service. Whether the guest experiences that adaptation as a good fit is a separate outcome to measure.</p>
+      </div>
+      <div class="four-part" aria-label="Four things to measure separately">
+        <article class="stage">
+          <span class="stage-index">01 · identity</span>
+          <h3>Recognition</h3>
+          <p>Does the employee know who the guest is? A correct name or face match may help, but can also be awkward or wrong.</p>
+        </article>
+        <article class="stage">
+          <span class="stage-index">02 · information</span>
+          <h3>Context access</h3>
+          <p>Can the right role find accurate, current, appropriate information before making a service decision?</p>
+        </article>
+        <article class="stage">
+          <span class="stage-index">03 · service</span>
+          <h3>Adaptation</h3>
+          <p>Does staff action change in a way that addresses the guest’s current need—and can the hotel fulfil it?</p>
+        </article>
+        <article class="stage">
+          <span class="stage-index">04 · guest</span>
+          <h3>Perceived fit</h3>
+          <p>Does the guest find it relevant, helpful, and welcome? Could it feel intrusive, inaccurate, or presumptive?</p>
+        </article>
+      </div>
+      <div class="grid-3">
+        <article class="card">
+          <h3>Personalisation</h3>
+          <p class="small">The hotel or employee uses context to adapt service for this person. Example: staff follows up on an open issue without making the guest explain it again.</p>
+        </article>
+        <article class="card">
+          <h3>Customisation</h3>
+          <p class="small">The guest chooses the service configuration. Example: selecting a room preference or how they want an issue resolved.</p>
+        </article>
+        <article class="card">
+          <h3>Recognition / good service</h3>
+          <p class="small">Recognition signals attention; good service may be excellent but generic. Either can accompany personalisation without proving it happened.</p>
+        </article>
+      </div>
+      <div class="callout">
+        <p><strong>Why being recognised may feel good:</strong> an accurate, natural acknowledgement can signal attention and individuality. Evidence suggests a possible rapport effect, but its size and welcome depend on the setting. A name is not a substitute for understanding what would help the guest.</p>
+      </div>
+      <div class="grid-3" style="margin-top:.8rem">
+        <article class="card">
+          <h3>Hotel guest evidence</h3>
+          <p class="small">In interviews with 25 frequent luxury-hotel guests, being acknowledged and remembered stood out as an experience value. A hotel scenario experiment found formality mattered: after a service failure, formal address produced higher satisfaction; after successful service, preferred style varied across people.</p>
+          <p class="small">Small or scenario-based evidence; not a measure of repeat booking or profit. <a href="https://doi.org/10.1108/JHTI-11-2018-0077">Buehring &amp; O’Mahony</a> · <a href="https://doi.org/10.1108/ihr-04-2021-0028">Fan et al.</a></p>
+        </article>
+        <article class="card">
+          <h3>Name-use evidence outside hotels</h3>
+          <p class="small">A two-week café field study found a small difference in reported service satisfaction when names rather than order numbers were called out (5.35 vs 5.13 on a seven-point scale). A 2026 restaurant study reported higher satisfaction and special-item upsell acceptance with name exchange, but its spending result was not significant across all four conditions.</p>
+          <p class="small">These settings do not establish hotel effects. Repeated name use or pairing a name with a sales pitch can reduce comfort or rapport. <a href="https://doi.org/10.1016/j.jretai.2024.04.002">Lim et al.</a> · <a href="https://doi.org/10.1016/j.jretai.2026.03.008">Raja et al.</a></p>
+        </article>
+        <article class="card">
+          <h3>What is known about profit?</h3>
+          <p class="small">The name-use studies do not establish hotel profit. One café sales comparison was explicitly exploratory; the restaurant study measured upsell acceptance and spend, not contribution after labor, food, discount, or technology cost. There is no reliable universal profit estimate for calling a guest by name.</p>
+          <p class="small">Test recognition, adapted service, guest response, cost, and commercial outcome separately.</p>
+        </article>
+      </div>
+    </section>
+
+    <section class="section" id="mindmap">
+      <div class="section-head">
+        <div>
+          <span class="section-num">04 · Mind map</span>
+          <h2>What connects to what?</h2>
+        </div>
+        <p>Use these branches as a fieldwork map. Each one can be a valid problem by itself; do not collapse them into a single “data problem.”</p>
+      </div>
+      <div class="mindmap" role="group" aria-label="Mind map of guest context and hotel service">
+        <article class="mind-node">
+          <h3>Guest value</h3>
+          <p>Convenience, comfort, less repetition, continuity, issue resolution, flexibility, feeling understood—or a sense of intrusion.</p>
+          <span class="mini">Ask: what changed for the guest?</span>
+        </article>
+        <article class="mind-node">
+          <h3>Frontline work</h3>
+          <p>Memory, profile lookup, task switching, shift handover, role clarity, authority, time, and capacity to fulfil the request.</p>
+          <span class="mini">Ask: where does work stall?</span>
+        </article>
+        <article class="mind-node">
+          <h3>Context and data</h3>
+          <p>Guest-stated preference, prior request, active issue, source, freshness, accuracy, permissions, and correction.</p>
+          <span class="mini">Ask: is it useful and trusted?</span>
+        </article>
+        <div class="mind-center">Relevant context<br>→ timely service<br>→ guest-perceived value</div>
+        <article class="mind-node">
+          <h3>Hotel operations</h3>
+          <p>Staffing at the busy moment, handover design, system integration, service standards, queues, supplies, and fulfilment limits.</p>
+          <span class="mini">Ask: is the hotel able to act?</span>
+        </article>
+        <article class="mind-node">
+          <h3>Business outcomes</h3>
+          <p>Staff minutes, service failures, guest ratings, repeat choice, channel mix, contribution after delivery costs.</p>
+          <span class="mini">Ask: which outcome is attributable?</span>
+        </article>
+        <article class="mind-node">
+          <h3>Trust and choice</h3>
+          <p>Consent, discretion, appropriate access, guest agency, identity confidence, employer booking rules, and rate constraints.</p>
+          <span class="mini">Ask: is use appropriate and welcome?</span>
+        </article>
+      </div>
+    </section>
+
+    <section class="section" id="evidence">
+      <div class="section-head">
+        <div>
+          <span class="section-num">05 · Evidence timeline</span>
+          <h2>What the studies support</h2>
+        </div>
+        <p>Studies vary in population, outcome, and method. A survey about preference, an association in hotel records, and a measured booking are different kinds of evidence.</p>
+      </div>
+      <div class="evidence-timeline">
+        <article class="evidence-row">
+          <span class="year">1998</span>
+          <div><strong>Luxury guests and relationship benefits</strong><p>Survey of 892 luxury-hotel guests, most frequent and primarily business travelers. Respondents supported personal service, room requests, faster registration, flexible arrival/departure, and serious problem handling.</p></div>
+          <p class="read"><span class="tag hypothesis">Stated preference</span><br>Not actual repeat bookings or profit. <a href="https://doi.org/10.1177/001088049803900104">Bowen &amp; Shoemaker</a></p>
+        </article>
+        <article class="evidence-row">
+          <span class="year">2015</span>
+          <div><strong>Business and leisure guests may value different loyalty drivers</strong><p>A survey of 608 guests at upscale hotels in Taipei found relationship equity was the leading modeled loyalty factor for business travelers, while brand equity led for leisure travelers.</p></div>
+          <p class="read"><span class="tag hypothesis">Survey association</span><br>Relationship equity includes more than personalisation; loyalty was modeled, not observed as repeat bookings. <a href="https://doi.org/10.1016/j.tmp.2015.07.017">Liu et al.</a></p>
+        </article>
+        <article class="evidence-row">
+          <span class="year">2017</span>
+          <div><strong>Guest preferences used in one four-star hotel</strong><p>Observational study of an IT-enabled preference page. Users had higher odds of better service/value ratings. Among guests who already returned, the system was associated with shifts toward direct website booking.</p></div>
+          <p class="read"><span class="tag supported">Hotel field data</span><br>One hotel, voluntary use. Does not show that personalisation caused the return. <a href="https://doi.org/10.1016/j.tourman.2016.08.015">Piccoli et al.</a></p>
+        </article>
+        <article class="evidence-row">
+          <span class="year">2019</span>
+          <div><strong>Repeat reviews and frequent luxury guests</strong><p>Longitudinal analysis of 521,083 reviews across 7,031 hotels links service quality with re-patronage over repeat visits and identifies location as an important return factor. A 25-person luxury guest study describes value in being acknowledged and remembered.</p></div>
+          <p class="read"><span class="tag hypothesis">Useful context</span><br>Selected reviewers; small purposive interview sample. Service quality is broader than personalisation. <a href="https://doi.org/10.1016/j.tourman.2019.04.010">Hu et al.</a> · <a href="https://doi.org/10.1108/JHTI-11-2018-0077">Buehring &amp; O’Mahony</a></p>
+        </article>
+        <article class="evidence-row">
+          <span class="year">2020</span>
+          <div><strong>Preference data used across seven Swiss hotels</strong><p>A longitudinal hotel-network field study examined how a digital customer-service system helped staff elicit and fulfil guest preferences. It supports studying the workflow and customer value, but does not report a profit uplift.</p></div>
+          <p class="read"><span class="tag supported">Multi-property field data</span><br>Observational study; not evidence for glasses or face recognition. <a href="https://doi.org/10.1016/j.im.2020.103346">Bonaretti et al.</a></p>
+        </article>
+        <article class="evidence-row">
+          <span class="year">2020</span>
+          <div><strong>Business-trip hotel choice varies by segment</strong><p>Choice-based conjoint research reports that business travelers are generally price-sensitive, while traveler groups differ in their preferences.</p></div>
+          <p class="read"><span class="tag hypothesis">Stated choices</span><br>Scenario choices, not observed bookings. <a href="https://doi.org/10.1016/j.jhtm.2020.08.014">Kim et al.</a></p>
+        </article>
+        <article class="evidence-row">
+          <span class="year">2023–24</span>
+          <div><strong>What hotel guests notice and call personal</strong><p>In a U.S. guest survey, 65% recalled staff already having stay details at an interaction start; 66% recalled issue follow-up. Only 23% rated their recent stay 9–10 for personalisation. Hotel scenario research found several practices similarly personal, with name greeting not a uniquely strong signal.</p></div>
+          <p class="read"><span class="tag supported">Guest reports</span><br>Recall and perceived-personalisation ratings, not verified failures or booking behavior. <a href="https://www.medallia.com/wp-content/uploads/pdf/resources/Medallia-Understanding-Personalization-Efforts-in-the-Hospitality-and-Retail-Industries-Report.pdf">Medallia</a> · <a href="https://doi.org/10.1016/j.tourman.2023.104818">Lei et al.</a></p>
+        </article>
+        <article class="evidence-row">
+          <span class="year">2024</span>
+          <div><strong>Luxury-hotel guests who perceived personalisation also reported stronger loyalty and price-premium intentions</strong><p>In a U.S. survey of 220 recent luxury-hotel guests, perceived personalisation was associated with loyalty intention (β=.34) and stated willingness to pay more (β=.35); both associations were statistically significant (p&lt;.001). Average stated willingness-to-pay-more was 5.88/7.</p></div>
+          <p class="read"><span class="tag hypothesis">Luxury survey</span><br>Conference paper and cross-sectional self-report; not a real premium, booking, causal effect, or profit result. <a href="https://eurochrie.org/2024/wp-content/uploads/2025/02/EuroCHRIE-2024-Conference-Proceedings.pdf">Baloglu &amp; Bai</a></p>
+        </article>
+        <article class="evidence-row">
+          <span class="year">2025</span>
+          <div><strong>Business-traveler repeat choice and hotel data access</strong><p>BCD reports 73% say they reuse the same hotel when revisiting a destination; location, employer policy, and price rank above prior experience. A vendor-sponsored hoteliers’ survey reports data-access and disconnected-system barriers.</p></div>
+          <p class="read"><span class="tag hypothesis">Segment lead</span><br>Self-report is not a retention rate; data-access survey is not a frontline preference-access measure. <a href="https://www.bcdtravel.com/wp-content/uploads/BCD-report-Traveler-insights-Hotel-booking-trends.pdf">BCD</a> · <a href="https://www.revinate.com/press-releases/the-future-of-hotel-data-report-reveals-nearly-50-of-hoteliers-struggle-to-access-critical-data/">Hapi/Revinate</a></p>
+        </article>
+        <article class="evidence-row">
+          <span class="year">2025</span>
+          <div><strong>Business traveler choice is shaped by corporate controls and cost</strong><p>Deloitte’s U.S. corporate-travel survey found 49% of frequent business travelers always use corporate booking channels, up from 43% in 2024. Cost was among the top three travel restrictions for 54% of travel managers and 64% at larger companies.</p></div>
+          <p class="read"><span class="tag supported">Industry survey</span><br>U.S. travel policy evidence, not hotel-specific or personalization research. <a href="https://www.deloitte.com/us/en/insights/industry/transportation/corporate-business-travel-survey/2025.html">Deloitte</a></p>
+        </article>
+        <article class="evidence-row">
+          <span class="year">2025</span>
+          <div><strong>Hotel costs, brand performance, and event economics</strong><p>CBRE U.S. full-service sample: labor is a major cost; revenue growth lagged expense growth in 2024. Brand performance varies even within luxury, while upper-midscale led RevPAR growth over 2019–24. Group business is material demand, but event contribution changes with property, demand, space, food, staffing, and room displacement.</p></div>
+          <p class="read"><span class="tag supported">Industry accounts</span><br>U.S. samples are not Singapore estimates. Revenue, RevPAR, and GOP margin are not net profit. <a href="https://www.cbre.com/insights/articles/all-eyes-on-operating-costs-in-2025-lessons-learned-in-2024">CBRE costs</a> · <a href="https://www.cbre.com/insights/reports/hotel-brand-performance-2025">Brand KPIs</a> · <a href="https://www.cbre.com.sg/insights/articles/hotel-food-and-beverage-a-bright-spot-in-2025">CBRE F&amp;B</a></p>
+        </article>
+        <article class="evidence-row">
+          <span class="year">2025</span>
+          <div><strong>Room choice and guest control</strong><p>In one hotel field experiment (81 guests), guests who chose between two rooms reported higher likelihood of returning than guests assigned a room (6.15 vs 5.57 on a 7-point scale). Actual later bookings were not measured.</p></div>
+          <p class="read"><span class="tag hypothesis">Return intention</span><br>Guest choice / customisation, not staff using prior guest data; single-property, modest sample. <a href="https://doi.org/10.1177/19389655241309634">Yoon et al.</a></p>
+        </article>
+        <article class="evidence-row">
+          <span class="year">2026</span>
+          <div><strong>“Personalised” hotel review responses can backfire</strong><p>Review and response data from over 1,000 hotels found topic matching between a guest review and a manager reply was negatively associated with review-based retention, especially for dissatisfied reviewers. Other response traits had different associations.</p></div>
+          <p class="read"><span class="tag hypothesis">Counterevidence</span><br>Observational online-response personalisation; repeat review is a proxy for return and does not test in-stay service. <a href="https://doi.org/10.1016/j.tourman.2025.105243">Lahsini et al.</a></p>
+        </article>
+      </div>
+      <div class="callout">
+        <p><strong>Read the Piccoli result precisely:</strong> among initial OTA bookers who already made a second stay, preference-system use was associated with 61.3% higher adjusted odds of booking the hotel website for stay two; among initial direct bookers who returned, it was associated with 32.2% lower odds of using an OTA next time. These are adjusted odds of channel choice within returners—not a 61.3% retention increase, percentage-point lift, or profit margin.</p>
+      </div>
+      <div class="callout">
+        <p><strong>How strong is the loyalty evidence overall?</strong> A hospitality meta-analysis of 102 studies and 423 effect sizes found that links weaken as the outcome moves from attitudes to return intentions to observed behavior. Treat intention scores as an early signal, not as retained customers or incremental stays. <a href="https://doi.org/10.1177/1938965516640121">Tanford (2016)</a>.</p>
+      </div>
+    </section>
+
+    <section class="section" id="causal-chain">
+      <div class="section-head">
+        <div>
+          <span class="section-num">06 · Causal chain</span>
+          <h2>Where value could arise—and where it can break</h2>
+        </div>
+        <p>Every arrow is a hypothesis to test locally. Evidence for one link does not prove the links after it.</p>
+      </div>
+      <div class="chain" aria-label="Possible path from guest context to hotel contribution">
+        <article class="chain-step">
+          <span class="tag supported">Known to exist</span>
+          <strong>Useful context is captured</strong>
+          <p>Guest-stated preferences, requests, or service history—not every available data point.</p>
+        </article>
+        <article class="chain-step">
+          <span class="tag hypothesis">Local test</span>
+          <strong>Context is accurate and current</strong>
+          <p>Source, last-confirmed date, correction, and relevance matter.</p>
+        </article>
+        <article class="chain-step">
+          <span class="tag hypothesis">Local test</span>
+          <strong>Right staff sees it in time</strong>
+          <p>Role access, shift handover, lookup effort, task timing.</p>
+        </article>
+        <article class="chain-step">
+          <span class="tag untested">Unproven here</span>
+          <strong>Staff can interpret and act</strong>
+          <p>Time, authority, skill, supplies, and service capacity.</p>
+        </article>
+        <article class="chain-step">
+          <span class="tag untested">Unproven here</span>
+          <strong>Service is fulfilled</strong>
+          <p>Track timely, partial, late, and failed fulfilment.</p>
+        </article>
+        <article class="chain-step">
+          <span class="tag supported">Guest evidence</span>
+          <strong>Guest finds it relevant</strong>
+          <p>Fit, effort saved, comfort, trust, and privacy comfort.</p>
+        </article>
+        <article class="chain-step">
+          <span class="tag untested">Later outcome</span>
+          <strong>Repeat choice / contribution</strong>
+          <p>Requires real choice and incremental economics, net of costs.</p>
+        </article>
+      </div>
+      <h3 style="margin-top:1.25rem">Factors that can alter the chain</h3>
+      <div class="moderators" aria-label="Moderating factors">
+        <span>workload and staff coverage</span><span>location and availability</span><span>price and company policy</span><span>identity confidence</span><span>data freshness</span><span>guest consent and choice</span><span>service recovery</span><span>loyalty status</span><span>benefit delivery cost</span><span>booking channel</span>
+      </div>
+    </section>
+
+    <section class="section" id="five-whys">
+      <div class="section-head">
+        <div>
+          <span class="section-num">07 · Problem protocol</span>
+          <h2>Use “5 Whys” as a branching investigation</h2>
+        </div>
+        <p>Do not start from “staff lack data” or force every incident into one root cause. Start from a specific recent event and let evidence decide which branch matters.</p>
+      </div>
+      <div class="why-root"><strong>Start with an observable event:</strong> a guest repeated a request, a known preference was missed, an employee looked up a profile, or a handover did not lead to follow-through. Record what happened without assigning a cause.</div>
+      <div class="why-list">
+        <article class="why-item">
+          <div><h3>What exactly failed for whom, and at what moment?</h3><p>Separate identity recognition, finding context, understanding it, deciding what to do, fulfilling the service, and the guest noticing value.</p><div class="branches"><span>wrong person</span><span>context missing</span><span>context late</span><span>repeat question</span><span>request not fulfilled</span><span>guest did not welcome it</span></div></div>
+        </article>
+        <article class="why-item">
+          <div><h3>Why did that particular step fail?</h3><p>Walk the timeline: who knew what, where it was recorded, who needed it, when it was available, what else was happening, and what action followed.</p><div class="branches"><span>not captured</span><span>outdated or unclear</span><span>no role access</span><span>lookup effort</span><span>handover not received</span><span>staff lacked time / authority / capacity</span></div></div>
+        </article>
+        <article class="why-item">
+          <div><h3>How often does this happen, and what is the denominator?</h3><p>Count eligible interactions, successful cases, misses, late cases, and failed fulfilment in a defined place and period. Ask whether guests noticed and what the impact was.</p></div>
+        </article>
+        <article class="why-item">
+          <div><h3>What system, role, process, or constraint explains the pattern?</h3><p>Check the information source, handover ownership, permissions, shift design, demand peaks, staff coverage, and service limits. A technology gap is only one candidate.</p></div>
+        </article>
+        <article class="why-item">
+          <div><h3>What is the smallest supported problem worth changing?</h3><p>State the population, moment, failure, evidence, impact, and confidence. If cases are rare or guests do not value a fix, choose another problem before designing a tool.</p></div>
+        </article>
+      </div>
+      <div class="callout">
+        <p><strong>Evidence caution:</strong> the two hotel visits share leads around workload, handovers, manual coordination, and guest information. They do not show how often personalization fails across the industry, nor prove a single common cause.</p>
+      </div>
+    </section>
+
+    <section class="section" id="local-evidence">
+      <div class="section-head">
+        <div>
+          <span class="section-num">08 · Evidence from the visits</span>
+          <h2>Local leads, not validated findings</h2>
+        </div>
+        <p>Keep what staff reported distinct from what the project observed or inferred.</p>
+      </div>
+      <div class="grid-3">
+        <article class="card">
+          <span class="tag local">Novotel · reported</span>
+          <h3 style="margin-top:.75rem">F&amp;B and returning guests</h3>
+          <p class="small">Staff may recognise repeat guests from memory, may not have time to check ACDC during service, and may not consistently pass guest information between shifts. The VIP board was described by the manager; the team did not see it.</p>
+          <p class="small"><strong>What it supports:</strong> ask how context reaches F&amp;B staff and what happens at peaks and handovers.<br><strong>What it does not show:</strong> a frequency, guest impact, or luxury-industry rate.</p>
+        </article>
+        <article class="card">
+          <span class="tag local">PARKROYAL · interest / lead</span>
+          <h3 style="margin-top:.75rem">Lounge and handover</h3>
+          <p class="small">VIP recognition in a club lounge was discussed. Notes also mention a peak-period risk that an earpiece message may be missed. The property, interviewee role, and rate of missed messages need confirmation.</p>
+          <p class="small"><strong>What it supports:</strong> inspect a lounge workflow and its access rules.<br><strong>What it does not show:</strong> demand for face matching or that a wearable improves service.</p>
+        </article>
+        <article class="card">
+          <span class="tag hypothesis">Separate problem candidate</span>
+          <h3 style="margin-top:.75rem">Room readiness</h3>
+          <p class="small">Novotel notes report room-release delays of roughly 30–60 minutes associated with manpower and housekeeping constraints. This has a clearer stated guest wait, but is a different problem from personalising service through guest context.</p>
+          <p class="small"><strong>Use it as:</strong> a competing problem candidate if the team reopens selection—not as evidence for the lounge hypothesis.</p>
+        </article>
+      </div>
+      <div class="callout">
+        <p><strong>Cross-case limit:</strong> the recurring-problems review covers only two visits and says workload, handovers, and manual coordination recur as themes. It is a useful map of what to investigate, not an industry benchmark.</p>
+      </div>
+    </section>
+
+    <section class="section" id="hotel-business">
+      <div class="section-head">
+        <div>
+          <span class="section-num">09 · Business logic</span>
+          <h2>Repeat business is not the same as loyalty</h2>
+        </div>
+        <p>Business travelers may return to an area and sometimes a property. Ask whether the traveler had a real opportunity to choose the hotel again.</p>
+      </div>
+      <div class="stat-grid">
+        <div class="stat"><span class="value">73%</span><p>of 1,035 BCD survey respondents said they reuse the same hotel when revisiting a destination.</p></div>
+        <div class="stat"><span class="value">77%</span><p>selected location among their top three accommodation-choice factors.</p></div>
+        <div class="stat"><span class="value">56%</span><p>selected employer policy among their top three factors; 84% reported using a company booking tool.</p></div>
+        <div class="stat"><span class="value">53%</span><p>selected price among top three, versus 41% for prior experience. BCD self-report, not observed retention.</p></div>
+      </div>
+      <p class="small">The survey sample spans North America, Europe, and Asia Pacific and was not a luxury-hotel sample. Repeat destination travel creates a chance for service continuity; it does not prove that personalisation made the traveler return. For a person who mainly chooses on price—or whose employer chooses—the relevant benefit may be less friction or more reliable service, not loyalty.</p>
+      <div class="callout">
+        <p><strong>What the newer luxury and business-traveler studies add:</strong> a survey of 220 recent U.S. luxury-hotel guests associated perceived personalisation with loyalty intention (β=.34) and stated willingness to pay more (β=.35), while a separate upscale-hotel study found relationship equity was a stronger modeled loyalty driver for business than leisure guests. These results make the segment worth investigating; neither observes actual repeat bookings or proves that personalisation causes profit. The luxury study is a conference paper, and the business-traveler study measures relationship equity more broadly than tailored service. <a href="hotel-personalization-additional-evidence.md">Read the methods and limitations</a>.</p>
+      </div>
+      <div class="grid-3">
+        <article class="card">
+          <h3>Why recognise a returning guest?</h3>
+          <p class="small">Recognition can reduce repeated explanations and signal that staff are attentive. It is useful only when accurate, natural, relevant, and welcome. Do not make “calling by name” the project outcome.</p>
+        </article>
+        <article class="card">
+          <h3>What can “return” mean?</h3>
+          <p class="small">Same property, same brand, and same destination are different. Track them separately, and include only guests with a likely return opportunity and meaningful booking choice in a retention analysis.</p>
+        </article>
+        <article class="card">
+          <h3>What would make it commercial?</h3>
+          <p class="small">Measure actual incremental contribution, not only ADR, RevPAR, ratings, direct-channel share, stated willingness to return, or loyalty membership.</p>
+        </article>
+      </div>
+      <h3 style="margin-top:1.3rem">Evidence ladder: experience → repeat choice → profit</h3>
+      <div class="grid-4">
+        <article class="card"><span class="tag supported">Closest to service</span><h3 style="margin-top:.65rem">Service ratings</h3><p class="small">Piccoli’s preference-system users had better service/value ratings in one hotel. Self-selection limits causal interpretation.</p></article>
+        <article class="card"><span class="tag hypothesis">Behavior proxy</span><h3 style="margin-top:.65rem">Repeat review</h3><p class="small">Large review datasets can observe another review at a hotel, but miss stays that were not reviewed and do not isolate personalisation’s effect.</p></article>
+        <article class="card"><span class="tag hypothesis">Intention</span><h3 style="margin-top:.65rem">Likelihood to return</h3><p class="small">Small hotel trials and guest surveys can measure stated intention. They do not count actual future bookings.</p></article>
+        <article class="card"><span class="tag untested">Not established</span><h3 style="margin-top:.65rem">Incremental hotel profit</h3><p class="small">No cited study proves that frontline data-driven personalisation causes higher hotel net profit after delivery, labor, channel, and technology costs.</p></article>
+      </div>
+      <h3 style="margin-top:1.4rem">Other hotel advantages to consider alongside personalisation</h3>
+      <div class="choice-grid">
+        <article class="choice"><span class="choice-type">Choice drivers</span><h3>Location, price, access</h3><p>Convenient area, rate/value, availability, and employer policy can outweigh remembered service for a business trip.</p></article>
+        <article class="choice"><span class="choice-type">Hotel operations</span><h3>Reliable basics</h3><p>Room readiness, cleanliness, Wi-Fi, breakfast, check-in flexibility, maintenance, and service recovery affect the overall stay.</p></article>
+        <article class="choice"><span class="choice-type">Revenue mix</span><h3>Rooms, F&amp;B, events</h3><p>Rooms are usually the largest revenue source and often the most profit-efficient department; F&amp;B, meetings, and events add revenue but have their own labor, supply, and space costs.</p></article>
+      </div>
+      <details style="margin-top:.7rem">
+        <summary class="disclosure">Could meetings and conferences be a stronger project angle?</summary>
+        <div class="details-body">
+          <p>It is commercially plausible and distinct from VIP recognition. A full-service U.S. hotel mix included 23.5% group demand in CBRE’s 2025 sample; that is a share of demand, not conference profit. CBRE’s first-half 2025 analysis found F&amp;B department margin averaged 29.1%, while banquet revenue fell 7.3% at convention hotels and rose 8.7% at resorts. The difference is a reminder that property, event mix, and local demand matter.</p>
+          <p>A conference-context problem might be: “Can event, banquet, and AV teams access the organiser’s current setup, schedule, dietary, accessibility, and change requirements at the moment they need to act?” Validate recent event cases, rework, missed changes, organiser feedback, and event contribution. That is a separate workflow, with organisers and corporate accounts as repeat buyers and attendees as service recipients.</p>
+          <p>Evaluate the whole contract: room block, meeting rental, catering, AV, service charges, labor, food, setup, commissions, and space/room opportunity cost. A revenue stream is not automatically a profitable one.</p>
+          <p><a href="hotel-meeting-and-conference-profitability.md">Read the meeting and conference evidence review</a>.</p>
+        </div>
+      </details>
+    </section>
+
+    <section class="section" id="research-plan">
+      <div class="section-head">
+        <div>
+          <span class="section-num">10 · Field research protocol</span>
+          <h2>Make the next interview about a real event</h2>
+        </div>
+        <p>Choose one property, role, and service moment. Ask people to reconstruct the last case before asking for general opinions.</p>
+      </div>
+      <div class="decision-list">
+        <article class="decision"><h3>Bound the case</h3><p>Name the property, department, role, guest type, time window, and service decision.</p></article>
+        <article class="decision"><h3>Reconstruct the journey</h3><p>Source → access → interpretation → action → fulfilment → guest response. Include the staff handover.</p></article>
+        <article class="decision"><h3>Count the pattern</h3><p>Sample recent interactions; record cases where context was missing, late, inaccurate, unused, or useful.</p></article>
+        <article class="decision"><h3>Decide whether to proceed</h3><p>Require meaningful frequency or severity, guest/staff impact, actionable causes, and a measurable baseline.</p></article>
+      </div>
+      <h3 style="margin-top:1.6rem">Questions for hotel leaders, guest experience, and data teams</h3>
+      <details open>
+        <summary class="disclosure">Definitions, systems, and business measures</summary>
+        <div class="details-body">
+          <ol class="question-list">
+            <li>When this property says “personalised service,” what would I actually see an employee do differently? Can you walk me through one recent example?</li>
+            <li>Which guest details are recorded, where do they come from, and how does the guest or staff confirm that they are current?</li>
+            <li>Which roles can access each type of information, at what moments, and across which departments or shifts?</li>
+            <li>What share of eligible service interactions have an actionable preference or open request? How is eligibility defined?</li>
+            <li>How does the property know a request was fulfilled on time? Which existing logs, handover records, or service-recovery records could we inspect?</li>
+            <li>What outcome has the hotel measured—guest response, staff time, repeat booking, channel mix, revenue, or contribution? What are the numerator, denominator, period, and comparison?</li>
+            <li>For business travelers, who selects, pays, and books the hotel? What role do negotiated rates, company policy, booking tools, and travel arrangers play?</li>
+          </ol>
+        </div>
+      </details>
+      <details>
+        <summary class="disclosure">Questions for frontline employees, across shifts</summary>
+        <div class="details-body">
+          <ol class="question-list">
+            <li>Think of the last time knowing something about a guest changed what you did. What did you know, where did you find it, and what changed?</li>
+            <li>Think of a recent time you needed guest context but could not find it, did not trust it, or received it too late. What happened next?</li>
+            <li>What do guests have to explain more than once? How often in a shift, and what happens when it is repeated?</li>
+            <li>At what point would this information have been useful? Which role should receive it, and who currently owns the handover?</li>
+            <li>What prevents action: accuracy, access, uncertainty, time, authority, supplies, or service capacity? Which one affected the most recent case?</li>
+            <li>How did the guest respond? Have you seen a remembered detail feel inaccurate, awkward, or too personal?</li>
+            <li>What does the busy period look like in arrivals, requests, and staff available? What tasks are delayed when context retrieval takes time?</li>
+          </ol>
+        </div>
+      </details>
+      <details>
+        <summary class="disclosure">Questions for returning guests and business travelers</summary>
+        <div class="details-body">
+          <ol class="question-list">
+            <li>Think about your last two trips to this area. Which hotels did you consider, where did you stay, and who made the booking decision?</li>
+            <li>What made the same hotel a workable choice again—or made you choose another? How did location, employer rules, price, availability, and last stay matter?</li>
+            <li>Did a hotel use something it knew from an earlier stay? What did staff do, and did it save effort, improve comfort, or make no difference?</li>
+            <li>What have you had to explain more than once? What happened when staff did not know what you expected them to know?</li>
+            <li>When does a hotel remembering a detail feel helpful? When might it feel wrong or intrusive?</li>
+            <li>What would have to be true for you to choose that same property next time, if you had a genuine choice?</li>
+          </ol>
+        </div>
+      </details>
+      <h3 style="margin-top:1.4rem">Statistics and records to request</h3>
+      <p class="small">Ask for aggregate or de-identified data. For every number, request the period, definition, numerator, denominator, data source, and segment split. A 12–24 month baseline is useful if available; observe a short service sample if logs do not exist.</p>
+      <div style="overflow-x:auto">
+        <table class="metric-table">
+          <thead><tr><th>Evidence area</th><th>Example measure to request</th><th>What it answers</th></tr></thead>
+          <tbody>
+            <tr><td>Guest and trip mix</td><td>Business/leisure/group stays, corporate account share, rate plan, channel, eligible repeat guests</td><td>Is this segment and workflow large enough to study?</td></tr>
+            <tr><td>Repeat behavior</td><td>Same-property return and same-brand return separately; interval; guests with a destination return opportunity and booking choice</td><td>Did guests return, and could their experience plausibly affect choice?</td></tr>
+            <tr><td>Context quality</td><td>Eligible stays with guest-stated, current, actionable preference; source; last confirmed; correction or dispute</td><td>Is there usable information to work with?</td></tr>
+            <tr><td>Access and timing</td><td>Right role receives context before service decision; retrieval success; median and p90 lookup time; handover completion</td><td>Does access or timing fail at the hypothesized moment?</td></tr>
+            <tr><td>Service outcome</td><td>Requests fulfilled on time / requests due; partial/late/failed cases; repeat questions; reasons for misses</td><td>Does context change delivery, and can the hotel fulfil the adaptation?</td></tr>
+            <tr><td>Guest response</td><td>Interaction-level relevance, effort saved, comfort, satisfaction, privacy comfort; related complaints or recovery</td><td>Did the guest perceive value and welcome the use?</td></tr>
+            <tr><td>Commercial outcome</td><td>Actual repeat among eligible cohort; direct vs OTA among returners; incremental contribution net of cost</td><td>Is there a financial effect beyond ratings or stated intent?</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="formula">Personalisation delivery percentage (PDC) = relevant requested items fulfilled ÷ relevant requested items due</div>
+      <p class="small" style="margin-top:.6rem">Define “item,” partial fulfilment, and “due” before using the measure. Staff seeing a profile is not delivery; delivery is not proof the guest valued it.</p>
+    </section>
+
+    <section class="section" id="economics">
+      <div class="section-head">
+        <div>
+          <span class="section-num">11 · Economics and decision</span>
+          <h2>Measure contribution, not just revenue</h2>
+        </div>
+        <p>Hotel-wide commercial claims need the property’s own costs and a credible comparison. A benefit that costs little may still be useful; an expensive VIP amenity may not pay back.</p>
+      </div>
+      <div class="two-col">
+        <div class="card">
+          <h3>What current research says</h3>
+          <ul class="small">
+            <li>Rooms are typically the largest revenue source and often the most profit-efficient department. RevPAR is still a revenue measure, not profit.</li>
+            <li>In CBRE’s 2024 U.S. sample, total hotel revenue grew 2.3% while expenses above GOP grew 4.1%; labor was the largest operating expense category.</li>
+            <li>A U.S. sample reported brand loyalty fees averaging 2.2% of rooms revenue. That is chain-program fees—not the cost of one VIP guest, lounge visit, or perk.</li>
+            <li>There is no dependable universal public estimate of the net profit from one VIP gesture or personalisation action.</li>
+          </ul>
+        </div>
+        <div class="card">
+          <h3>How a local pilot could be evaluated</h3>
+          <p class="formula">Incremental contribution = incremental room / F&amp;B / event contribution + attributable cost savings − staff time − benefit and supply cost − channel / commission cost − technology and operating cost</p>
+          <p class="small" style="margin-top:.7rem">Use a comparison group, phased rollout, or another defensible baseline. Adjust for location, rate, season, availability, trip purpose, employer policy, booking channel, and loyalty status. Do not claim saved cost unless labor was actually redeployed or reduced.</p>
+        </div>
+      </div>
+      <div class="callout">
+        <p><strong>VIP-service caution:</strong> loyalty programs can show hotel-level benefits in research, and some guests value recognition, but that does not prove a particular complimentary lounge benefit or technology investment is profitable. Measure marginal staff minutes, food/supply use, capacity, fulfilment, and the guest and business outcome for the specific benefit.</p>
+      </div>
+    </section>
+
+    <section class="section" id="decision">
+      <div class="section-head">
+        <div>
+          <span class="section-num">12 · Recommended next move</span>
+          <h2>Test the lounge workflow, keep the problem hotel-wide</h2>
+        </div>
+        <p>Frequent business travelers are a useful subgroup for interviews, not the only user group. The first test should show that the operational problem exists and matters.</p>
+      </div>
+      <div class="grid-2">
+        <div>
+          <h3>Start with one specific service moment</h3>
+          <p class="small">Example: a returning guest with an already recorded, guest-stated preference or current request visits the club lounge. Follow how staff learn who the guest is, find context, decide what matters, act, and hand over any follow-up.</p>
+          <h3 style="margin-top:1.15rem">First measures</h3>
+          <p class="small">Context correct and available before the decision; lookup time; repeated explanations; on-time request fulfilment; staff minutes; guest-perceived relevance and comfort. Track identity recognition separately from service adaptation.</p>
+        </div>
+        <div class="card">
+          <h3>Decision gate before choosing a solution</h3>
+          <div class="redline"><b>Continue</b><p>Recurring or severe cases; guests or staff are meaningfully affected; relevant information exists; a clear and actionable bottleneck appears.</p></div>
+          <div class="redline"><b>Reframe</b><p>The main issue is capacity, ownership, system permissions, profile quality, or service fulfilment rather than identification.</p></div>
+          <div class="redline"><b>Stop this angle</b><p>Few eligible cases, context already reaches staff, guests do not value the adaptation, or the hotel cannot act on it.</p></div>
+          <div class="redline"><b>Only then</b><p>Compare candidate interventions against the diagnosed bottleneck and measure the change against baseline.</p></div>
+        </div>
+      </div>
+      <details style="margin-top:1rem">
+        <summary class="disclosure">Where smart glasses currently sit</summary>
+        <div class="details-body">
+          <p>They remain one possible interface hypothesis. The current architecture document is explicitly a proposal; live camera delivery on the target glasses, staff field access, tap-in/out behavior, acceptable identity confidence, lounge workflow, and success measures remain open. The project can keep its hotel-wide research framing while these technical questions remain unresolved.</p>
+          <p><a href="../architecture/hotel-lounge-smart-glasses-poc.md">Open the current architecture proposal</a> · <a href="../agents/hotel-smart-glasses-poc.md">Open the POC framing notes</a></p>
+        </div>
+      </details>
+    </section>
+
+    <section class="section" id="sources">
+      <div class="section-head">
+        <div>
+          <span class="section-num">13 · Reading trail</span>
+          <h2>Sources and project documents</h2>
+        </div>
+        <p>Open the original research or the local review note for method details, population, and caveats.</p>
+      </div>
+      <h3>External studies and industry sources</h3>
+      <ol class="source-list">
+        <li><a href="https://doi.org/10.1016/j.tourman.2016.08.015">Piccoli, Lui &amp; Grün (2017)</a>, preference-system use and hotel performance; observational data from one four-star property.</li>
+        <li><a href="https://doi.org/10.1016/j.tmp.2015.07.017">Liu et al. (2015)</a>, modeled loyalty drivers among upscale-hotel business and leisure travelers.</li>
+        <li><a href="https://www.bcdtravel.com/wp-content/uploads/BCD-report-Traveler-insights-Hotel-booking-trends.pdf">BCD Travel (2025)</a>, business-traveler hotel-booking survey and methods.</li>
+        <li><a href="https://www.medallia.com/wp-content/uploads/pdf/resources/Medallia-Understanding-Personalization-Efforts-in-the-Hospitality-and-Retail-Industries-Report.pdf">Medallia (2024)</a>, U.S. hotel guest recall and stated preferences, survey fielded November 2023.</li>
+        <li><a href="https://doi.org/10.1177/001088049803900104">Bowen &amp; Shoemaker (1998)</a>, stated loyalty benefits among luxury hotel guests.</li>
+        <li><a href="https://doi.org/10.1108/JHTI-11-2018-0077">Buehring &amp; O’Mahony (2019)</a>, frequent luxury guests and memorable experience factors.</li>
+        <li><a href="https://doi.org/10.1016/j.tourman.2019.04.010">Hu et al. (2019)</a>, hotel reviews and re-patronage.</li>
+        <li><a href="https://doi.org/10.1016/j.jhtm.2020.08.014">Kim et al. (2020)</a>, heterogeneous preferences in business-trip and leisure hotel-choice scenarios.</li>
+        <li><a href="https://doi.org/10.1016/j.tourman.2023.104818">Lei et al. (2024)</a>, hotel practices and perceived personalisation.</li>
+        <li><a href="https://eurochrie.org/2024/wp-content/uploads/2025/02/EuroCHRIE-2024-Conference-Proceedings.pdf">Baloglu &amp; Bai (2024)</a>, luxury guest perceptions, loyalty intention, and stated willingness to pay more; conference paper.</li>
+        <li><a href="https://www.deloitte.com/us/en/insights/industry/transportation/corporate-business-travel-survey/2025.html">Deloitte (2025)</a>, U.S. corporate traveler booking-channel use and travel-manager constraints.</li>
+        <li><a href="https://doi.org/10.1177/1938965516640121">Tanford (2016)</a>, hospitality loyalty meta-analysis: 102 studies and 423 effect sizes.</li>
+        <li><a href="https://doi.org/10.1016/j.jretai.2024.04.002">Lim et al. (2024)</a>, name-based order identification in café and experimental studies.</li>
+        <li><a href="https://doi.org/10.1016/j.jretai.2026.03.008">Raja et al. (2026)</a>, name exchange, service satisfaction, and upsell behavior in one restaurant field experiment.</li>
+        <li><a href="https://doi.org/10.1177/19389655241309634">Yoon et al. (2025)</a>, room choice, psychological ownership, and return intentions.</li>
+        <li><a href="https://doi.org/10.1016/j.tourman.2025.105243">Lahsini et al. (2026)</a>, hotel management replies, response attributes, and review-based traveller retention.</li>
+        <li><a href="https://www.revinate.com/press-releases/the-future-of-hotel-data-report-reveals-nearly-50-of-hoteliers-struggle-to-access-critical-data/">Hapi / Revinate (2025)</a>, hotel data-access practitioner survey and sponsor methodology.</li>
+        <li><a href="https://www.cbre.com/insights/articles/all-eyes-on-operating-costs-in-2025-lessons-learned-in-2024">CBRE (2025)</a>, U.S. hotel operating costs and revenue growth.</li>
+        <li><a href="https://pip.cbrehotels.com/docs/default-source/samples/trends/annual-trends/2025-annual-us-trends-sample.pdf?sfvrsn=2">CBRE (2025) U.S. Trends sample</a>, GOP margin and full-service hotel operating statements.</li>
+        <li><a href="https://www.cbre.com.sg/insights/articles/hotel-food-and-beverage-a-bright-spot-in-2025">CBRE (2025)</a>, U.S. hotel F&amp;B and banquet performance.</li>
+        <li><a href="https://www.cbre.com/insights/articles/for-hotel-owners-loyalty-program-benefits-and-costs-continue-to-rise">CBRE (2025)</a>, loyalty-program fees and benefits for hotel owners.</li>
+        <li><a href="https://www.cbre.com/insights/reports/hotel-brand-performance-2025">CBRE (2025)</a>, public KPIs across 50 hotel brands, chain-scale RevPAR patterns, and brand variation.</li>
+        <li><a href="https://www.cbre.com/insights/articles/the-cost-of-franchising-core-and-soft">CBRE (2025)</a>, franchise-related fees across a 4,200-hotel U.S. sample.</li>
+        <li><a href="https://www.cbre.com/insights/reports/the-luxury-lodge-market-2025">CBRE (2025)</a>, luxury-lodge market: relative revenue and profit-margin growth since 2018.</li>
+        <li><a href="https://www.cbre.com/insights/reports/h2-2025-global-hotel-outlook">CBRE (2025)</a>, H2 global outlook, including U.S. chain-scale performance and cost pressures.</li>
+        <li><a href="https://doi.org/10.1016/j.im.2020.103346">Bonaretti et al. (2020)</a>, preference elicitation and service personalisation across seven Swiss hotels.</li>
+        <li><a href="https://www.hotelnewsresource.com/pdf13/HVS0705131.pdf">HVS (2013)</a>, Canadian hotel F&amp;B profitability by meeting-space capacity; old, contextual benchmark.</li>
+      </ol>
+      <h3 style="margin-top:1.6rem">Local project documents</h3>
+      <div class="internal-links">
+        <a href="hotel-personalization-project-review.md">Project evidence review</a>
+        <a href="defining-hotel-service-personalization.md">Operational definition</a>
+        <a href="hotel-personalization-guest-data-access-evidence.md">Guest data-access evidence</a>
+        <a href="what-hotel-guests-value-in-personalization.md">Guest value</a>
+        <a href="hotel-profitability-and-business-traveller-preferences.md">Hotel economics and business travel</a>
+        <a href="hotel-vip-service-costs-and-profitability.md">VIP cost and profit</a>
+        <a href="hotel-meeting-and-conference-profitability.md">Meetings and conferences</a>
+        <a href="hotel-guest-name-recognition-experience-and-profit.md">Name recognition and profit</a>
+        <a href="hotel-personalization-additional-evidence.md">Additional luxury and business-traveler evidence</a>
+        <a href="../../hotel-visit/recurring-problems-literature-review.md">Two-visit synthesis</a>
+        <a href="../../hotel-visit/novotel-formatted.md">Novotel visit notes</a>
+        <a href="../../hotel-visit/parkroyal-main-points.md">PARKROYAL visit notes</a>
+      </div>
+    </section>
+    <footer class="footer">
+      <p>Prepared from project documents and the sources linked above. This is a synthesis for problem discovery, not a validated claim about a specific hotel. Update it when the team gathers property-level workflow and outcome data.</p>
+      <p><a href="#top">Back to top ↑</a></p>
+    </footer>
+  </main>
+</body>
+</html>

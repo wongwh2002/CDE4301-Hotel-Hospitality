@@ -8,6 +8,12 @@ After enabling GitHub Pages from the `main` branch's `/docs` folder, open the in
 - [View the HTML source](docs/architecture/hotel-lounge-smart-glasses-poc.html)
 - [Read the architecture proposal](docs/architecture/hotel-lounge-smart-glasses-poc.md)
 
+For the project problem framing and personalization evidence:
+
+- [Open the hotel personalization learning map](https://wongwh2002.github.io/CDE4301-Hotel-Hospitality/research/hotel-personalization-learning-map.html)
+- [View the HTML source](docs/research/hotel-personalization-learning-map.html)
+- [Read the additional luxury and business-traveler evidence](docs/research/hotel-personalization-additional-evidence.md)
+
 ---
 
 ### Scaffold Status
