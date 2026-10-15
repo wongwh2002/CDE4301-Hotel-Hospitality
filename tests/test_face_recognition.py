@@ -30,7 +30,12 @@ def load_worker_module():
 
 
 def detection(embedding="alex"):
-    return SimpleNamespace(bbox=(10.0, 10.0, 30.0, 30.0), embedding=embedding)
+    return SimpleNamespace(
+        bbox=(10.0, 10.0, 30.0, 30.0),
+        embedding=embedding,
+        crop_jpeg=b"\xff\xd8alex-face\xff\xd9",
+        crop_signature=0,
+    )
 
 
 def test_match_requires_three_stable_observations_then_clears():

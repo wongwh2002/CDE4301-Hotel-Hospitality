@@ -8,7 +8,9 @@ from contracts.models import (
     CandidateEnrollment,
     CueMessage,
     CuePayload,
+    DetectionSetMessage,
     DeviceStreamMessage,
+    FaceCropMessage,
     LoungeProfile,
     MatchEvent,
     TapEvent,
@@ -25,6 +27,8 @@ def test_contract_schemas_exist_and_are_valid_json():
         "device-stream.schema.json",
         "match-event.schema.json",
         "cue.schema.json",
+        "detection-set.schema.json",
+        "face-crop.schema.json",
         "lounge-profile.schema.json",
         "candidate.schema.json",
     ]
@@ -85,17 +89,71 @@ def test_device_stream_message_model():
 
 
 def test_match_event_model():
-    """Test MatchEvent strictly requires opaque candidate ID and no PII."""
+    """Test stable match updates require an opaque candidate ID."""
     event = MatchEvent(
         candidate_id="cand-opaque-999",
         stream_id="stream-1",
         track_id="track-01",
         status="stable_match",
         confidence=0.92,
+        crop_id="crop-1234",
+        crop_b64="ZmFrZS1qcGVn",
         matched_at="2026-10-07T12:00:00Z",
     )
     assert event.candidate_id == "cand-opaque-999"
     assert event.status == "stable_match"
+
+    refresh = MatchEvent(
+        candidate_id="cand-opaque-999",
+        stream_id="stream-1",
+        track_id="track-01",
+        status="stable_refresh",
+        crop_id="crop-1234",
+        matched_at="2026-10-07T12:00:01Z",
+    )
+    assert refresh.status == "stable_refresh"
+    with pytest.raises(ValidationError):
+        MatchEvent(
+            stream_id="stream-1",
+            track_id="track-01",
+            status="stable_refresh",
+            matched_at="2026-10-07T12:00:01Z",
+        )
+
+
+def test_detection_set_and_crop_messages():
+    snapshot = DetectionSetMessage(
+        type="detection_set",
+        stream_id="stream-1",
+        people=[
+            {
+                "track_id": "track-01",
+                "guest_id": "guest-opaque-01",
+                "display_name": "ALEX",
+                "preferences": ["Sparkling water"],
+                "allergies": ["Peanut allergy"],
+                "crop_id": "crop-1234",
+            }
+        ],
+    )
+    assert snapshot.people[0].guest_id == "guest-opaque-01"
+    assert snapshot.people[0].preferences == ["Sparkling water"]
+
+    crop = FaceCropMessage(
+        type="face_crop",
+        stream_id="stream-1",
+        track_id="track-01",
+        crop_id="crop-1234",
+        image_b64="ZmFrZS1qcGVn",
+    )
+    assert crop.mime_type == "image/jpeg"
+
+    with pytest.raises(ValidationError):
+        DetectionSetMessage(
+            type="detection_set",
+            stream_id="stream-1",
+            people=[{"track_id": "track-01", "display_name": "ALEX"}],
+        )
 
 
 def test_cue_message_model():

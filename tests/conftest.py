@@ -19,6 +19,9 @@ os.environ["COHORT_EXPIRY_SECONDS"] = "3600"
 os.environ["MAX_FRAME_SIZE_BYTES"] = "1048576"  # 1 MB for testing
 os.environ["QUEUE_MAXSIZE"] = "3"
 os.environ["FACE_RECOGNITION_ENABLED"] = "false"
+# Keep the service's periodic broadcaster quiet in unrelated tests; its cadence
+# is exercised directly with a short interval in the dedicated snapshot test.
+os.environ["DETECTION_SET_INTERVAL_SECONDS"] = "3600"
 
 
 def load_app(app_name: str):

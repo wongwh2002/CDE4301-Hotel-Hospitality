@@ -48,7 +48,7 @@ flowchart LR
     Queue --> Vision
     Cohort --> Vision
     Vision -->|Match callback| Control
-    Control -->|Short cue via WebSocket| Bridge
+    Control -->|detection_set + face_crop + cue via WebSocket| Bridge
     Bridge -->|Emoji, color, text| Glasses
 ```
 
@@ -102,7 +102,7 @@ Use a small number of deep modules with narrow interfaces. A teammate can change
 | `lounge-control` | Tap handling, profile lookup, active guest state, device sessions, cue composition | `POST /v1/lounge/taps`; one device WebSocket per paired phone; internal match callback | Guest reference, permitted profile fields, device and stream IDs, recognition results |
 | `face-worker` | Face detection/tracking, template enrollment, matching, temporal stability, frame backpressure | `PUT /internal/v1/candidates/{id}`; `DELETE /internal/v1/candidates/{id}`; `POST /internal/v1/frames`; `POST /internal/v1/matches` callback | Up to three reference photos at enrollment, opaque candidate IDs, lounge/stream IDs, transient frames; no names, preferences, or allergies |
 | `mock-hotel` | Development profiles and reference photos; SQLite persistence and profile API | `GET /v1/guests/{guest_ref}/lounge-profile` | Synthetic or consented demo records only |
-| `glasses-bridge` | Vendor SDK integration, camera access, display rendering, reconnect behavior | Device WebSocket contract and cue payload schema | Frames from camera; short cue payloads |
+| `glasses-bridge` | Vendor SDK integration, camera access, display rendering, reconnect behavior | Device WebSocket: JPEG input; `detection_set`, `face_crop`, and cue output | Frames from camera; per-person guest fields and transient cropped-face images |
 | `tap-simulator` | Simulated entry/exit events | Same tap-event interface as the reader adapter | Synthetic guest references |
 | `frame-replay` | One-shot deterministic CV integration input | Sends a prepared frame fixture once through the same device-frame interface as the bridge | Consented/synthetic test images; never real guest data in source control |
 
@@ -137,7 +137,7 @@ Keep each module's implementation in its own directory. Put only shared message 
 | `lounge-control` → `face-worker` | `DELETE /internal/v1/candidates/{candidate_id}` | Removes candidate template and any pending match state |
 | `lounge-control` → `face-worker` | `POST /internal/v1/frames` | Binary JPEG body plus `device_id`, `stream_id`, `sequence`, `captured_at`; queues latest frame and returns `202` |
 | `face-worker` → `lounge-control` | `POST /internal/v1/matches` | Sends opaque candidate ID, device/stream/track IDs, capture time, and quality state after temporal stability |
-| Phone bridge ↔ `lounge-control` | Authenticated device WebSocket | Receives compact frame messages and returns cue/clear/session events |
+| Phone bridge ↔ `lounge-control` | Authenticated device WebSocket | Receives frame messages and returns full person snapshots, separate cropped-face messages, and cue/clear/session events |
 
 The HTTP route names are proposed contracts. Store their request/response schemas in `contracts/` and test both callers and receivers against those files. If the face worker restarts, the control module re-enrolls still-active candidates from the profile adapter before resuming cues. If the control module restarts and cannot reconstruct active entries, it starts unavailable and waits for fresh/replayed tap events rather than showing stale matches.
 
@@ -146,7 +146,7 @@ The HTTP route names are proposed contracts. Store their request/response schema
 1. `lounge-control` resolves the tap to a guest profile and sends `face-worker` an opaque candidate ID, up to three reference images, and expiry. `face-worker` keeps one embedding per usable image in memory, then discards the submitted image bytes.
 2. The phone bridge opens a device WebSocket to `lounge-control`. The control module forwards sampled binary frames to `face-worker` using an internal HTTP call; it does not retain the frame.
 3. `face-worker` processes the frame on its bounded queue. For a stable match it posts only the opaque candidate ID, stream ID, track ID, capture time, and quality status to the match callback.
-4. `lounge-control` checks that the candidate and device session are still active, looks up the allowed display fields, and sends the cue to that device's WebSocket.
+4. `lounge-control` checks that the candidate and device session are still active, looks up the allowed display fields, and sends the full `detection_set` snapshot plus the separate `face_crop` image over that device's WebSocket. Per-track cue and clear events remain available for clients that use the compact cue path.
 
 This keeps the most privacy-sensitive recognition logic and the worker-facing guest data in separate modules. It also lets the control module run against a fake recognizer, and the vision module run against a fake control callback.
 
@@ -222,7 +222,7 @@ Use one authenticated WebSocket per paired phone/glasses session, for example `/
 
 The POC wire format is defined in [`contracts/device-stream.schema.json`](../../contracts/device-stream.schema.json): send `frame_meta` JSON with `device_id`, `stream_id`, monotonically increasing `sequence`, `captured_at`, and `format: image/jpeg`, followed immediately by the raw JPEG bytes as a WebSocket binary message. In the standard lounge flow, `lounge-control` forwards the transient image to `face-worker`; a stable match cue returns on the same WebSocket.
 
-The video WebSocket is available on host `VIDEO_STREAM_PORT` (default `8003`) at `/v1/video/stream/{device_id}`. It enters the same `lounge-control` container as host port `8000`, uses the `device-stream-v1` and `device-token.<DEVICE_AUTH_TOKEN>` subprotocols, and forwards sampled JPEG frames to `face-worker`. After the first frame metadata for a stream and each worker stable-match or clear callback, `lounge-control` sends a `detection_set` snapshot containing the full current set of stable, identified guest tracks on that stream. Each `track_id` is a temporary face-track key, not a guest identifier. Per-track cue/clear messages remain available for existing clients. Unknown or unconfirmed faces are not included as named people. The message schema is [`contracts/detection-set.schema.json`](../../contracts/detection-set.schema.json).
+The video WebSocket is available on host `VIDEO_STREAM_PORT` (default `8003`) at `/v1/video/stream/{device_id}`. It enters the same `lounge-control` container as host port `8000`, uses the `device-stream-v1` and `device-token.<DEVICE_AUTH_TOKEN>` subprotocols, and forwards sampled JPEG frames to `face-worker`. Lounge-control sends an initial empty `detection_set`, publishes full snapshots after changes and once per second, and expires each stable result five seconds after the worker's `matched_at` observation time. Callbacks older than five seconds are ignored. Each person entry includes a temporary `track_id`, opaque stable `guest_id`, display name, preferences, allergies, and required `crop_id`. A separate `face_crop` WebSocket message carries the base64 JPEG before a snapshot references a new crop. The worker retries a crop after failed delivery or when lounge-control reports a missing crop reference; unchanged crops are otherwise not retransmitted. The phone caches crops by `crop_id` and removes them when their track leaves a snapshot or its five-second local TTL expires. Frames and crops are transient in memory and are never written to disk. Per-track cue/clear messages remain available for existing clients; unknown and unconfirmed faces are not included as named people. See [`contracts/detection-set.schema.json`](../../contracts/detection-set.schema.json) and [`contracts/face-crop.schema.json`](../../contracts/face-crop.schema.json).
 
 FastAPI officially supports WebSocket endpoints and Docker deployment. The glasses SDK boundary is vendor-specific: Meta's toolkit connects an iOS/Android app to compatible glasses, and Rokid documents app/phone SDK paths for its device families. Validate capture, display, and local-network permissions against the exact SKU before committing to this interface. ([FastAPI WebSockets](https://fastapi.tiangolo.com/advanced/websockets/), [FastAPI in Docker](https://fastapi.tiangolo.com/deployment/docker/), [Meta Device Access Toolkit](https://developers.meta.com/wearables/device-access-toolkit/), [Rokid Open Platform](https://open.rokid.com/))
 
@@ -232,6 +232,7 @@ FastAPI officially supports WebSocket endpoints and Docker deployment. The glass
 - Keep a bounded latest-frame queue per glasses stream. If inference falls behind, drop stale frames instead of building latency.
 - Detect and track multiple faces per frame. Match each track independently against the active cohort.
 - Emit a match only when the best candidate passes a threshold, is separated sufficiently from the next candidate, and remains stable across several observations. Calibrate these values using representative, consented test data; do not ship default model thresholds as hotel policy.
+- While a stable track remains visible, refresh it at most once per second. Lounge-control keeps that result for five seconds without a refresh; the separate face-track association timeout remains 2.5 seconds.
 - Deduplicate cues per track and clear them when the track is gone, the match changes, the guest leaves the active cohort, or the device disconnects.
 - Set a provisional POC target such as **under 1 second p95 from frame capture to cue**, then adjust after measuring camera transport, laptop inference, and glasses rendering separately.
 

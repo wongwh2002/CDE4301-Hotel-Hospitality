@@ -1,0 +1,32 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://hotel-hospitality.internal/contracts/v1/face-crop.schema.json",
+  "title": "FaceCropMessage",
+  "description": "Transient cropped JPEG for a matched face track, sent separately over the device WebSocket",
+  "type": "object",
+  "required": ["type", "stream_id", "track_id", "crop_id", "image_b64", "mime_type", "emitted_at"],
+  "properties": {
+    "type": {"const": "face_crop"},
+    "stream_id": {
+      "type": "string",
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]{0,63}$"
+    },
+    "track_id": {
+      "type": "string",
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]{0,63}$"
+    },
+    "crop_id": {
+      "type": "string",
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]{0,63}$"
+    },
+    "image_b64": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 2800000,
+      "description": "Base64-encoded JPEG face crop"
+    },
+    "mime_type": {"const": "image/jpeg"},
+    "emitted_at": {"type": "string", "format": "date-time"}
+  },
+  "additionalProperties": false
+}

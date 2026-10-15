@@ -1,6 +1,8 @@
 """Transient face matching and bounded frame processing for face-worker."""
 
 import asyncio
+import base64
+import hashlib
 import logging
 import os
 from pathlib import Path
@@ -30,6 +32,8 @@ MATCH_MARGIN = float(os.environ.get("FACE_MATCH_MARGIN", "0.10"))
 STABLE_FRAME_COUNT = max(2, int(os.environ.get("FACE_STABLE_FRAMES", "3")))
 TRACK_MAX_MISSES = 3
 TRACK_TTL_SECONDS = 2.5
+STABLE_REFRESH_INTERVAL_SECONDS = 1.0
+CROP_CHANGE_HAMMING_DISTANCE = 16
 
 
 @dataclass
@@ -48,6 +52,11 @@ class FaceTrack:
     emitted_candidate: Optional[str] = None
     last_score: Optional[float] = None
     misses: int = 0
+    last_refresh_at: float = 0.0
+    crop_id: Optional[str] = None
+    crop_signature: Optional[int] = None
+    crop_b64: Optional[str] = None
+    crop_pending: bool = False
 
 
 _candidates: Dict[str, CandidateState] = {}
@@ -207,15 +216,58 @@ def _new_event(
     status: str,
     candidate_id: Optional[str],
 ) -> Dict[str, Any]:
-    return {
+    event = {
         "candidate_id": candidate_id,
         "device_id": device_id,
         "stream_id": stream_id,
         "track_id": track.track_id,
         "status": status,
-        "confidence": track.last_score if status == "stable_match" else None,
+        "confidence": track.last_score if status in {"stable_match", "stable_refresh"} else None,
         "matched_at": datetime.now(timezone.utc).isoformat(),
     }
+    if status in {"stable_match", "stable_refresh"} and track.crop_id:
+        event["crop_id"] = track.crop_id
+        if track.crop_pending and track.crop_b64:
+            event["crop_b64"] = track.crop_b64
+    return event
+
+
+def _update_track_crop(track: FaceTrack, detection: Any, force: bool = False) -> tuple[bool, Optional[str]]:
+    """Cache a crop reference and return image data only for a new/material change."""
+    crop_jpeg = getattr(detection, "crop_jpeg", None)
+    if not crop_jpeg:
+        return False, None
+
+    digest = hashlib.sha256(crop_jpeg).hexdigest()[:24]
+    new_crop_id = f"crop-{digest}"
+    if not force and track.crop_id == new_crop_id:
+        return False, None
+
+    signature = getattr(detection, "crop_signature", None)
+    if (
+        not force
+        and track.crop_id is not None
+        and signature is not None
+        and track.crop_signature is not None
+        and (signature ^ track.crop_signature).bit_count() < CROP_CHANGE_HAMMING_DISTANCE
+    ):
+        return False, None
+
+    track.crop_id = new_crop_id
+    track.crop_signature = signature
+    track.crop_b64 = base64.b64encode(crop_jpeg).decode("ascii")
+    track.crop_pending = True
+    return True, track.crop_b64
+
+
+def _set_crop_delivery_state(
+    stream_id: str, track_id: str, crop_id: Optional[str], delivered: bool
+) -> None:
+    """Keep a crop pending until lounge-control confirms phone delivery."""
+    track = _tracks.get(stream_id, {}).get(track_id)
+    if track is None or not crop_id or track.crop_id != crop_id:
+        return
+    track.crop_pending = not delivered
 
 
 def _process_frame(
@@ -268,10 +320,24 @@ def _process_frame(
             and all(item == candidate_id for item in track.evidence)
         )
         if is_stable and track.emitted_candidate != candidate_id:
-            track.emitted_candidate = candidate_id
-            events.append(_new_event(stream_id, device_id, track, "stable_match", candidate_id))
+            _update_track_crop(track, detection, force=True)
+            if track.crop_id and track.crop_pending:
+                track.emitted_candidate = candidate_id
+                track.last_refresh_at = now
+                events.append(_new_event(stream_id, device_id, track, "stable_match", candidate_id))
+        elif is_stable:
+            if now - track.last_refresh_at >= STABLE_REFRESH_INTERVAL_SECONDS:
+                _update_track_crop(track, detection)
+                track.last_refresh_at = now
+                events.append(
+                    _new_event(stream_id, device_id, track, "stable_refresh", candidate_id)
+                )
         elif track.emitted_candidate and track.misses >= TRACK_MAX_MISSES:
             track.emitted_candidate = None
+            track.crop_id = None
+            track.crop_signature = None
+            track.crop_b64 = None
+            track.crop_pending = False
             events.append(_new_event(stream_id, device_id, track, "no_match", None))
 
     for track_id, track in list(stream_tracks.items()):
@@ -281,6 +347,10 @@ def _process_frame(
         track.evidence.append(None)
         if track.emitted_candidate and track.misses >= TRACK_MAX_MISSES:
             track.emitted_candidate = None
+            track.crop_id = None
+            track.crop_signature = None
+            track.crop_b64 = None
+            track.crop_pending = False
             events.append(_new_event(stream_id, device_id, track, "no_match", None))
         if now - track.last_seen > TRACK_TTL_SECONDS:
             if track.emitted_candidate:
@@ -322,6 +392,15 @@ async def _report_events(client: httpx.AsyncClient, events: list[Dict[str, Any]]
                 headers={"X-Internal-Token": internal_token},
             )
             response.raise_for_status()
+            result = response.json()
+            if event.get("crop_b64") and result.get("crop_delivered") is True:
+                _set_crop_delivery_state(
+                    event["stream_id"], event["track_id"], event.get("crop_id"), delivered=True
+                )
+            elif result.get("crop_required") is True:
+                _set_crop_delivery_state(
+                    event["stream_id"], event["track_id"], event.get("crop_id"), delivered=False
+                )
         except httpx.HTTPError as exc:
             logger.warning("Could not deliver recognition result to lounge-control: %s", exc)
 

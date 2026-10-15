@@ -6,11 +6,14 @@ and cue delivery for the Hotel Smart-Glasses POC.
 
 import asyncio
 import base64
+import hashlib
+import hmac
 import json
 import logging
 import os
 import re
 import sys
+import time
 import uuid
 from contextlib import asynccontextmanager
 from datetime import datetime, timedelta, timezone
@@ -44,6 +47,7 @@ from contracts.models import (
     CuePayload,
     DetectionSetMessage,
     DeviceStreamMessage,
+    FaceCropMessage,
     GuestRegistrationRequest,
     LoungeProfile,
     MatchEvent,
@@ -67,6 +71,7 @@ FACE_WORKER_URL = os.environ.get("FACE_WORKER_URL", "http://face-worker:8001").r
 COHORT_EXPIRY_SECONDS = int(os.environ.get("COHORT_EXPIRY_SECONDS", 7200))
 INTERNAL_API_TOKEN = os.environ.get("INTERNAL_API_TOKEN", "")
 MAX_FRAME_SIZE_BYTES = int(os.environ.get("MAX_FRAME_SIZE_BYTES", 5 * 1024 * 1024))
+DETECTION_SET_INTERVAL_SECONDS = float(os.environ.get("DETECTION_SET_INTERVAL_SECONDS", "1"))
 
 cohort_manager = ActiveCohortManager()
 device_manager = DeviceSessionManager()
@@ -75,13 +80,54 @@ tap_locks: Dict[str, asyncio.Lock] = {}
 http_client: Optional[httpx.AsyncClient] = None
 
 
+def public_guest_id(guest_ref: str) -> str:
+    """Return a stable opaque guest ID without exposing the hotel reference."""
+    key = (INTERNAL_API_TOKEN or "hotel-lounge-poc").encode("utf-8")
+    digest = hmac.new(key, guest_ref.encode("utf-8"), hashlib.sha256).hexdigest()[:24]
+    return f"guest-{digest}"
+
+
+async def publish_detection_set(stream_id: str) -> bool:
+    """Send the current unexpired set of identified tracks to their phone."""
+    message = DetectionSetMessage(
+        type="detection_set",
+        stream_id=stream_id,
+        people=device_manager.get_detected_people(stream_id),
+    )
+    return await device_manager.send_cue(
+        stream_id,
+        message.model_dump(exclude_none=True),
+    )
+
+
+async def detection_set_broadcast_loop() -> None:
+    """Refresh full snapshots once per second for every active device stream."""
+    while True:
+        try:
+            await asyncio.sleep(DETECTION_SET_INTERVAL_SECONDS)
+            for stream_id in device_manager.stream_ids():
+                await publish_detection_set(stream_id)
+        except asyncio.CancelledError:
+            raise
+        except Exception:
+            logger.exception("Failed to publish a periodic detection set")
+
+
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     global http_client
     http_client = httpx.AsyncClient(timeout=10.0)
-    yield
-    if http_client:
-        await http_client.aclose()
+    detection_task = asyncio.create_task(detection_set_broadcast_loop())
+    try:
+        yield
+    finally:
+        detection_task.cancel()
+        try:
+            await detection_task
+        except asyncio.CancelledError:
+            pass
+        if http_client:
+            await http_client.aclose()
 
 
 app = FastAPI(
@@ -353,6 +399,22 @@ async def _process_tap(event: TapEvent):
             except Exception as e:
                 logger.warning("Failed to delete candidate %s from face-worker: %s", cid, e)
 
+        removed_tracks = device_manager.remove_guest(public_guest_id(event.guest_ref))
+        for stream_id, track_ids in removed_tracks.items():
+            for track_id in track_ids:
+                await device_manager.send_cue(
+                    stream_id,
+                    CueMessage(
+                        type="clear",
+                        stream_id=stream_id,
+                        track_id=track_id,
+                        status="cleared",
+                        cue=None,
+                        emitted_at=utc_now_iso(),
+                    ).model_dump(),
+                )
+            await publish_detection_set(stream_id)
+
         outcome = {
             "action": "departed",
             "guest_ref": event.guest_ref,
@@ -378,23 +440,7 @@ async def post_match(
     if not verify_internal_token(x_internal_token):
         raise HTTPException(status_code=401, detail="Invalid internal service token")
 
-    async def send_detection_set(person: Optional[Dict[str, Optional[str]]]) -> bool:
-        people = device_manager.update_detected_person(
-            event.stream_id,
-            event.track_id,
-            person,
-        )
-        message = DetectionSetMessage(
-            type="detection_set",
-            stream_id=event.stream_id,
-            people=people,
-        )
-        return await device_manager.send_cue(
-            event.stream_id,
-            message.model_dump(exclude_none=True),
-        )
-
-    if event.status != "stable_match":
+    if event.status not in {"stable_match", "stable_refresh"}:
         clear_message = CueMessage(
             type="clear",
             stream_id=event.stream_id,
@@ -404,7 +450,8 @@ async def post_match(
             emitted_at=utc_now_iso(),
         )
         sent = await device_manager.send_cue(event.stream_id, clear_message.model_dump())
-        await send_detection_set(None)
+        device_manager.update_detected_person(event.stream_id, event.track_id, None)
+        await publish_detection_set(event.stream_id)
         return {
             "status": "suppressed" if sent else "device_not_connected",
             "stream_id": event.stream_id,
@@ -422,8 +469,53 @@ async def post_match(
             emitted_at=utc_now_iso(),
         )
         await device_manager.send_cue(event.stream_id, clear_message.model_dump())
-        await send_detection_set(None)
+        device_manager.update_detected_person(event.stream_id, event.track_id, None)
+        await publish_detection_set(event.stream_id)
         return {"status": "ignored", "reason": "candidate_not_active"}
+
+    processing_time = time.monotonic()
+    observed_at = device_manager.observation_last_seen(
+        event.matched_at, now_monotonic=processing_time
+    )
+    if observed_at is None:
+        return {
+            "status": "ignored",
+            "reason": "stale_observation",
+            "crop_delivered": False,
+        }
+
+    current_person = device_manager.get_detected_person(
+        event.stream_id, event.track_id, now=processing_time
+    )
+    crop_delivered = False
+    if event.crop_b64 is not None:
+        crop_message = FaceCropMessage(
+            type="face_crop",
+            stream_id=event.stream_id,
+            track_id=event.track_id,
+            crop_id=event.crop_id,
+            image_b64=event.crop_b64,
+        )
+        crop_delivered = await device_manager.send_cue(
+            event.stream_id,
+            crop_message.model_dump(exclude_none=True),
+        )
+        if not crop_delivered:
+            return {
+                "status": "crop_delivery_failed",
+                "stream_id": event.stream_id,
+                "track_id": event.track_id,
+                "crop_delivered": False,
+                "crop_required": True,
+            }
+    elif current_person is None or current_person.get("crop_id") != event.crop_id:
+        return {
+            "status": "crop_required",
+            "stream_id": event.stream_id,
+            "track_id": event.track_id,
+            "crop_delivered": False,
+            "crop_required": True,
+        }
 
     # Compose compact glanceable cue:
     # 🟢 ✅ ALEX
@@ -466,17 +558,46 @@ async def post_match(
         emitted_at=utc_now_iso(),
     )
 
-    await send_detection_set(
-        {
-            "display_name": display_name,
-            "alert": alert,
-        }
+    detected_person = {
+        "guest_id": public_guest_id(candidate["guest_ref"]),
+        "display_name": display_name,
+        "preferences": list(candidate.get("preferences", [])),
+        "allergies": list(allergies),
+        "crop_id": event.crop_id,
+        "alert": alert,
+    }
+    device_manager.update_detected_person(
+        event.stream_id,
+        event.track_id,
+        detected_person,
+        now=processing_time,
+        last_seen=observed_at,
     )
+
+    if event.status == "stable_refresh":
+        if crop_delivered:
+            await publish_detection_set(event.stream_id)
+        cue_delivered = False
+        if current_person is None:
+            cue_delivered = await device_manager.send_cue(
+                event.stream_id,
+                cue_message.model_dump(exclude_none=True),
+            )
+        return {
+            "status": "refreshed",
+            "stream_id": event.stream_id,
+            "track_id": event.track_id,
+            "crop_delivered": crop_delivered,
+            "cue_delivered": cue_delivered,
+        }
+
+    await publish_detection_set(event.stream_id)
     sent = await device_manager.send_cue(event.stream_id, cue_message.model_dump(exclude_none=True))
     return {
         "status": "delivered" if sent else "device_not_connected",
         "stream_id": event.stream_id,
         "candidate_id": event.candidate_id,
+        "crop_delivered": crop_delivered,
     }
 
 
@@ -492,7 +613,7 @@ async def device_stream_endpoint(
     - Authenticates explicitly via query parameter or Authorization header
     - Accepts frame metadata and binary JPEG frames
     - Forwards transient frames via internal HTTP to face-worker
-    - Pushes per-track cues and a current stable detection set to the phone
+    - Pushes per-track cues, transient face crops, and current detection sets to the phone
     - Cleans up session and stream state upon disconnect
     """
     # Check authentication

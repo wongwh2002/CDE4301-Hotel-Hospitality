@@ -215,6 +215,36 @@
     .swatch.internal { background: var(--violet); }
     .swatch.device { height: 0; border-top: 2px dashed #687a91; }
 
+    .output-contract {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) minmax(300px, .85fr);
+      gap: 22px;
+      margin-top: 22px;
+      padding: 20px;
+      border: 1px solid #d9e1eb;
+      border-radius: 16px;
+      background: var(--surface);
+      box-shadow: var(--shadow);
+    }
+
+    .output-contract h2 { margin: 0 0 8px; font-size: 1.18rem; letter-spacing: -.02em; }
+    .output-contract p { margin: 0; color: var(--muted); font-size: .9rem; }
+    .output-contract .eyebrow { margin-bottom: 7px; font-size: .68rem; }
+    .output-contract pre {
+      overflow-x: auto;
+      margin: 8px 0 7px;
+      padding: 13px 15px;
+      border: 1px solid #dce4ee;
+      border-radius: 10px;
+      background: #f7f9fd;
+      color: #263950;
+      font-size: .79rem;
+      line-height: 1.5;
+    }
+
+    .output-contract code { font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace; }
+    .output-contract .payload-caption { color: #53647b; font-size: .78rem; font-weight: 750; }
+
     .validation {
       display: grid;
       grid-template-columns: auto 1fr;
@@ -248,6 +278,7 @@
       .toolbar { margin-top: 25px; }
       .toolbar-label { flex-basis: 100%; }
       .validation { grid-template-columns: 1fr; gap: 4px; }
+      .output-contract { grid-template-columns: 1fr; gap: 14px; }
     }
 
     @media (prefers-reduced-motion: reduce) {
@@ -259,7 +290,7 @@
   <main class="page">
     <p class="eyebrow">Hotel lounge · Smart-glasses proof of concept</p>
     <h1>From lounge entry to a useful guest cue</h1>
-    <p class="intro">A local laptop handles profile lookup and face matching. The phone bridges the Rokid RV101 to the Docker stack, then returns a short cue to the worker.</p>
+    <p class="intro">A local laptop handles profile lookup and face matching. The phone bridges the Rokid RV101 to the Docker stack and receives a live set of identified people, their cropped faces, and compact service cues.</p>
     <div class="badges" aria-label="Architecture status">
       <span class="badge proposal">Proposed architecture</span>
       <span class="badge">RV101 → Android phone → local laptop</span>
@@ -278,7 +309,7 @@
       <div class="diagram-shell">
         <svg class="architecture" id="architecture" viewBox="0 0 1380 820" role="img" aria-labelledby="svg-title svg-desc" data-focus="all" xmlns="http://www.w3.org/2000/svg">
           <title id="svg-title">Hotel lounge smart-glasses proposed architecture</title>
-          <desc id="svg-desc">A card reader sends entry events through an adapter to FastAPI lounge-control inside Docker. The control service looks up synthetic guest profiles from a SQLite-backed mock-hotel API and keeps active guest context in memory. One or more Android companion phones connect over the private lounge network, each using its own authenticated WebSocket to send camera frames and receive cues. The control service forwards frames to a Python face-worker. All three service ports are published only on the private local network for this proof of concept.</desc>
+          <desc id="svg-desc">A card reader sends entry events through an adapter to FastAPI lounge-control inside Docker. The control service looks up synthetic guest profiles from a SQLite-backed mock-hotel API and keeps active guest context in memory. One or more Android companion phones connect over the private lounge network, each using its own authenticated WebSocket to send camera frames and receive full detection-set snapshots plus separate cropped-face messages joined by crop ID. The control service forwards frames to a Python face-worker. All three service ports are published only on the private local network for this proof of concept.</desc>
           <defs>
             <marker id="arrow-teal" viewBox="0 0 10 10" refX="8.4" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" class="flow-arrow-teal"/></marker>
             <marker id="arrow-blue" viewBox="0 0 10 10" refX="8.4" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" class="flow-arrow-blue"/></marker>
@@ -325,11 +356,11 @@
             <text x="649" y="227" class="node-code">POST /v1/lounge/taps</text>
             <text x="649" y="249" class="node-copy">Profile adapter + active guest context</text>
             <text x="649" y="270" class="node-copy">In-memory cohort with expiry (TTL)</text>
-            <text x="649" y="291" class="node-copy">Device WebSocket + cue composer</text>
+            <text x="649" y="291" class="node-copy">Device WebSocket + detection-set publisher</text>
             <rect x="649" y="312" width="282" height="55" rx="10" fill="#fff" stroke="#c6d7f5"/>
-            <text x="663" y="335" class="node-code">/v1/devices/{id}/stream</text>
-            <text x="663" y="354" class="node-small">Frames in · cues and clear events out</text>
-            <text x="649" y="384" class="node-small">Guest context stays here; frames are transient</text>
+            <text x="663" y="335" class="node-code">/v1/video/stream/{device_id} · :8003</text>
+            <text x="663" y="354" class="node-small">Frames in · people, crops, cues out</text>
+            <text x="649" y="384" class="node-small">5s match TTL; frames and crops are transient</text>
           </g>
 
           <g class="node node-violet node-tap-only" aria-label="Mock hotel profile API backed by SQLite">
@@ -356,7 +387,7 @@
             <line x1="649" y1="578" x2="931" y2="578" stroke="#d5c9f2"/>
             <text x="649" y="601" class="node-copy">Bounded latest-frame queue</text>
             <text x="649" y="622" class="node-copy">Detect → track → compare active cohort</text>
-            <text x="649" y="643" class="node-copy">Opaque candidate IDs + RAM templates</text>
+            <text x="649" y="643" class="node-copy">Match each face; return stable tracks + crops</text>
             <text x="649" y="668" class="node-code">POST /internal/v1/matches</text>
             <text x="649" y="698" class="node-small">Drops stale frames; does not persist images</text>
           </g>
@@ -387,7 +418,7 @@
             <text x="321" y="620" class="node-subtitle">Rokid app / CXR-L bridge</text>
             <text x="321" y="650" class="node-copy">Receives camera data</text>
             <text x="321" y="671" class="node-copy">Sends sampled JPEG frames</text>
-            <text x="321" y="692" class="node-copy">Receives cue / clear updates</text>
+            <text x="321" y="692" class="node-copy">Renders people list + cropped faces</text>
             <rect x="321" y="708" width="172" height="25" rx="8" class="pill"/>
             <text x="331" y="725" class="pill-text">Vendor-specific boundary</text>
           </g>
@@ -398,9 +429,9 @@
 
           <path d="M520 615 H565 V375 H625" class="flow flow-frame node-recognition" marker-end="url(#arrow-blue)"/>
           <path d="M625 385 H580 V681 H520" class="flow flow-cue node-recognition" marker-end="url(#arrow-green)"/>
-          <rect x="528" y="454" width="143" height="43" rx="8" class="flow-label-bg node-recognition"/>
+          <rect x="528" y="454" width="196" height="43" rx="8" class="flow-label-bg node-recognition"/>
           <text x="539" y="472" class="flow-label-small node-recognition">One WS per phone</text>
-          <text x="539" y="488" class="flow-label-small node-recognition">JPEG in · cue / clear out</text>
+          <text x="539" y="488" class="flow-label-small node-recognition">JPEG in · people + crops · cues out</text>
 
           <text x="622" y="766" class="flow-note">Private LAN ports · one WebSocket per phone · no broker in the live path</text>
         </svg>
@@ -412,6 +443,26 @@
         <span class="legend-item"><i class="swatch cue" aria-hidden="true"></i>Match result / worker cue</span>
         <span class="legend-item"><i class="swatch internal" aria-hidden="true"></i>Candidate enrollment / internal handoff</span>
         <span class="legend-item"><i class="swatch device" aria-hidden="true"></i>Glasses ↔ phone</span>
+      </div>
+    </section>
+
+    <section class="output-contract" aria-labelledby="output-contract-heading">
+      <div>
+        <p class="eyebrow">Phone → glasses</p>
+        <h2 id="output-contract-heading">One display card per detected person</h2>
+        <p>The WebSocket sends a full <code>detection_set</code> snapshot with one profile object per stable face. A separate <code>face_crop</code> message carries the JPEG. The phone joins the messages by <code>crop_id</code> and keeps each card keyed by <code>track_id</code>; <code>guest_id</code> identifies the matched profile. This keeps two people with the same name distinct.</p>
+      </div>
+      <div>
+        <p class="payload-caption">Phone-side display object assembled from both messages</p>
+        <pre><code>{
+  "guest_id": "guest-a81b...",
+  "display_name": "ALEX",
+  "track_id": "track-a81b...",
+  "cropped_face": "&lt;JPEG from crop cache&gt;",
+  "preferences": ["Sparkling water"],
+  "allergies": ["Peanut allergy"]
+}</code></pre>
+        <p>The image is not repeated in every snapshot. Clients cache crops by <code>crop_id</code> and discard them when the track leaves the set or its five-second TTL expires.</p>
       </div>
     </section>
 

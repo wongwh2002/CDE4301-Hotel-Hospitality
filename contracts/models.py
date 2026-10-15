@@ -10,7 +10,7 @@ These versioned contracts define data exchange between:
 from datetime import datetime, timezone
 import re
 from typing import Annotated, List, Literal, Optional
-from pydantic import BaseModel, ConfigDict, Field, StringConstraints, model_validator
+from pydantic import BaseModel, ConfigDict, Field, StringConstraints, field_validator, model_validator
 
 IDENTIFIER_PATTERN = r"^[A-Za-z0-9][A-Za-z0-9._-]{0,63}$"
 _IDENTIFIER_PATTERN = re.compile(IDENTIFIER_PATTERN)
@@ -65,21 +65,36 @@ class DeviceStreamMessage(ContractModel):
 
 
 class MatchEvent(ContractModel):
-    """Match callback sent from face-worker to lounge-control (opaque candidate ID only)."""
+    """Match update from face-worker, with transient crop bytes when required."""
     candidate_id: Optional[Identifier] = Field(
         None, description="Opaque candidate ID; absent for a no_match cue clear"
     )
     stream_id: Identifier
     track_id: Identifier
-    status: Literal["stable_match", "unconfirmed", "no_match"]
+    status: Literal["stable_match", "stable_refresh", "unconfirmed", "no_match"]
     device_id: Optional[Identifier] = None
     confidence: Optional[float] = Field(None, ge=0.0, le=1.0)
-    matched_at: str
+    crop_id: Optional[Identifier] = None
+    crop_b64: Optional[Base64Jpeg] = None
+    matched_at: datetime
+
+    @field_validator("matched_at")
+    @classmethod
+    def require_timezone_aware_match_time(cls, value: datetime) -> datetime:
+        if value.tzinfo is None or value.utcoffset() is None:
+            raise ValueError("matched_at must include a timezone")
+        return value.astimezone(timezone.utc)
 
     @model_validator(mode="after")
-    def require_candidate_for_stable_match(self):
-        if self.status == "stable_match" and self.candidate_id is None:
-            raise ValueError("stable_match requires candidate_id")
+    def require_candidate_for_stable_events(self):
+        if self.status in {"stable_match", "stable_refresh"} and self.candidate_id is None:
+            raise ValueError(f"{self.status} requires candidate_id")
+        if self.status == "stable_match" and (self.crop_id is None or self.crop_b64 is None):
+            raise ValueError("stable_match requires crop_id and crop_b64")
+        if self.status == "stable_refresh" and self.crop_id is None:
+            raise ValueError("stable_refresh requires crop_id")
+        if self.crop_b64 is not None and self.crop_id is None:
+            raise ValueError("crop_b64 requires crop_id")
         return self
 
 
@@ -105,7 +120,11 @@ class CueMessage(ContractModel):
 class DetectedPerson(ContractModel):
     """A stable guest match included in a stream's current detection set."""
     track_id: Identifier
+    guest_id: Identifier
     display_name: str = Field(..., min_length=1)
+    preferences: List[str] = Field(default_factory=list)
+    allergies: List[str] = Field(default_factory=list)
+    crop_id: Identifier
     alert: Optional[str] = None
 
 
@@ -114,6 +133,17 @@ class DetectionSetMessage(ContractModel):
     type: Literal["detection_set"]
     stream_id: Identifier
     people: List[DetectedPerson] = Field(default_factory=list)
+    emitted_at: str = Field(default_factory=utc_now_iso)
+
+
+class FaceCropMessage(ContractModel):
+    """Transient cropped face image for a track, sent only when it changes."""
+    type: Literal["face_crop"]
+    stream_id: Identifier
+    track_id: Identifier
+    crop_id: Identifier
+    image_b64: Base64Jpeg
+    mime_type: Literal["image/jpeg"] = "image/jpeg"
     emitted_at: str = Field(default_factory=utc_now_iso)
 
 

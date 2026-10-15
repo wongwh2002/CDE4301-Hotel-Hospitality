@@ -17,7 +17,7 @@
       "type": "array",
       "items": {
         "type": "object",
-        "required": ["track_id", "display_name"],
+        "required": ["track_id", "guest_id", "display_name", "preferences", "allergies", "crop_id"],
         "properties": {
           "track_id": {
             "type": "string",
@@ -26,6 +26,24 @@
           "display_name": {
             "type": "string",
             "minLength": 1
+          },
+          "guest_id": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]{0,63}$",
+            "description": "Stable opaque ID for the guest profile"
+          },
+          "preferences": {
+            "type": "array",
+            "items": {"type": "string"}
+          },
+          "allergies": {
+            "type": "array",
+            "items": {"type": "string"}
+          },
+          "crop_id": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]{0,63}$",
+            "description": "ID of the separately delivered transient face crop"
           },
           "alert": {
             "type": "string"

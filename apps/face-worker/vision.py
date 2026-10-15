@@ -9,7 +9,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 from pathlib import Path
 from threading import Lock
-from typing import Any
+from typing import Any, Optional
 
 
 class InvalidImage(ValueError):
@@ -25,6 +25,8 @@ class DetectedFace:
     bbox: tuple[float, float, float, float]
     embedding: Any
     detector_score: float
+    crop_jpeg: Optional[bytes] = None
+    crop_signature: Optional[int] = None
 
 
 class InsightFaceEngine:
@@ -55,6 +57,8 @@ class InsightFaceEngine:
         return image
 
     def detect(self, image_bytes: bytes) -> list[DetectedFace]:
+        import cv2
+
         image = self._decode(image_bytes)
         faces: list[DetectedFace] = []
         # Lounge matching and direct phone streams share this model instance.
@@ -75,14 +79,59 @@ class InsightFaceEngine:
                 else:
                     feature = None
             x1, y1, x2, y2 = (float(value) for value in face.bbox)
+            bbox = (x1, y1, max(0.0, x2 - x1), max(0.0, y2 - y1))
+            crop_jpeg, crop_signature = self._encode_face_crop(cv2, image, bbox)
             faces.append(
                 DetectedFace(
-                    bbox=(x1, y1, max(0.0, x2 - x1), max(0.0, y2 - y1)),
+                    bbox=bbox,
                     embedding=feature,
                     detector_score=float(face.det_score or 0.0),
+                    crop_jpeg=crop_jpeg,
+                    crop_signature=crop_signature,
                 )
             )
         return faces
+
+    @staticmethod
+    def _encode_face_crop(cv2, image, bbox) -> tuple[Optional[bytes], Optional[int]]:
+        """Encode a padded, bounded JPEG crop and a small perceptual signature."""
+        x, y, width, height = bbox
+        if width <= 0 or height <= 0:
+            return None, None
+
+        image_height, image_width = image.shape[:2]
+        side = max(width, height) * 1.35
+        center_x, center_y = x + width / 2, y + height / 2
+        left = max(0, int(center_x - side / 2))
+        top = max(0, int(center_y - side / 2))
+        right = min(image_width, int(center_x + side / 2))
+        bottom = min(image_height, int(center_y + side / 2))
+        crop = image[top:bottom, left:right]
+        if crop.size == 0:
+            return None, None
+
+        longest_side = max(crop.shape[:2])
+        if longest_side > 320:
+            scale = 320 / longest_side
+            crop = cv2.resize(
+                crop,
+                (max(1, int(crop.shape[1] * scale)), max(1, int(crop.shape[0] * scale))),
+                interpolation=cv2.INTER_AREA,
+            )
+
+        encoded, jpeg = cv2.imencode(
+            ".jpg", crop, [int(cv2.IMWRITE_JPEG_QUALITY), 82]
+        )
+        if not encoded:
+            return None, None
+
+        gray = cv2.cvtColor(crop, cv2.COLOR_BGR2GRAY)
+        thumbnail = cv2.resize(gray, (8, 8), interpolation=cv2.INTER_AREA)
+        median = float(thumbnail.mean())
+        signature = 0
+        for pixel in thumbnail.reshape(-1):
+            signature = (signature << 1) | int(float(pixel) >= median)
+        return jpeg.tobytes(), signature
 
     def create_template(self, image_bytes: bytes):
         """Return one normalized embedding; reject empty or multi-face photos."""

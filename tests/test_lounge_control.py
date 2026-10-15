@@ -2,10 +2,15 @@
 
 import asyncio
 import json
+from datetime import datetime, timedelta, timezone
 from unittest.mock import AsyncMock, MagicMock, patch
 import pytest
 from starlette.websockets import WebSocketDisconnect
 from fixtures.synthetic_data import SYNTHETIC_JPEG_BYTES
+
+
+def fresh_match_time():
+    return datetime.now(timezone.utc).isoformat()
 
 
 def test_lounge_control_health(lounge_control_client):
@@ -15,6 +20,16 @@ def test_lounge_control_health(lounge_control_client):
     data = resp.json()
     assert data["status"] == "ok"
     assert data["service"] == "lounge-control"
+
+
+def test_dashboard_has_multi_person_websocket_result_preview(lounge_control_client):
+    response = lounge_control_client.get("/")
+
+    assert response.status_code == 200
+    assert 'id="cv-people-list"' in response.text
+    assert "People returned to this client" in response.text
+    assert "message.type === 'face_crop'" in response.text
+    assert "message.type === 'detection_set'" in response.text
 
 
 def test_active_cohort_empty_initially(lounge_control_client):
@@ -123,7 +138,9 @@ def test_internal_match_callback_requires_service_token(lounge_control_client):
         "track_id": "track-01",
         "status": "stable_match",
         "confidence": 0.9,
-        "matched_at": "2026-10-07T12:00:00Z",
+        "crop_id": "crop-auth-test",
+        "crop_b64": "ZmFrZS1qcGVn",
+        "matched_at": fresh_match_time(),
     }
     response = lounge_control_client.post(
         "/internal/v1/matches",
@@ -185,19 +202,28 @@ def test_one_control_routes_cues_to_multiple_phone_sessions(lounge_control_clien
                     "track_id": "track-01",
                     "status": "stable_match",
                     "confidence": 0.95,
-                    "matched_at": "2026-10-07T12:00:00Z",
+                    "crop_id": "crop-phone-test",
+                    "crop_b64": "ZmFrZS1qcGVn",
+                    "matched_at": fresh_match_time(),
                 },
                 headers={"X-Internal-Token": "test-internal-token"},
             )
             assert response.status_code == 200
             assert response.json()["status"] == "delivered"
             recipient = phone_a if stream_id == "stream-a" else phone_b
+            crop = recipient.receive_json()
+            assert crop["type"] == "face_crop"
+            assert crop["crop_id"] == "crop-phone-test"
             detected = recipient.receive_json()
             assert detected["type"] == "detection_set"
             assert detected["stream_id"] == stream_id
-            assert detected["people"] == [
-                {"track_id": "track-01", "display_name": display_name}
-            ]
+            assert len(detected["people"]) == 1
+            person = detected["people"][0]
+            assert person["track_id"] == "track-01"
+            assert person["guest_id"].startswith("guest-")
+            assert person["display_name"] == display_name
+            assert person["preferences"] == []
+            assert person["allergies"] == []
             cue_message = recipient.receive_json()
             assert cue_message["type"] == "cue"
             cue = cue_message["cue"]
@@ -205,6 +231,345 @@ def test_one_control_routes_cues_to_multiple_phone_sessions(lounge_control_clien
             assert "guest_ref" not in cue
 
     assert device_manager.connected_count() == 0
+
+
+def test_one_stream_returns_multiple_guest_profiles_and_face_crops(lounge_control_client):
+    from apps_lounge_control import cohort_manager, public_guest_id
+
+    guests = (
+        ("cand-face-a", "guest-alex-101", "Alex", ["Sparkling water"], ["Peanut allergy"]),
+        ("cand-face-b", "guest-jordan-102", "Jordan", ["Late checkout"], []),
+    )
+    for candidate_id, guest_ref, display_name, preferences, allergies in guests:
+        cohort_manager.admit_candidate(
+            candidate_id=candidate_id,
+            guest_ref=guest_ref,
+            display_name=display_name,
+            room_number="401",
+            allergies=allergies,
+            preferences=preferences,
+            expires_at="2099-01-01T00:00:00Z",
+        )
+
+    with lounge_control_client.websocket_connect(
+        "/v1/video/stream/phone-multi?token=test-secret-token"
+    ) as phone:
+        assert phone.receive_json()["type"] == "session_ack"
+        phone.send_json({
+            "type": "frame_meta",
+            "stream_id": "stream-multi",
+            "sequence": 1,
+            "captured_at": "2026-10-15T09:00:00Z",
+        })
+        assert phone.receive_json()["people"] == []
+
+        for index, (candidate_id, _, _, _, _) in enumerate(guests, start=1):
+            response = lounge_control_client.post(
+                "/internal/v1/matches",
+                json={
+                    "candidate_id": candidate_id,
+                    "stream_id": "stream-multi",
+                    "track_id": f"track-{index}",
+                    "status": "stable_match",
+                    "confidence": 0.95,
+                    "crop_id": f"crop-{index}",
+                    "crop_b64": "ZmFrZS1qcGVn",
+                    "matched_at": fresh_match_time(),
+                },
+                headers={"X-Internal-Token": "test-internal-token"},
+            )
+            assert response.status_code == 200
+
+            crop = phone.receive_json()
+            assert crop["type"] == "face_crop"
+            assert crop["track_id"] == f"track-{index}"
+            assert crop["crop_id"] == f"crop-{index}"
+            assert crop["image_b64"] == "ZmFrZS1qcGVn"
+
+            snapshot = phone.receive_json()
+            assert snapshot["type"] == "detection_set"
+            assert len(snapshot["people"]) == index
+            person = next(
+                item for item in snapshot["people"] if item["track_id"] == f"track-{index}"
+            )
+            expected_guest = guests[index - 1]
+            assert person["guest_id"] == public_guest_id(expected_guest[1])
+            assert person["display_name"] == expected_guest[2].upper()
+            assert person["preferences"] == expected_guest[3]
+            assert person["allergies"] == expected_guest[4]
+            assert person["crop_id"] == f"crop-{index}"
+            assert expected_guest[1] not in str(snapshot)
+            assert phone.receive_json()["type"] == "cue"
+
+        # Refreshing a known track updates the five-second TTL without replaying
+        # an unchanged crop or sending another one-shot cue.
+        refresh = lounge_control_client.post(
+            "/internal/v1/matches",
+            json={
+                "candidate_id": "cand-face-a",
+                "stream_id": "stream-multi",
+                "track_id": "track-1",
+                "status": "stable_refresh",
+                "crop_id": "crop-1",
+                "matched_at": fresh_match_time(),
+            },
+            headers={"X-Internal-Token": "test-internal-token"},
+        )
+        assert refresh.status_code == 200
+        assert refresh.json()["status"] == "refreshed"
+
+        with patch("apps_lounge_control.http_client") as mock_client:
+            mock_client.delete = AsyncMock(return_value=MagicMock(status_code=200))
+            exit_response = lounge_control_client.post(
+                "/v1/lounge/taps",
+                json={
+                    "event_id": "evt-alex-departed",
+                    "reader_id": "lounge-exit-1",
+                    "guest_ref": "guest-alex-101",
+                    "event_type": "exit",
+                    "occurred_at": "2026-10-15T09:01:00Z",
+                },
+            )
+        assert exit_response.status_code == 200
+        clear = phone.receive_json()
+        assert clear["type"] == "clear"
+        assert clear["track_id"] == "track-1"
+        remaining = phone.receive_json()
+        assert remaining["type"] == "detection_set"
+        assert [person["track_id"] for person in remaining["people"]] == ["track-2"]
+
+
+def test_detection_cache_expires_after_five_seconds_and_clears_on_guest_departure(
+    lounge_control_client,
+):
+    from apps_lounge_control import DeviceSessionManager
+
+    class FakeWebSocket:
+        async def send_json(self, _message):
+            return None
+
+    manager = DeviceSessionManager(detection_ttl_seconds=5)
+    manager.register("phone-ttl", FakeWebSocket())
+    manager.bind_stream("phone-ttl", "stream-ttl")
+    manager.update_detected_person(
+        "stream-ttl",
+        "track-a",
+        {"guest_id": "guest-a", "display_name": "ALEX"},
+        now=100.0,
+    )
+    manager.update_detected_person(
+        "stream-ttl",
+        "track-b",
+        {"guest_id": "guest-b", "display_name": "JORDAN"},
+        now=100.0,
+    )
+    assert len(manager.get_detected_people("stream-ttl", now=104.99)) == 2
+    manager.update_detected_person(
+        "stream-ttl",
+        "track-a",
+        {"guest_id": "guest-a", "display_name": "ALEX"},
+        now=104.99,
+    )
+    assert [
+        person["track_id"]
+        for person in manager.get_detected_people("stream-ttl", now=105.0)
+    ] == ["track-a"]
+    assert manager.get_detected_people("stream-ttl", now=109.98)
+    assert manager.get_detected_people("stream-ttl", now=109.99) == []
+
+    manager.update_detected_person(
+        "stream-ttl",
+        "track-a",
+        {"guest_id": "guest-a", "display_name": "ALEX"},
+        now=200.0,
+    )
+    assert manager.remove_guest("guest-a") == {"stream-ttl": ["track-a"]}
+    assert manager.get_detected_people("stream-ttl", now=200.1) == []
+
+
+def test_detection_ttl_uses_match_observation_time_not_callback_receipt():
+    from apps_lounge_control import DeviceSessionManager
+
+    manager = DeviceSessionManager(detection_ttl_seconds=5)
+    observed_at = datetime.now(timezone.utc)
+    wall_now = observed_at + timedelta(seconds=4)
+    last_seen = manager.observation_last_seen(
+        observed_at,
+        now_monotonic=100.0,
+        now_utc=wall_now,
+    )
+    assert last_seen == pytest.approx(96.0)
+    assert manager.observation_last_seen(
+        observed_at,
+        now_monotonic=100.0,
+        now_utc=observed_at + timedelta(seconds=5),
+    ) is None
+
+    class FakeWebSocket:
+        async def send_json(self, _message):
+            return None
+
+    manager.register("phone-observed", FakeWebSocket())
+    manager.bind_stream("phone-observed", "stream-observed")
+    manager.update_detected_person(
+        "stream-observed",
+        "track-old",
+        {"guest_id": "guest-old", "display_name": "ALEX"},
+        now=100.0,
+        last_seen=last_seen,
+    )
+    assert manager.get_detected_people("stream-observed", now=100.99)
+    assert manager.get_detected_people("stream-observed", now=101.0) == []
+
+
+def test_stale_match_callback_does_not_create_a_detection(lounge_control_client):
+    from apps_lounge_control import cohort_manager, device_manager
+
+    cohort_manager.admit_candidate(
+        candidate_id="cand-stale-match",
+        guest_ref="guest-stale-101",
+        display_name="Alex",
+        room_number=None,
+        allergies=[],
+        preferences=[],
+        expires_at="2099-01-01T00:00:00Z",
+    )
+    with lounge_control_client.websocket_connect(
+        "/v1/video/stream/phone-stale?token=test-secret-token"
+    ) as phone:
+        assert phone.receive_json()["type"] == "session_ack"
+        phone.send_json({
+            "type": "frame_meta",
+            "stream_id": "stream-stale",
+            "sequence": 1,
+            "captured_at": fresh_match_time(),
+        })
+        assert phone.receive_json()["people"] == []
+
+        response = lounge_control_client.post(
+            "/internal/v1/matches",
+            json={
+                "candidate_id": "cand-stale-match",
+                "stream_id": "stream-stale",
+                "track_id": "track-stale",
+                "status": "stable_match",
+                "crop_id": "crop-stale",
+                "crop_b64": "ZmFrZS1qcGVn",
+                "matched_at": (datetime.now(timezone.utc) - timedelta(seconds=6)).isoformat(),
+            },
+            headers={"X-Internal-Token": "test-internal-token"},
+        )
+        assert response.status_code == 200
+        assert response.json()["reason"] == "stale_observation"
+        assert device_manager.get_detected_people("stream-stale") == []
+
+
+def test_failed_first_crop_delivery_retry_sends_initial_cue(
+    lounge_control_client, monkeypatch
+):
+    import apps_lounge_control as main
+
+    main.cohort_manager.admit_candidate(
+        candidate_id="cand-crop-retry",
+        guest_ref="guest-crop-retry",
+        display_name="Alex",
+        room_number=None,
+        allergies=[],
+        preferences=["Sparkling water"],
+        expires_at="2099-01-01T00:00:00Z",
+    )
+    with lounge_control_client.websocket_connect(
+        "/v1/video/stream/phone-crop-retry?token=test-secret-token"
+    ) as phone:
+        assert phone.receive_json()["type"] == "session_ack"
+        phone.send_json({
+            "type": "frame_meta",
+            "stream_id": "stream-crop-retry",
+            "sequence": 1,
+            "captured_at": fresh_match_time(),
+        })
+        assert phone.receive_json()["people"] == []
+
+        original_send = main.device_manager.send_cue
+        failed_once = False
+
+        async def fail_first_crop(stream_id, message):
+            nonlocal failed_once
+            if message.get("type") == "face_crop" and not failed_once:
+                failed_once = True
+                return False
+            return await original_send(stream_id, message)
+
+        monkeypatch.setattr(main.device_manager, "send_cue", fail_first_crop)
+        first = {
+            "candidate_id": "cand-crop-retry",
+            "stream_id": "stream-crop-retry",
+            "track_id": "track-crop-retry",
+            "status": "stable_match",
+            "crop_id": "crop-crop-retry",
+            "crop_b64": "ZmFrZS1qcGVn",
+            "matched_at": fresh_match_time(),
+        }
+        failed = lounge_control_client.post(
+            "/internal/v1/matches",
+            json=first,
+            headers={"X-Internal-Token": "test-internal-token"},
+        )
+        assert failed.json()["status"] == "crop_delivery_failed"
+
+        retry = dict(first, status="stable_refresh", matched_at=fresh_match_time())
+        recovered = lounge_control_client.post(
+            "/internal/v1/matches",
+            json=retry,
+            headers={"X-Internal-Token": "test-internal-token"},
+        )
+        assert recovered.status_code == 200
+        assert recovered.json()["cue_delivered"] is True
+        assert phone.receive_json()["type"] == "face_crop"
+        snapshot = phone.receive_json()
+        assert snapshot["type"] == "detection_set"
+        assert snapshot["people"][0]["crop_id"] == "crop-crop-retry"
+        cue = phone.receive_json()
+        assert cue["type"] == "cue"
+        assert cue["cue"]["headline"] == "🟢 ✅ ALEX"
+
+
+@pytest.mark.asyncio
+async def test_detection_set_broadcast_loop_sends_periodic_full_snapshots(
+    lounge_control_client, monkeypatch
+):
+    import apps_lounge_control as main
+
+    class FakeWebSocket:
+        def __init__(self):
+            self.messages = []
+
+        async def send_json(self, message):
+            self.messages.append(message)
+
+    websocket = FakeWebSocket()
+    manager = main.DeviceSessionManager()
+    manager.register("phone-periodic", websocket)
+    manager.bind_stream("phone-periodic", "stream-periodic")
+    manager.update_detected_person(
+        "stream-periodic",
+        "track-a",
+        {"guest_id": "guest-a", "display_name": "ALEX", "crop_id": "crop-a"},
+    )
+    monkeypatch.setattr(main, "device_manager", manager)
+    monkeypatch.setattr(main, "DETECTION_SET_INTERVAL_SECONDS", 0.01)
+
+    task = asyncio.create_task(main.detection_set_broadcast_loop())
+    try:
+        await asyncio.sleep(0.035)
+    finally:
+        task.cancel()
+        with pytest.raises(asyncio.CancelledError):
+            await task
+
+    assert len(websocket.messages) >= 2
+    assert all(message["type"] == "detection_set" for message in websocket.messages)
+    assert all(message["people"][0]["track_id"] == "track-a" for message in websocket.messages)
 
 
 @pytest.mark.parametrize("match_status", ["unconfirmed", "no_match"])
@@ -331,17 +696,20 @@ def test_match_callback_generates_emoji_cue(lounge_control_client):
         "track_id": "track-01",
         "status": "stable_match",
         "confidence": 0.95,
-        "matched_at": "2026-10-07T12:00:00Z",
+        "crop_id": "crop-emoji-test",
+        "crop_b64": "ZmFrZS1qcGVn",
+        "matched_at": fresh_match_time(),
     }
 
-    # If device not connected, returns status device_not_connected
+    # Without a connected phone, the crop is not cached or published.
     resp = lounge_control_client.post(
         "/internal/v1/matches",
         json=match_payload,
         headers={"X-Internal-Token": "test-internal-token"},
     )
     assert resp.status_code == 200
-    assert resp.json()["status"] == "device_not_connected"
+    assert resp.json()["status"] == "crop_delivery_failed"
+    assert resp.json()["crop_delivered"] is False
 
 
 @pytest.mark.asyncio

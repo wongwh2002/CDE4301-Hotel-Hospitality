@@ -243,6 +243,49 @@ DASHBOARD_HTML = """<!DOCTYPE html>
     .media-preview[hidden] {
       display: none;
     }
+    .cv-output {
+      margin-top: 1rem;
+    }
+    .cv-people-list {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 0.75rem;
+    }
+    .cv-person-card {
+      display: grid;
+      grid-template-columns: minmax(90px, 130px) minmax(0, 1fr);
+      gap: 0.75rem;
+      align-items: start;
+      padding: 0.75rem;
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 0.5rem;
+    }
+    .cv-person-card img {
+      width: 100%;
+      aspect-ratio: 1;
+      object-fit: cover;
+      background: #020617;
+      border: 1px solid var(--border);
+      border-radius: 0.375rem;
+    }
+    .cv-person-details {
+      min-width: 0;
+      overflow-wrap: anywhere;
+    }
+    .cv-person-details h4 {
+      margin: 0 0 0.5rem;
+      color: var(--text-main);
+    }
+    .cv-person-details p {
+      margin: 0.25rem 0;
+      color: var(--text-muted);
+      font-size: 0.8rem;
+      line-height: 1.4;
+    }
+    .cv-person-details strong {
+      color: var(--text-main);
+    }
     .help-text {
       color: var(--text-muted);
       font-size: 0.8rem;
@@ -453,8 +496,13 @@ DASHBOARD_HTML = """<!DOCTYPE html>
         <button type="button" class="btn-register" id="cv-send-camera" disabled>Send 3 camera frames</button>
       </div>
       <div id="cv-feedback" class="feedback" role="status" aria-live="polite"></div>
+      <div class="cv-output" aria-live="polite">
+        <h3>People returned to this client</h3>
+        <p id="cv-people-empty" class="help-text">No stable matches have been returned for this test yet.</p>
+        <div id="cv-people-list" class="cv-people-list"></div>
+      </div>
       <div class="privacy-notice">
-        Sends JPEG frames over the authenticated WebSocket on port 8000. Images are not saved. A still picture is replayed three times for a pipeline demo; use the camera burst for three distinct observations. Camera access requires localhost or HTTPS.
+        Sends JPEG frames over the authenticated WebSocket on port 8000. Images are not saved. A still picture is replayed three times for a pipeline demo; use the camera burst for three distinct observations. The preview below joins each face_crop image to its detection_set person entry, as a phone client would. Camera access requires localhost or HTTPS.
       </div>
     </div>
   </main>
@@ -483,6 +531,8 @@ DASHBOARD_HTML = """<!DOCTYPE html>
     const cvImagePreview = document.getElementById('cv-image-preview');
     const cvVideo = document.getElementById('cv-camera-preview');
     const cvFeedback = document.getElementById('cv-feedback');
+    const cvPeopleEmpty = document.getElementById('cv-people-empty');
+    const cvPeopleList = document.getElementById('cv-people-list');
     const cvStartCameraButton = document.getElementById('cv-start-camera');
     const cvStopCameraButton = document.getElementById('cv-stop-camera');
     const cvSendPictureButton = document.getElementById('cv-send-picture');
@@ -491,7 +541,16 @@ DASHBOARD_HTML = """<!DOCTYPE html>
     let cvImageObjectUrl = null;
     let cvCameraStream = null;
     let cvSocket = null;
-    let cvResolveCue = null;
+    let cvResolveResults = null;
+    let cvResultQuietTimer = null;
+    let cvResultMaxTimer = null;
+    let cvActiveStreamId = null;
+    let cvLastPeopleSignature = '';
+    let cvLastResultActivityAt = 0;
+    let cvHadResultActivity = false;
+    let cvCurrentPeople = [];
+    const CV_CROP_CACHE_TTL_MS = 5000;
+    const cvCropCache = new Map();
     let cvRunActive = false;
     const registrationPhotos = [];
     let guestCameraStream = null;
@@ -514,13 +573,119 @@ DASHBOARD_HTML = """<!DOCTYPE html>
       cvSendCameraButton.disabled = busy || !cvCameraStream;
     }
 
+    function renderCvPeople() {
+      cvPeopleList.replaceChildren();
+      cvPeopleEmpty.hidden = cvCurrentPeople.length > 0;
+      if (!cvCurrentPeople.length) {
+        cvPeopleEmpty.textContent = 'No stable, identified people in the current result set.';
+        return;
+      }
+
+      cvCurrentPeople.forEach(person => {
+        const card = document.createElement('article');
+        card.className = 'cv-person-card';
+        const crop = document.createElement('img');
+        crop.alt = `Cropped face for ${person.display_name}`;
+        const cachedCrop = cvCropCache.get(person.crop_id);
+        if (cachedCrop) crop.src = cachedCrop.dataUrl;
+        else crop.hidden = true;
+
+        const details = document.createElement('div');
+        details.className = 'cv-person-details';
+        const title = document.createElement('h4');
+        title.textContent = person.display_name;
+        details.append(title);
+        const fields = [
+          ['Guest ID', person.guest_id],
+          ['Track ID', person.track_id],
+          ['Preferences', (person.preferences || []).join(', ') || 'None listed'],
+          ['Allergies', (person.allergies || []).join(', ') || 'None listed'],
+        ];
+        fields.forEach(([label, value]) => {
+          const row = document.createElement('p');
+          const field = document.createElement('strong');
+          field.textContent = `${label}: `;
+          row.append(field, document.createTextNode(value || 'None listed'));
+          details.append(row);
+        });
+        if (person.alert) {
+          const alert = document.createElement('p');
+          alert.textContent = person.alert;
+          details.append(alert);
+        }
+        card.append(crop, details);
+        cvPeopleList.append(card);
+      });
+    }
+
+    function finishCvResultWait(hasResults) {
+      if (!cvResolveResults) return;
+      const resolve = cvResolveResults;
+      cvResolveResults = null;
+      clearTimeout(cvResultQuietTimer);
+      clearTimeout(cvResultMaxTimer);
+      cvResultQuietTimer = null;
+      cvResultMaxTimer = null;
+      resolve(Boolean(hasResults));
+    }
+
+    function noteCvResultActivity() {
+      cvHadResultActivity = true;
+      cvLastResultActivityAt = Date.now();
+      if (!cvResolveResults) return;
+      clearTimeout(cvResultQuietTimer);
+      const quietRemaining = Math.max(0, 1500 - (Date.now() - cvLastResultActivityAt));
+      cvResultQuietTimer = setTimeout(() => finishCvResultWait(true), quietRemaining);
+    }
+
+    function refreshCvCropCache(referencedCrops = new Set()) {
+      const now = Date.now();
+      referencedCrops.forEach(cropId => {
+        const entry = cvCropCache.get(cropId);
+        if (entry) entry.lastSeenAt = now;
+      });
+      for (const [cropId, entry] of cvCropCache) {
+        if (now - entry.lastSeenAt > CV_CROP_CACHE_TTL_MS) cvCropCache.delete(cropId);
+      }
+    }
+
+    function waitForCvResults() {
+      return new Promise(resolve => {
+        cvResolveResults = resolve;
+        cvResultMaxTimer = setTimeout(() => finishCvResultWait(cvHadResultActivity), 15000);
+        if (cvHadResultActivity) {
+          clearTimeout(cvResultQuietTimer);
+          const quietRemaining = Math.max(0, 1500 - (Date.now() - cvLastResultActivityAt));
+          cvResultQuietTimer = setTimeout(() => finishCvResultWait(true), quietRemaining);
+        }
+      });
+    }
+
     function handleCvMessage(message) {
-      if (message.type === 'cue' && message.status === 'active') {
+      if (cvActiveStreamId && message.stream_id && message.stream_id !== cvActiveStreamId) return;
+      if (message.type === 'face_crop') {
+        cvCropCache.set(message.crop_id, {
+          dataUrl: `data:${message.mime_type || 'image/jpeg'};base64,${message.image_b64}`,
+          lastSeenAt: Date.now(),
+        });
+        refreshCvCropCache();
+        renderCvPeople();
+        noteCvResultActivity();
+      } else if (message.type === 'detection_set') {
+        const people = Array.isArray(message.people) ? message.people : [];
+        const signature = JSON.stringify([...people].sort((a, b) => a.track_id.localeCompare(b.track_id)));
+        const changed = signature !== cvLastPeopleSignature;
+        cvLastPeopleSignature = signature;
+        cvCurrentPeople = people;
+        const referencedCrops = new Set(people.map(person => person.crop_id));
+        refreshCvCropCache(referencedCrops);
+        renderCvPeople();
+        if (people.length && changed) noteCvResultActivity();
+      } else if (message.type === 'cue' && message.status === 'active') {
         const cue = message.cue || {};
         showCvFeedback([cue.headline, cue.alert].filter(Boolean).join(' · ') || 'Stable face match received.', 'success');
-        if (cvResolveCue) cvResolveCue(message);
       } else if (message.type === 'clear') {
-        showCvFeedback('Frames processed; no stable match yet. Check that Alex is admitted and the image matches the enrolled test face.', 'info');
+        showCvFeedback('Frames processed; no stable match yet. Confirm the test guests are admitted and the reference pictures match.', 'info');
       } else if (message.type === 'error') {
         showCvFeedback(message.message || 'The device stream reported an error.', 'error');
       }
@@ -626,13 +791,19 @@ DASHBOARD_HTML = """<!DOCTYPE html>
       cvRunActive = true;
       refreshCvButtons();
       let socket;
-      let cuePromise;
       try {
+        cvCurrentPeople = [];
+        cvCropCache.clear();
+        cvLastPeopleSignature = '';
+        cvLastResultActivityAt = 0;
+        cvHadResultActivity = false;
+        cvActiveStreamId = null;
+        renderCvPeople();
         const deviceId = cvDeviceIdInput.value.trim();
         showCvFeedback('Connecting to lounge-control…', 'info');
-        cuePromise = new Promise(resolve => { cvResolveCue = resolve; });
         socket = await connectCvDevice(deviceId);
         const streamId = `stream-ui-${Date.now()}`;
+        cvActiveStreamId = streamId;
         for (let index = 0; index < frames.length; index += 1) {
           if (socket.readyState !== WebSocket.OPEN) throw new Error('Device connection closed before all frames were sent.');
           const metadata = {
@@ -648,14 +819,18 @@ DASHBOARD_HTML = """<!DOCTYPE html>
           showCvFeedback(`Sent ${sourceLabel} frame ${index + 1}/${frames.length}; waiting for CV…`, 'info');
           if (index < frames.length - 1) await delay(600);
         }
-        const result = await Promise.race([cuePromise, delay(15000).then(() => null)]);
+        showCvFeedback('Frames sent; collecting the full people set…', 'info');
+        const result = await waitForCvResults();
         if (!result) {
-          showCvFeedback('No stable match returned in 15 seconds. Confirm Alex is admitted and check face-worker logs.', 'info');
+          showCvFeedback('No stable matches returned in 15 seconds. Confirm the test guests are admitted, the reference pictures match, and check face-worker logs.', 'info');
+        } else {
+          showCvFeedback(`Received ${cvCurrentPeople.length} stable person${cvCurrentPeople.length === 1 ? '' : 's'} from lounge-control.`, 'success');
         }
       } catch (error) {
         showCvFeedback(error.message || 'The CV test could not run.', 'error');
       } finally {
-        cvResolveCue = null;
+        finishCvResultWait(cvHadResultActivity);
+        cvActiveStreamId = null;
         if (socket && socket.readyState === WebSocket.OPEN) socket.close(1000, 'CV test complete');
         cvRunActive = false;
         refreshCvButtons();
