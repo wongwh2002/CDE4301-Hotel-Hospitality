@@ -133,7 +133,13 @@ Port `8003` is another published port for the existing `lounge-control` containe
 
 The phone app is the bridge between the glasses camera/display and the laptop. For the first POC, run a small **face-presence trigger on the paired phone** when the glasses SDK exposes preview frames. Keep identity matching on the laptop in `face-worker`; the phone detector only decides whether a frame should be uploaded. Meta's toolkit connects a phone app to compatible glasses. For the physical Rokid RV101, the CXR-L sample currently documented in this repo demonstrates still-photo capture, but does not prove a continuous preview stream or custom model execution on the glasses. Treat that camera capability as a device-validation gate. ([Meta Device Access Toolkit](https://developers.meta.com/wearables/device-access-toolkit/), [RV101 CXR-L photo sample](https://github.com/e7naq3y/CXR-L-SDK/blob/main/cxrlsample101/app/src/main/java/com/rokid/cxrlsample/activities/photo/PhotoUsageViewModel.kt))
 
-The phone sends JPEG frame messages to `lounge-control` over the WebSocket on host port `8003`. It can send one frame or a short burst, then close the connection; it does not need to continuously stream video. For the current default stable-match rule, send three distinct frames in the same short session because a single frame may not produce an identified match. Lounge-control forwards frames to `face-worker`. This is a sequence of JPEG frames over WebSocket, not an RTSP or H.264 endpoint. Start with 1–5 frames per second for a burst. The repo contains the server endpoint and a replay client, but does not yet include an Android companion app that captures from the glasses and sends frames.
+The phone sends JPEG frame messages to `lounge-control` over the WebSocket on host port `8003`. The same endpoint supports these capture patterns:
+
+- **One still image:** connect, send one `frame_meta` message followed by its binary JPEG, wait for a response or timeout, then close. The frame is accepted, but one image may not produce an identified guest because stable matching defaults to three observations.
+- **Short burst:** open one WebSocket for a capture event, send three distinct frames with increasing sequence numbers and the same `stream_id`, wait for the match result or timeout, then close. That brief connect-send-wait-close cycle is what “one short connection” means; you do not keep it open between capture events.
+- **Ongoing sampled feed:** keep the WebSocket open during the camera session and send repeated `frame_meta`/JPEG pairs, starting at 1–5 frames per second. This behaves like a live feed made from still frames.
+
+Each frame is sent separately; this endpoint does not accept raw RTSP or H.264 video. Lounge-control forwards frames to `face-worker`. The repo contains the server endpoint and a replay client, but does not yet include an Android companion app that captures from the glasses and sends frames.
 
 #### Recommended capture flow
 
