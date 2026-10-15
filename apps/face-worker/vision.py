@@ -1,4 +1,4 @@
-"""OpenCV YuNet/SFace pipeline for transient face detection and matching.
+"""InsightFace buffalo_l pipeline for transient face detection and matching.
 
 This is a POC baseline. Thresholds need evaluation on consented, representative
 images before any real-world use; an uncertain result never becomes a match.
@@ -8,6 +8,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from pathlib import Path
+from threading import Lock
 from typing import Any
 
 
@@ -26,17 +27,22 @@ class DetectedFace:
     detector_score: float
 
 
-class OpenCVFaceEngine:
-    """CPU-first face detector and embedding model backed by OpenCV DNN."""
+class InsightFaceEngine:
+    """CPU-first face detector and embedding model backed by InsightFace."""
 
-    def __init__(self, yunet_path: str | Path, sface_path: str | Path):
-        import cv2
+    def __init__(self, model_root: str | Path):
+        import numpy as np
+        from insightface.app import FaceAnalysis
 
-        self._cv2 = cv2
-        self._detector = cv2.FaceDetectorYN.create(
-            str(yunet_path), "", (320, 320), 0.80, 0.30, 5000
+        self._np = np
+        self._analysis = FaceAnalysis(
+            name="buffalo_l",
+            root=str(model_root),
+            allowed_modules=["detection", "recognition"],
+            providers=["CPUExecutionProvider"],
         )
-        self._recognizer = cv2.FaceRecognizerSF.create(str(sface_path), "")
+        self._analysis.prepare(ctx_id=-1)
+        self._model_lock = Lock()
 
     @staticmethod
     def _decode(image_bytes: bytes):
@@ -49,28 +55,31 @@ class OpenCVFaceEngine:
         return image
 
     def detect(self, image_bytes: bytes) -> list[DetectedFace]:
-        import numpy as np
-
         image = self._decode(image_bytes)
-        height, width = image.shape[:2]
-        self._detector.setInputSize((width, height))
-        _, rows = self._detector.detect(image)
-        if rows is None:
-            return []
-
         faces: list[DetectedFace] = []
-        for row in rows:
-            aligned = self._recognizer.alignCrop(image, row)
-            feature = np.asarray(self._recognizer.feature(aligned), dtype=np.float32).reshape(-1)
-            norm = float(np.linalg.norm(feature))
-            if not norm:
+        # Lounge matching and direct phone streams share this model instance.
+        # Serialize inference to bound contention across incoming frames.
+        with self._model_lock:
+            detected_faces = self._analysis.get(image)
+        for face in detected_faces:
+            if face.bbox is None:
                 continue
-            feature /= norm
+            feature = None
+            if face.normed_embedding is not None:
+                feature = self._np.asarray(
+                    face.normed_embedding, dtype=self._np.float32
+                ).reshape(-1)
+                norm = float(self._np.linalg.norm(feature))
+                if norm:
+                    feature /= norm
+                else:
+                    feature = None
+            x1, y1, x2, y2 = (float(value) for value in face.bbox)
             faces.append(
                 DetectedFace(
-                    bbox=(float(row[0]), float(row[1]), float(row[2]), float(row[3])),
+                    bbox=(x1, y1, max(0.0, x2 - x1), max(0.0, y2 - y1)),
                     embedding=feature,
-                    detector_score=float(row[-1]),
+                    detector_score=float(face.det_score or 0.0),
                 )
             )
         return faces
@@ -78,9 +87,10 @@ class OpenCVFaceEngine:
     def create_template(self, image_bytes: bytes):
         """Return one normalized embedding; reject empty or multi-face photos."""
         faces = self.detect(image_bytes)
-        if len(faces) != 1:
+        if len(faces) != 1 or faces[0].embedding is None:
             raise FaceCountError(
-                f"Reference photo must contain exactly one detectable face; found {len(faces)}"
+                "Reference photo must contain exactly one face with a usable embedding; "
+                f"found {len(faces)} detectable face(s)"
             )
         return faces[0].embedding
 

@@ -62,11 +62,12 @@ async def run_replay(
     frame_bytes = load_fixture(fixture_path)
     logger.info("Loaded synthetic fixture: %d bytes (never logged or persisted)", len(frame_bytes))
 
-    url = f"{ws_url.rstrip('/')}/v1/devices/{device_id}/stream?token={token}"
+    url = f"{ws_url.rstrip('/')}/v1/devices/{device_id}/stream"
+    subprotocols = ["device-stream-v1", f"device-token.{token}"]
     logger.info("Connecting to lounge-control: %s/v1/devices/%s/stream", ws_url, device_id)
 
     try:
-        async with websockets.connect(url) as ws:
+        async with websockets.connect(url, subprotocols=subprotocols) as ws:
             # 1. Read initial session ack
             try:
                 ack_raw = await asyncio.wait_for(ws.recv(), timeout=2.0)

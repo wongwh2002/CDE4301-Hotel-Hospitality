@@ -1,7 +1,7 @@
 """SQLite database manager for mock-hotel.
 
-Stores and seeds clearly synthetic guest profile records for the POC.
-Contains no real guest photographs, identity records, or personal data.
+Seeds synthetic guest profiles and can persist up to three local reference
+photos per registered guest. Uploaded photos remain in the Docker data volume.
 """
 
 import json
@@ -58,6 +58,17 @@ def init_db() -> None:
                     allergies_json TEXT,
                     preferences_json TEXT,
                     photo_bytes BLOB
+                )
+                """
+            )
+            conn.execute(
+                """
+                CREATE TABLE IF NOT EXISTS guest_reference_photos (
+                    guest_ref TEXT NOT NULL,
+                    photo_index INTEGER NOT NULL,
+                    photo_bytes BLOB NOT NULL,
+                    PRIMARY KEY (guest_ref, photo_index),
+                    FOREIGN KEY (guest_ref) REFERENCES guests(guest_ref)
                 )
                 """
             )
@@ -154,6 +165,7 @@ def get_guest_profile(guest_ref: str) -> Optional[Dict[str, Any]]:
         row = cursor.fetchone()
         if not row:
             return None
+        photo_urls = get_guest_photo_urls(guest_ref)
         return {
             "guest_ref": row["guest_ref"],
             "display_name": row["display_name"],
@@ -162,23 +174,56 @@ def get_guest_profile(guest_ref: str) -> Optional[Dict[str, Any]]:
             "allergies": json.loads(row["allergies_json"] or "[]"),
             "preferences": json.loads(row["preferences_json"] or "[]"),
             "photo_url": f"/v1/guests/{row['guest_ref']}/photo",
+            "photo_urls": photo_urls,
         }
     finally:
         conn.close()
 
 
-def get_guest_photo_bytes(guest_ref: str) -> Optional[bytes]:
-    """Fetch synthetic photo bytes for candidate enrollment."""
+def get_guest_photo_bytes(guest_ref: str, photo_index: int = 0) -> Optional[bytes]:
+    """Fetch one persisted reference photo for candidate enrollment."""
     conn = get_connection()
     try:
-        cursor = conn.execute(
-            "SELECT photo_bytes FROM guests WHERE guest_ref = ?",
-            (guest_ref,),
-        )
+        if photo_index == 0:
+            cursor = conn.execute(
+                "SELECT photo_bytes FROM guests WHERE guest_ref = ?",
+                (guest_ref,),
+            )
+        elif photo_index > 0:
+            cursor = conn.execute(
+                """SELECT photo_bytes FROM guest_reference_photos
+                   WHERE guest_ref = ? AND photo_index = ?""",
+                (guest_ref, photo_index),
+            )
+        else:
+            return None
         row = cursor.fetchone()
         if not row or not row["photo_bytes"]:
             return None
         return bytes(row["photo_bytes"])
+    finally:
+        conn.close()
+
+
+def get_guest_photo_urls(guest_ref: str) -> List[str]:
+    """Return relative URLs for the guest's stored reference photos."""
+    conn = get_connection()
+    try:
+        cursor = conn.execute(
+            """SELECT g.photo_bytes,
+                      (SELECT COUNT(*) FROM guest_reference_photos p
+                       WHERE p.guest_ref = g.guest_ref) AS extra_count
+               FROM guests g WHERE g.guest_ref = ?""",
+            (guest_ref,),
+        )
+        row = cursor.fetchone()
+        if not row or not row["photo_bytes"]:
+            return []
+        count = 1 + int(row["extra_count"] or 0)
+        return [
+            f"/v1/guests/{guest_ref}/photos/{photo_index}"
+            for photo_index in range(min(count, 3))
+        ]
     finally:
         conn.close()
 
@@ -197,6 +242,7 @@ def list_all_guests() -> List[Dict[str, Any]]:
         )
         results = []
         for row in cursor.fetchall():
+            photo_urls = get_guest_photo_urls(row["guest_ref"])
             results.append(
                 {
                     "guest_ref": row["guest_ref"],
@@ -206,6 +252,7 @@ def list_all_guests() -> List[Dict[str, Any]]:
                     "allergies": json.loads(row["allergies_json"] or "[]"),
                     "preferences": json.loads(row["preferences_json"] or "[]"),
                     "photo_url": f"/v1/guests/{row['guest_ref']}/photo",
+                    "photo_urls": photo_urls,
                 }
             )
         return results
@@ -220,12 +267,13 @@ def register_guest(
     room_number: Optional[str] = None,
     vip_tier: Optional[str] = None,
     photo_bytes: Optional[bytes] = None,
+    photo_bytes_list: Optional[List[bytes]] = None,
     guest_ref: Optional[str] = None,
 ) -> Dict[str, Any]:
     """Register a new synthetic guest into SQLite.
 
-    Generates a unique guest_ref if not provided, stores optional allergies/preferences,
-    and attaches synthetic photo fixture.
+    Generates a unique guest_ref if not provided and stores up to three reference
+    photos. If no photo is provided, it attaches a person-free synthetic fixture.
     """
     clean_name = re.sub(r"[^a-z0-9]", "", display_name.lower())[:16] or "guest"
     conn = get_connection()
@@ -240,7 +288,11 @@ def register_guest(
 
         allergies_list = list(allergies) if allergies else []
         preferences_list = list(preferences) if preferences else []
-        final_photo_bytes = photo_bytes if photo_bytes is not None else SYNTHETIC_JPEG_BYTES
+        supplied_photos = list(photo_bytes_list or [])[:3]
+        if supplied_photos:
+            final_photo_bytes = supplied_photos[0]
+        else:
+            final_photo_bytes = photo_bytes if photo_bytes is not None else SYNTHETIC_JPEG_BYTES
 
         with conn:
             conn.execute(
@@ -260,6 +312,20 @@ def register_guest(
                     final_photo_bytes,
                 ),
             )
+            if supplied_photos:
+                conn.executemany(
+                    """INSERT INTO guest_reference_photos
+                       (guest_ref, photo_index, photo_bytes) VALUES (?, ?, ?)""",
+                    [
+                        (guest_ref, index, image_bytes)
+                        for index, image_bytes in enumerate(supplied_photos[1:], start=1)
+                    ],
+                )
+
+        photo_urls = [
+            f"/v1/guests/{guest_ref}/photos/{photo_index}"
+            for photo_index in range(len(supplied_photos) or 1)
+        ]
 
         return {
             "guest_ref": guest_ref,
@@ -269,6 +335,7 @@ def register_guest(
             "allergies": allergies_list,
             "preferences": preferences_list,
             "photo_url": f"/v1/guests/{guest_ref}/photo",
+            "photo_urls": photo_urls,
         }
     finally:
         conn.close()

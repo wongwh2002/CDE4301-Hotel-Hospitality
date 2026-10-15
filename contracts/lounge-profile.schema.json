@@ -38,6 +38,11 @@
     "photo_url": {
       "type": "string",
       "description": "Relative URL to retrieve synthetic reference photo"
+    },
+    "photo_urls": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "Relative URLs for up to three indexed reference photos"
     }
   },
   "additionalProperties": false

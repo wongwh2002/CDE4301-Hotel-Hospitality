@@ -9,6 +9,7 @@ import base64
 import json
 import logging
 import os
+import re
 import sys
 import uuid
 from contextlib import asynccontextmanager
@@ -41,6 +42,7 @@ from contracts.models import (
     CandidateEnrollment,
     CueMessage,
     CuePayload,
+    DetectionSetMessage,
     DeviceStreamMessage,
     GuestRegistrationRequest,
     LoungeProfile,
@@ -88,6 +90,27 @@ app = FastAPI(
     version="0.1.0",
     lifespan=lifespan,
 )
+
+
+ALLERGY_EMOJI_RULES = (
+    (("peanut", "peanuts", "groundnut", "groundnuts"), "🥜"),
+    (("shrimp", "shrimps", "prawn", "prawns"), "🦐"),
+    (("crab", "crabs"), "🦀"),
+    (("lobster", "lobsters"), "🦞"),
+    (("fish",), "🐟"),
+    (("milk", "dairy"), "🥛"),
+    (("egg", "eggs"), "🥚"),
+    (("wheat",), "🌾"),
+)
+
+
+def allergy_emoji(allergy_text: str) -> str:
+    """Return a familiar emoji for a known allergen, if there is a clear one."""
+    words = set(re.findall(r"[a-z]+", allergy_text.lower()))
+    for terms, emoji in ALLERGY_EMOJI_RULES:
+        if words.intersection(terms):
+            return emoji
+    return ""
 
 
 @app.get("/health", tags=["Health"])
@@ -259,14 +282,18 @@ async def _process_tap(event: TapEvent):
             )
         profile_data = profile_resp.json()
 
-        # 2. Fetch synthetic reference photo from mock-hotel
-        try:
-            photo_resp = await http_client.get(
-                f"{MOCK_HOTEL_URL}/v1/guests/{event.guest_ref}/photo"
-            )
-            photo_bytes = photo_resp.content if photo_resp.status_code == 200 else b""
-        except Exception:
-            photo_bytes = b""
+        # 2. Fetch up to three stored reference photos from mock-hotel.
+        photo_urls = profile_data.get("photo_urls") or [
+            profile_data.get("photo_url") or f"/v1/guests/{event.guest_ref}/photo"
+        ]
+        photo_b64_list = []
+        for photo_url in photo_urls[:3]:
+            try:
+                photo_resp = await http_client.get(f"{MOCK_HOTEL_URL}{photo_url}")
+                if photo_resp.status_code == 200 and photo_resp.content:
+                    photo_b64_list.append(base64.b64encode(photo_resp.content).decode())
+            except Exception:
+                logger.warning("Failed to fetch a guest reference photo during enrollment")
 
         # 3. Create opaque candidate ID (no PII in candidate_id)
         candidate_id = f"cand-{uuid.uuid4().hex[:12]}"
@@ -274,11 +301,10 @@ async def _process_tap(event: TapEvent):
         expires_at = expiry_dt.isoformat()
 
         # 4. Enroll candidate in face-worker
-        photo_b64 = base64.b64encode(photo_bytes).decode() if photo_bytes else None
         enrollment = CandidateEnrollment(
             candidate_id=candidate_id,
             expires_at=expires_at,
-            photo_b64=photo_b64,
+            photos_b64=photo_b64_list,
         )
         try:
             worker_resp = await http_client.put(
@@ -288,6 +314,10 @@ async def _process_tap(event: TapEvent):
             )
             if worker_resp.status_code not in (200, 201):
                 logger.warning("Face worker returned status %s for enrollment", worker_resp.status_code)
+            else:
+                template_status = worker_resp.json().get("template_status", "unknown")
+                if template_status != "ready":
+                    logger.warning("Face worker candidate enrollment status: %s", template_status)
         except Exception as e:
             logger.warning("Failed to enroll candidate into face-worker: %s", e)
 
@@ -348,6 +378,22 @@ async def post_match(
     if not verify_internal_token(x_internal_token):
         raise HTTPException(status_code=401, detail="Invalid internal service token")
 
+    async def send_detection_set(person: Optional[Dict[str, Optional[str]]]) -> bool:
+        people = device_manager.update_detected_person(
+            event.stream_id,
+            event.track_id,
+            person,
+        )
+        message = DetectionSetMessage(
+            type="detection_set",
+            stream_id=event.stream_id,
+            people=people,
+        )
+        return await device_manager.send_cue(
+            event.stream_id,
+            message.model_dump(exclude_none=True),
+        )
+
     if event.status != "stable_match":
         clear_message = CueMessage(
             type="clear",
@@ -358,6 +404,7 @@ async def post_match(
             emitted_at=utc_now_iso(),
         )
         sent = await device_manager.send_cue(event.stream_id, clear_message.model_dump())
+        await send_detection_set(None)
         return {
             "status": "suppressed" if sent else "device_not_connected",
             "stream_id": event.stream_id,
@@ -366,6 +413,16 @@ async def post_match(
     candidate = cohort_manager.get_candidate(event.candidate_id)
     if not candidate:
         logger.info("Match callback for non-active or expired candidate: %s", event.candidate_id)
+        clear_message = CueMessage(
+            type="clear",
+            stream_id=event.stream_id,
+            track_id=event.track_id,
+            status="suppressed",
+            cue=None,
+            emitted_at=utc_now_iso(),
+        )
+        await device_manager.send_cue(event.stream_id, clear_message.model_dump())
+        await send_detection_set(None)
         return {"status": "ignored", "reason": "candidate_not_active"}
 
     # Compose compact glanceable cue:
@@ -378,7 +435,19 @@ async def post_match(
     secondary_color = None
     allergies = candidate.get("allergies", [])
     if allergies:
-        alert = f"🔴 ⚠️ {allergies[0].upper()}"
+        allergy_text = str(allergies[0]).strip()
+        allergy_lower = allergy_text.lower()
+        allergy_icon = allergy_emoji(allergy_lower)
+        if (
+            allergy_icon
+            and "allergy" not in allergy_lower
+            and "intoler" not in allergy_lower
+            and "sensitiv" not in allergy_lower
+        ):
+            allergen = allergy_text.upper()
+            allergy_text = f"{allergen} ALLERGY"
+        allergy_icon = f"{allergy_icon} " if allergy_icon else ""
+        alert = f"🔴 ⚠️ {allergy_icon}{allergy_text.upper()}"
         secondary_color = "red"
 
     cue_payload = CuePayload(
@@ -397,6 +466,12 @@ async def post_match(
         emitted_at=utc_now_iso(),
     )
 
+    await send_detection_set(
+        {
+            "display_name": display_name,
+            "alert": alert,
+        }
+    )
     sent = await device_manager.send_cue(event.stream_id, cue_message.model_dump(exclude_none=True))
     return {
         "status": "delivered" if sent else "device_not_connected",
@@ -405,6 +480,7 @@ async def post_match(
     }
 
 
+@app.websocket("/v1/video/stream/{device_id}")
 @app.websocket("/v1/devices/{device_id}/stream")
 async def device_stream_endpoint(
     websocket: WebSocket,
@@ -416,7 +492,7 @@ async def device_stream_endpoint(
     - Authenticates explicitly via query parameter or Authorization header
     - Accepts frame metadata and binary JPEG frames
     - Forwards transient frames via internal HTTP to face-worker
-    - Pushes glanceable cue messages to connected companion device
+    - Pushes per-track cues and a current stable detection set to the phone
     - Cleans up session and stream state upon disconnect
     """
     # Check authentication
@@ -425,7 +501,16 @@ async def device_stream_endpoint(
     if auth_header.lower().startswith("bearer "):
         bearer_token = auth_header[7:].strip()
 
-    candidate_token = token or bearer_token
+    requested_protocols = [
+        value.strip()
+        for value in websocket.headers.get("sec-websocket-protocol", "").split(",")
+        if value.strip()
+    ]
+    protocol_token = next(
+        (value.removeprefix("device-token.") for value in requested_protocols if value.startswith("device-token.")),
+        None,
+    )
+    candidate_token = token or bearer_token or protocol_token
 
     if not is_valid_identifier(device_id) or not verify_token(candidate_token):
         await websocket.close(
@@ -434,7 +519,8 @@ async def device_stream_endpoint(
         )
         return
 
-    await websocket.accept()
+    selected_protocol = "device-stream-v1" if "device-stream-v1" in requested_protocols else None
+    await websocket.accept(subprotocol=selected_protocol)
     if not device_manager.register(device_id, websocket):
         await websocket.close(
             code=status.WS_1008_POLICY_VIOLATION,
@@ -446,6 +532,8 @@ async def device_stream_endpoint(
         await websocket.send_json({"type": "session_ack", "status": "authenticated", "device_id": device_id})
         while True:
             message = await websocket.receive()
+            if message.get("type") == "websocket.disconnect":
+                break
             if "text" in message:
                 try:
                     data = json.loads(message["text"])
@@ -459,6 +547,7 @@ async def device_stream_endpoint(
                     continue
 
                 if device_message.type == "frame_meta":
+                    is_new_stream = not device_manager.has_stream(device_message.stream_id)
                     if not device_manager.set_pending_meta(
                         device_id,
                         device_message.model_dump(exclude_none=True),
@@ -466,6 +555,15 @@ async def device_stream_endpoint(
                         await websocket.send_json({"type": "error", "message": "stream_id is already in use"})
                         await websocket.close(code=status.WS_1008_POLICY_VIOLATION)
                         break
+                    if is_new_stream:
+                        await device_manager.send_cue(
+                            device_message.stream_id,
+                            DetectionSetMessage(
+                                type="detection_set",
+                                stream_id=device_message.stream_id,
+                                people=[],
+                            ).model_dump(exclude_none=True),
+                        )
                 elif device_message.type == "frame" and device_message.payload_b64:
                     try:
                         frame_bytes = base64.b64decode(device_message.payload_b64, validate=True)

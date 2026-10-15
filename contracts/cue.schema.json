@@ -40,7 +40,7 @@
         },
         "alert": {
           "type": "string",
-          "description": "Second line: warning icon, explicit critical note (e.g. '🔴 ⚠️ PEANUT ALLERGY')"
+          "description": "Second line: warning icon, optional allergen symbol, and explicit critical note (e.g. '🔴 ⚠️ 🥜 PEANUT ALLERGY'); do not rely on color or emoji alone"
         },
         "guest_ref": {
           "type": "string",

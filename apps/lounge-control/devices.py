@@ -42,6 +42,8 @@ class DeviceSessionManager:
         self._stream_to_device: Dict[str, str] = {}
         # device_id -> most recent frame_meta dict
         self._pending_meta: Dict[str, Dict[str, Any]] = {}
+        # stream_id -> track_id -> stable, display-safe detected person
+        self._detected_people: Dict[str, Dict[str, Dict[str, Any]]] = {}
 
     def register(self, device_id: str, websocket: WebSocket) -> bool:
         """Register an authenticated device connection unless one is active."""
@@ -62,6 +64,7 @@ class DeviceSessionManager:
         stream_ids = self._device_to_streams.pop(device_id, set())
         for sid in stream_ids:
             self._stream_to_device.pop(sid, None)
+            self._detected_people.pop(sid, None)
         logger.info("Cleaned up device session: %s (cleared %d streams)", device_id, len(stream_ids))
 
     def bind_stream(self, device_id: str, stream_id: str) -> bool:
@@ -75,6 +78,10 @@ class DeviceSessionManager:
         self._stream_to_device[stream_id] = device_id
         return True
 
+    def has_stream(self, stream_id: str) -> bool:
+        """Return whether a stream is already bound to an authenticated device."""
+        return stream_id in self._stream_to_device
+
     def set_pending_meta(self, device_id: str, meta: Dict[str, Any]) -> bool:
         """Store stream metadata preceding a binary JPEG frame."""
         stream_id = meta.get("stream_id")
@@ -86,6 +93,22 @@ class DeviceSessionManager:
     def get_and_clear_pending_meta(self, device_id: str) -> Optional[Dict[str, Any]]:
         """Retrieve and clear pending metadata for an incoming binary frame."""
         return self._pending_meta.pop(device_id, None)
+
+    def update_detected_person(
+        self,
+        stream_id: str,
+        track_id: str,
+        person: Optional[Dict[str, Any]],
+    ) -> list[Dict[str, Any]]:
+        """Update one stable track and return the full current set for its stream."""
+        if stream_id not in self._stream_to_device:
+            return []
+        stream_people = self._detected_people.setdefault(stream_id, {})
+        if person is None:
+            stream_people.pop(track_id, None)
+        else:
+            stream_people[track_id] = {"track_id": track_id, **person}
+        return [dict(item) for item in stream_people.values()]
 
     async def send_cue(self, stream_id: str, cue_payload: Dict[str, Any]) -> bool:
         """Send glanceable cue to the companion phone owning this stream."""

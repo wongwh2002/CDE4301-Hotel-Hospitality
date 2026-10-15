@@ -15,11 +15,11 @@ flowchart LR
   LC[lounge-control<br/>FastAPI, taps, SSE, WebSocket]
   Hotel[mock-hotel<br/>synthetic profiles + SQLite]
   Queue[Bounded in-memory<br/>frame queue]
-  FW[face-worker<br/>YuNet + SFace]
+  FW[face-worker<br/>InsightFace buffalo_l]
 
   Staff -->|HTTP: taps and registration| LC
   LC -->|SSE: roster updates| Staff
-  LC <-->|profile and reference photo| Hotel
+  LC <-->|profile and up to 3 reference photos| Hotel
   LC -->|HTTP: candidate enrollment| FW
   Phone -->|JPEG frames + metadata<br/>authenticated WebSocket| LC
   LC -->|internal HTTP: frame| Queue
@@ -30,8 +30,8 @@ flowchart LR
 
 ### Recognition flow
 
-1. An entry tap tells `lounge-control` to fetch the guest profile and reference photo from `mock-hotel`.
-2. `lounge-control` sends the photo and an opaque candidate ID to `face-worker`. The worker derives a template and keeps only its normalized embedding in memory while the guest is in the active lounge cohort.
+1. An entry tap tells `lounge-control` to fetch the guest profile and up to three reference photos from `mock-hotel`.
+2. `lounge-control` sends the photos and an opaque candidate ID to `face-worker`. The worker derives one embedding per usable photo and keeps those templates in memory while the guest is in the active lounge cohort; submitted photo bytes are discarded after enrollment.
 3. The phone sends sampled JPEG frames plus stream metadata to `lounge-control` over its WebSocket.
 4. `lounge-control` validates each frame and forwards it over internal HTTP to the worker's bounded queue. If inference falls behind, the queue drops old frames rather than building latency.
 5. `face-worker` detects faces, tracks them between frames, and compares their embeddings with templates for the active lounge cohort. A unique candidate must remain stable for three observations before a match is emitted.
@@ -41,14 +41,14 @@ The browser dashboard is a separate staff control surface: it sends tap and gues
 
 ## Models
 
-The worker uses OpenCV DNN on the laptop CPU; it does not call a hosted recognition service or require ONNX Runtime.
+The worker uses InsightFace with CPU ONNX Runtime on the laptop; it does not call a hosted recognition service.
 
-- **YuNet** (`face_detection_yunet_2023mar.onnx`) detects faces and facial landmarks. OpenCV describes it as a lightweight face detector. [OpenCV YuNet model page](https://github.com/opencv/opencv_zoo/blob/main/models/face_detection_yunet/README.md)
-- **SFace** (`face_recognition_sface_2021dec.onnx`) aligns each detected face and produces a 128-value feature embedding. Similarity between a frame embedding and an enrolled guest embedding is calculated with cosine similarity. [OpenCV SFace model page](https://github.com/opencv/opencv_zoo/blob/main/models/face_recognition_sface/README.md)
+- **`buffalo_l`** combines SCRFD-10GF face detection and landmarks with a ResNet-50 / ArcFace recognizer. It returns a normalized 512-value embedding for each face. [InsightFace model zoo](https://github.com/deepinsight/insightface/blob/master/python-package/docs/model_zoo.md)
+- `face-worker` enables only detection and recognition from the package; it does not run the bundled age or gender models.
 
-Model files download on first startup into the named `face-model-cache` Docker volume and are checked against pinned SHA-256 digests. The Python package is `opencv-contrib-python-headless==4.14.0.94`.
+InsightFace downloads the model package on first startup into the named `face-model-cache` Docker volume. The container installs InsightFace 2.1.0 with the CPU `onnxruntime` and headless OpenCV packages.
 
-Current POC settings are a `0.50` cosine threshold, a `0.10` margin over the next candidate, and three stable frames. OpenCV's sample code uses a different cosine threshold (`0.363`); the POC values are provisional and need evaluation against varied, consented test images. The SFace training-data provenance question is recorded in the [OpenCV Zoo issue tracker](https://github.com/opencv/opencv_zoo/issues/313).
+Current POC settings are a `0.65` cosine threshold, a `0.10` margin over the next candidate, and three stable observations. `0.65` follows the official recognition example as a starting point; it is not validated on the project's images and must be tuned on varied, consented test images. [InsightFace example](https://github.com/deepinsight/insightface/blob/master/examples/face_recognition/insightface_app.py)
 
 ## Local demo
 
@@ -65,7 +65,7 @@ The one-shot replay sends three frames through the same WebSocket route used by 
 The staff page is served at `/` by `lounge-control`. Its visible sections are:
 
 - **Guest Tap Ingress:** select a seeded guest, edit the guest reference, and send Admit or Depart taps.
-- **Register Mock Hotel Guest:** add a synthetic profile to the local hotel list.
+- **Register Mock Hotel Guest:** add a synthetic profile and upload/capture up to three reference photos. Use clear, single-face images; the local mock-hotel database retains them for re-enrollment.
 - **Active Lounge Roster:** see admitted guest names and admission times, refreshed through SSE.
 
-For implementation details, see [the face-worker pipeline](../../apps/face-worker/vision.py), [frame replay](../../apps/frame-replay/main.py), and [the POC model notes](../../apps/face-worker/MODELS.md).
+For implementation details, see [the face-worker pipeline](../../apps/face-worker/vision.py), [frame replay](../../apps/frame-replay/main.py), and [the POC model notes](../../apps/face-worker/MODELS.md). The multi-photo enrollment and allergy-cue source review is in [face enrollment and allergy cue](../research/face-enrollment-and-allergy-cue.md).

@@ -118,7 +118,7 @@ DASHBOARD_HTML = """<!DOCTYPE html>
       color: var(--text-muted);
       font-weight: 500;
     }
-    select, input[type="text"] {
+    select, input[type="text"], input[type="password"], input[type="file"] {
       background: #0f172a;
       border: 1px solid var(--border);
       color: var(--text-main);
@@ -128,7 +128,7 @@ DASHBOARD_HTML = """<!DOCTYPE html>
       outline: none;
       transition: border-color 0.15s;
     }
-    select:focus, input[type="text"]:focus {
+    select:focus, input[type="text"]:focus, input[type="password"]:focus, input[type="file"]:focus {
       border-color: var(--accent);
     }
     .btn-row {
@@ -184,6 +184,69 @@ DASHBOARD_HTML = """<!DOCTYPE html>
     .btn-refresh:hover {
       color: var(--text-main);
       border-color: var(--text-muted);
+    }
+    .btn-camera {
+      background: var(--accent);
+      color: #082f49;
+    }
+    .btn-secondary {
+      background: #475569;
+      color: var(--text-main);
+    }
+    .cv-actions {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 0.75rem;
+    }
+    .photo-actions {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 0.75rem;
+    }
+    .photo-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 0.75rem;
+    }
+    .photo-card {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+      min-width: 0;
+      color: var(--text-muted);
+      font-size: 0.8rem;
+    }
+    .photo-card img {
+      width: 100%;
+      aspect-ratio: 1;
+      object-fit: cover;
+      background: #020617;
+      border: 1px solid var(--border);
+      border-radius: 0.375rem;
+    }
+    .photo-remove {
+      flex: 0 0 auto;
+      padding: 0.4rem;
+      background: #475569;
+      color: var(--text-main);
+      font-size: 0.8rem;
+    }
+    .media-preview {
+      display: block;
+      width: 100%;
+      max-height: 320px;
+      object-fit: contain;
+      background: #020617;
+      border: 1px solid var(--border);
+      border-radius: 0.375rem;
+    }
+    .media-preview[hidden] {
+      display: none;
+    }
+    .help-text {
+      color: var(--text-muted);
+      font-size: 0.8rem;
+      line-height: 1.45;
     }
     .feedback {
       padding: 0.75rem 1rem;
@@ -316,11 +379,24 @@ DASHBOARD_HTML = """<!DOCTYPE html>
           <label for="guest-preferences">Preferences (optional, comma-separated)</label>
           <input type="text" id="guest-preferences" placeholder="e.g. still water, quiet table" />
         </div>
+        <div class="form-group">
+          <label for="guest-photo-files">Face reference photos (up to 3)</label>
+          <input type="file" id="guest-photo-files" accept="image/*" capture="user" multiple />
+          <div class="help-text">Add clear photos of one face. A front-facing photo plus slight left/right angles is a useful start. Photos are resized to JPEG before saving. Live camera preview needs localhost or HTTPS; on a phone over plain LAN HTTP, use the photo picker’s camera option if available.</div>
+        </div>
+        <div class="photo-actions">
+          <button type="button" class="btn-camera" id="guest-camera-start">Open camera</button>
+          <button type="button" class="btn-register" id="guest-camera-capture" disabled>Capture photo</button>
+          <button type="button" class="btn-secondary" id="guest-camera-stop" disabled>Stop camera</button>
+        </div>
+        <video id="guest-camera-preview" class="media-preview" autoplay playsinline muted hidden></video>
+        <div class="help-text" id="guest-photo-count">0 of 3 photos selected</div>
+        <div id="guest-photo-previews" class="photo-grid" aria-live="polite"></div>
         <button type="submit" class="btn-register" id="btn-register-guest">Register guest</button>
       </form>
       <div id="registration-feedback" class="feedback" role="status" aria-live="polite"></div>
       <div class="privacy-notice">
-        Creates a mock guest in the hotel list with a generated reference and synthetic photo.
+        Saves up to three JPEG reference photos in the local mock-hotel database for re-enrollment. This POC has no per-guest photo deletion yet; photos remain in its Docker data volume until that volume is removed. The face-worker keeps derived templates in memory while a guest is admitted. Use synthetic or consented demo photos.
       </div>
     </div>
 
@@ -350,6 +426,37 @@ DASHBOARD_HTML = """<!DOCTYPE html>
         Displaying guest display_name and admitted_at only. No personal preferences, allergies, or identifiers shown.
       </div>
     </div>
+
+    <!-- Local CV test card -->
+    <div class="card">
+      <h2>Face Recognition Test</h2>
+      <div class="form-group">
+        <label for="cv-device-token">Device token from local .env</label>
+        <input type="password" id="cv-device-token" autocomplete="off" placeholder="DEVICE_AUTH_TOKEN" />
+      </div>
+      <div class="form-group">
+        <label for="cv-device-id">Test device ID</label>
+        <input type="text" id="cv-device-id" value="device-dashboard-test" autocomplete="off" spellcheck="false" />
+      </div>
+      <div class="form-group">
+        <label for="cv-image-file">Choose a test picture</label>
+        <input type="file" id="cv-image-file" accept="image/jpeg,image/png,image/webp" />
+      </div>
+      <img id="cv-image-preview" class="media-preview" alt="Selected test picture preview" hidden />
+      <div class="cv-actions">
+        <button type="button" class="btn-camera" id="cv-start-camera">Start camera</button>
+        <button type="button" class="btn-secondary" id="cv-stop-camera" disabled>Stop camera</button>
+      </div>
+      <video id="cv-camera-preview" class="media-preview" autoplay playsinline muted hidden></video>
+      <div class="cv-actions">
+        <button type="button" class="btn-register" id="cv-send-picture" disabled>Send picture test</button>
+        <button type="button" class="btn-register" id="cv-send-camera" disabled>Send 3 camera frames</button>
+      </div>
+      <div id="cv-feedback" class="feedback" role="status" aria-live="polite"></div>
+      <div class="privacy-notice">
+        Sends JPEG frames over the authenticated WebSocket on port 8000. Images are not saved. A still picture is replayed three times for a pipeline demo; use the camera burst for three distinct observations. Camera access requires localhost or HTTPS.
+      </div>
+    </div>
   </main>
 
   <script>
@@ -361,13 +468,276 @@ DASHBOARD_HTML = """<!DOCTYPE html>
     const tapFeedback = document.getElementById('tap-feedback');
     const registrationForm = document.getElementById('guest-registration-form');
     const registrationFeedback = document.getElementById('registration-feedback');
+    const guestPhotoInput = document.getElementById('guest-photo-files');
+    const guestPhotoCount = document.getElementById('guest-photo-count');
+    const guestPhotoPreviews = document.getElementById('guest-photo-previews');
+    const guestCameraVideo = document.getElementById('guest-camera-preview');
+    const guestCameraStart = document.getElementById('guest-camera-start');
+    const guestCameraCapture = document.getElementById('guest-camera-capture');
+    const guestCameraStop = document.getElementById('guest-camera-stop');
     const sseDot = document.getElementById('sse-dot');
     const sseText = document.getElementById('sse-text');
+    const cvTokenInput = document.getElementById('cv-device-token');
+    const cvDeviceIdInput = document.getElementById('cv-device-id');
+    const cvImageInput = document.getElementById('cv-image-file');
+    const cvImagePreview = document.getElementById('cv-image-preview');
+    const cvVideo = document.getElementById('cv-camera-preview');
+    const cvFeedback = document.getElementById('cv-feedback');
+    const cvStartCameraButton = document.getElementById('cv-start-camera');
+    const cvStopCameraButton = document.getElementById('cv-stop-camera');
+    const cvSendPictureButton = document.getElementById('cv-send-picture');
+    const cvSendCameraButton = document.getElementById('cv-send-camera');
+    let cvSelectedImage = null;
+    let cvImageObjectUrl = null;
+    let cvCameraStream = null;
+    let cvSocket = null;
+    let cvResolveCue = null;
+    let cvRunActive = false;
+    const registrationPhotos = [];
+    let guestCameraStream = null;
 
     function showFeedback(message, type) {
       tapFeedback.textContent = message;
       tapFeedback.className = 'feedback ' + type;
     }
+
+    function showCvFeedback(message, type) {
+      cvFeedback.textContent = message;
+      cvFeedback.className = 'feedback ' + type;
+    }
+
+    function refreshCvButtons() {
+      const busy = cvRunActive;
+      cvStartCameraButton.disabled = busy || Boolean(cvCameraStream);
+      cvStopCameraButton.disabled = busy || !cvCameraStream;
+      cvSendPictureButton.disabled = busy || !cvSelectedImage;
+      cvSendCameraButton.disabled = busy || !cvCameraStream;
+    }
+
+    function handleCvMessage(message) {
+      if (message.type === 'cue' && message.status === 'active') {
+        const cue = message.cue || {};
+        showCvFeedback([cue.headline, cue.alert].filter(Boolean).join(' · ') || 'Stable face match received.', 'success');
+        if (cvResolveCue) cvResolveCue(message);
+      } else if (message.type === 'clear') {
+        showCvFeedback('Frames processed; no stable match yet. Check that Alex is admitted and the image matches the enrolled test face.', 'info');
+      } else if (message.type === 'error') {
+        showCvFeedback(message.message || 'The device stream reported an error.', 'error');
+      }
+    }
+
+    function connectCvDevice(deviceId) {
+      return new Promise((resolve, reject) => {
+        const token = cvTokenInput.value.trim();
+        if (!token) {
+          reject(new Error('Enter DEVICE_AUTH_TOKEN from the local .env file.'));
+          return;
+        }
+        if (!/^[A-Za-z0-9][A-Za-z0-9._-]{0,63}$/.test(deviceId)) {
+          reject(new Error('Device ID must use letters, numbers, dot, underscore, or hyphen.'));
+          return;
+        }
+
+        const scheme = location.protocol === 'https:' ? 'wss:' : 'ws:';
+        const url = `${scheme}//${location.host}/v1/devices/${encodeURIComponent(deviceId)}/stream`;
+        let settled = false;
+        let timeoutId;
+        let socket;
+        try {
+          socket = new WebSocket(url, ['device-stream-v1', `device-token.${token}`]);
+        } catch (error) {
+          reject(new Error(`Could not open device WebSocket: ${error.message}`));
+          return;
+        }
+        cvSocket = socket;
+        cvTokenInput.value = '';
+        timeoutId = setTimeout(() => {
+          if (!settled) {
+            settled = true;
+            socket.close();
+            reject(new Error('Timed out waiting for lounge-control to authenticate the device.'));
+          }
+        }, 7000);
+
+        socket.onmessage = event => {
+          let message;
+          try {
+            message = JSON.parse(event.data);
+          } catch (_) {
+            return;
+          }
+          if (message.type === 'session_ack' && !settled) {
+            settled = true;
+            clearTimeout(timeoutId);
+            resolve(socket);
+          }
+          handleCvMessage(message);
+        };
+        socket.onerror = () => {
+          if (!settled) {
+            settled = true;
+            clearTimeout(timeoutId);
+            reject(new Error('Could not connect. Check that the stack is running and reachable on port 8000.'));
+          }
+        };
+        socket.onclose = event => {
+          if (!settled) {
+            settled = true;
+            clearTimeout(timeoutId);
+            reject(new Error(event.code === 1008 ? 'Device authentication failed. Check DEVICE_AUTH_TOKEN.' : 'Device connection closed before authentication.'));
+          }
+          if (cvSocket === socket) cvSocket = null;
+        };
+      });
+    }
+
+    function imageAsJpegBlob(image, maxBytes = 5 * 1024 * 1024) {
+      return new Promise((resolve, reject) => {
+        const width = image.videoWidth || image.naturalWidth;
+        const height = image.videoHeight || image.naturalHeight;
+        if (!width || !height) {
+          reject(new Error('The selected image or camera has no usable frame.'));
+          return;
+        }
+        const scale = Math.min(1, 1280 / width, 1280 / height);
+        const canvas = document.createElement('canvas');
+        canvas.width = Math.max(1, Math.round(width * scale));
+        canvas.height = Math.max(1, Math.round(height * scale));
+        const context = canvas.getContext('2d');
+        context.drawImage(image, 0, 0, canvas.width, canvas.height);
+        canvas.toBlob(blob => {
+          if (!blob) {
+            reject(new Error('Could not encode this frame as JPEG.'));
+          } else if (blob.size > maxBytes) {
+            reject(new Error(`Encoded JPEG exceeds the ${Math.floor(maxBytes / (1024 * 1024))} MiB limit. Try a smaller image.`));
+          } else {
+            resolve(blob);
+          }
+        }, 'image/jpeg', 0.82);
+      });
+    }
+
+    function delay(ms) {
+      return new Promise(resolve => setTimeout(resolve, ms));
+    }
+
+    async function runCvFrames(frames, sourceLabel) {
+      if (cvRunActive) return;
+      cvRunActive = true;
+      refreshCvButtons();
+      let socket;
+      let cuePromise;
+      try {
+        const deviceId = cvDeviceIdInput.value.trim();
+        showCvFeedback('Connecting to lounge-control…', 'info');
+        cuePromise = new Promise(resolve => { cvResolveCue = resolve; });
+        socket = await connectCvDevice(deviceId);
+        const streamId = `stream-ui-${Date.now()}`;
+        for (let index = 0; index < frames.length; index += 1) {
+          if (socket.readyState !== WebSocket.OPEN) throw new Error('Device connection closed before all frames were sent.');
+          const metadata = {
+            type: 'frame_meta',
+            device_id: deviceId,
+            stream_id: streamId,
+            sequence: index + 1,
+            captured_at: new Date().toISOString(),
+            format: 'image/jpeg'
+          };
+          socket.send(JSON.stringify(metadata));
+          socket.send(frames[index]);
+          showCvFeedback(`Sent ${sourceLabel} frame ${index + 1}/${frames.length}; waiting for CV…`, 'info');
+          if (index < frames.length - 1) await delay(600);
+        }
+        const result = await Promise.race([cuePromise, delay(15000).then(() => null)]);
+        if (!result) {
+          showCvFeedback('No stable match returned in 15 seconds. Confirm Alex is admitted and check face-worker logs.', 'info');
+        }
+      } catch (error) {
+        showCvFeedback(error.message || 'The CV test could not run.', 'error');
+      } finally {
+        cvResolveCue = null;
+        if (socket && socket.readyState === WebSocket.OPEN) socket.close(1000, 'CV test complete');
+        cvRunActive = false;
+        refreshCvButtons();
+      }
+    }
+
+    cvImageInput.addEventListener('change', () => {
+      const file = cvImageInput.files && cvImageInput.files[0];
+      cvSelectedImage = null;
+      if (cvImageObjectUrl) URL.revokeObjectURL(cvImageObjectUrl);
+      cvImageObjectUrl = null;
+      cvImagePreview.hidden = true;
+      if (!file) {
+        refreshCvButtons();
+        return;
+      }
+      cvImageObjectUrl = URL.createObjectURL(file);
+      const image = new Image();
+      image.onload = () => {
+        cvSelectedImage = image;
+        cvImagePreview.src = cvImageObjectUrl;
+        cvImagePreview.hidden = false;
+        showCvFeedback(`Picture ready: ${file.name}. The pipeline test sends this still three times.`, 'info');
+        refreshCvButtons();
+      };
+      image.onerror = () => showCvFeedback('Could not read the selected picture.', 'error');
+      image.src = cvImageObjectUrl;
+    });
+
+    cvStartCameraButton.addEventListener('click', async () => {
+      if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+        showCvFeedback('Camera access needs localhost or an HTTPS page. On a phone, use the companion app or a trusted HTTPS setup.', 'error');
+        return;
+      }
+      try {
+        cvCameraStream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' }, audio: false });
+        cvVideo.srcObject = cvCameraStream;
+        cvVideo.hidden = false;
+        await cvVideo.play();
+        showCvFeedback('Camera ready. Capture a three-frame burst when the test face is in view.', 'info');
+      } catch (error) {
+        cvCameraStream = null;
+        showCvFeedback(`Could not start camera: ${error.message}`, 'error');
+      }
+      refreshCvButtons();
+    });
+
+    cvStopCameraButton.addEventListener('click', () => {
+      if (cvCameraStream) cvCameraStream.getTracks().forEach(track => track.stop());
+      cvCameraStream = null;
+      cvVideo.srcObject = null;
+      cvVideo.hidden = true;
+      refreshCvButtons();
+    });
+
+    cvSendPictureButton.addEventListener('click', async () => {
+      if (!cvSelectedImage) return;
+      try {
+        showCvFeedback('Preparing picture frames…', 'info');
+        const frame = await imageAsJpegBlob(cvSelectedImage);
+        await runCvFrames([frame, frame, frame], 'picture');
+      } catch (error) {
+        showCvFeedback(error.message, 'error');
+      }
+    });
+
+    cvSendCameraButton.addEventListener('click', async () => {
+      if (!cvCameraStream || !cvVideo.videoWidth) return;
+      try {
+        showCvFeedback('Capturing three distinct camera frames…', 'info');
+        const frames = [];
+        for (let index = 0; index < 3; index += 1) {
+          frames.push(await imageAsJpegBlob(cvVideo));
+          if (index < 2) await delay(700);
+        }
+        await runCvFrames(frames, 'camera');
+      } catch (error) {
+        showCvFeedback(error.message, 'error');
+      }
+    });
+
+    refreshCvButtons();
 
     // Populate guest dropdown
     async function loadHotelGuests(selectedGuestRef = null) {
@@ -402,6 +772,130 @@ DASHBOARD_HTML = """<!DOCTYPE html>
       return value.split(',').map(item => item.trim()).filter(Boolean);
     }
 
+    function updateGuestPhotoControls() {
+      guestPhotoCount.textContent = `${registrationPhotos.length} of 3 photos selected`;
+      guestCameraStart.disabled = Boolean(guestCameraStream) || registrationPhotos.length >= 3;
+      guestCameraCapture.disabled = !guestCameraStream || registrationPhotos.length >= 3;
+      guestCameraStop.disabled = !guestCameraStream;
+      guestPhotoInput.disabled = registrationPhotos.length >= 3;
+    }
+
+    function renderGuestPhotoPreviews() {
+      guestPhotoPreviews.querySelectorAll('img[data-object-url]').forEach(image => URL.revokeObjectURL(image.dataset.objectUrl));
+      guestPhotoPreviews.replaceChildren();
+      registrationPhotos.forEach((blob, index) => {
+        const card = document.createElement('div');
+        card.className = 'photo-card';
+        const image = document.createElement('img');
+        image.alt = `Guest reference photo ${index + 1}`;
+        image.dataset.objectUrl = URL.createObjectURL(blob);
+        image.src = image.dataset.objectUrl;
+        const caption = document.createElement('span');
+        caption.textContent = `Photo ${index + 1}`;
+        const remove = document.createElement('button');
+        remove.type = 'button';
+        remove.className = 'photo-remove';
+        remove.textContent = 'Remove';
+        remove.setAttribute('aria-label', `Remove photo ${index + 1}`);
+        remove.addEventListener('click', () => {
+          registrationPhotos.splice(index, 1);
+          renderGuestPhotoPreviews();
+          updateGuestPhotoControls();
+        });
+        card.append(image, caption, remove);
+        guestPhotoPreviews.appendChild(card);
+      });
+      updateGuestPhotoControls();
+    }
+
+    async function photoFileAsJpeg(file) {
+      const objectUrl = URL.createObjectURL(file);
+      try {
+        const image = new Image();
+        await new Promise((resolve, reject) => {
+          image.onload = resolve;
+          image.onerror = () => reject(new Error(`Could not read ${file.name} as an image.`));
+          image.src = objectUrl;
+        });
+        return await imageAsJpegBlob(image, 2 * 1024 * 1024);
+      } finally {
+        URL.revokeObjectURL(objectUrl);
+      }
+    }
+
+    function blobAsBase64(blob) {
+      return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve(String(reader.result).split(',')[1]);
+        reader.onerror = () => reject(new Error('Could not encode a reference photo for upload.'));
+        reader.readAsDataURL(blob);
+      });
+    }
+
+    guestPhotoInput.addEventListener('change', async () => {
+      const files = Array.from(guestPhotoInput.files || []);
+      guestPhotoInput.value = '';
+      const available = 3 - registrationPhotos.length;
+      if (!files.length) return;
+      const skippedCount = Math.max(0, files.length - available);
+      try {
+        for (const file of files.slice(0, available)) {
+          registrationPhotos.push(await photoFileAsJpeg(file));
+        }
+        renderGuestPhotoPreviews();
+        const skippedMessage = skippedCount ? ` ${skippedCount} extra photo${skippedCount === 1 ? '' : 's'} skipped; the limit is 3.` : '';
+        showRegistrationFeedback(`${registrationPhotos.length} reference photo${registrationPhotos.length === 1 ? '' : 's'} ready.${skippedMessage}`, skippedCount ? 'info' : 'success');
+      } catch (error) {
+        renderGuestPhotoPreviews();
+        showRegistrationFeedback(error.message, 'error');
+      }
+    });
+
+    guestCameraStart.addEventListener('click', async () => {
+      if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+        showRegistrationFeedback('Live camera access needs localhost or HTTPS. You can also use the photo picker to take or upload images.', 'error');
+        return;
+      }
+      try {
+        guestCameraStream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: { ideal: 'user' } }, audio: false });
+        guestCameraVideo.srcObject = guestCameraStream;
+        guestCameraVideo.hidden = false;
+        await guestCameraVideo.play();
+        updateGuestPhotoControls();
+        showRegistrationFeedback('Camera ready. Capture up to three distinct views.', 'info');
+      } catch (error) {
+        guestCameraStream = null;
+        updateGuestPhotoControls();
+        showRegistrationFeedback(`Could not start camera: ${error.message}`, 'error');
+      }
+    });
+
+    guestCameraCapture.addEventListener('click', async () => {
+      if (!guestCameraStream || !guestCameraVideo.videoWidth || registrationPhotos.length >= 3) return;
+      guestCameraCapture.disabled = true;
+      try {
+        registrationPhotos.push(await imageAsJpegBlob(guestCameraVideo, 2 * 1024 * 1024));
+        renderGuestPhotoPreviews();
+        showRegistrationFeedback(`${registrationPhotos.length} reference photo${registrationPhotos.length === 1 ? '' : 's'} captured.`, 'success');
+      } catch (error) {
+        showRegistrationFeedback(error.message, 'error');
+      } finally {
+        updateGuestPhotoControls();
+      }
+    });
+
+    guestCameraStop.addEventListener('click', () => {
+      if (guestCameraStream) guestCameraStream.getTracks().forEach(track => track.stop());
+      guestCameraStream = null;
+      guestCameraVideo.srcObject = null;
+      guestCameraVideo.hidden = true;
+      updateGuestPhotoControls();
+    });
+
+    window.addEventListener('pagehide', () => {
+      [guestCameraStream, cvCameraStream].filter(Boolean).forEach(stream => stream.getTracks().forEach(track => track.stop()));
+    });
+
     async function registerGuest(event) {
       event.preventDefault();
       const displayName = document.getElementById('guest-name').value.trim();
@@ -414,11 +908,13 @@ DASHBOARD_HTML = """<!DOCTYPE html>
         display_name: displayName,
         room_number: document.getElementById('guest-room').value.trim() || null,
         allergies: commaSeparatedValues(document.getElementById('guest-allergies').value),
-        preferences: commaSeparatedValues(document.getElementById('guest-preferences').value)
+        preferences: commaSeparatedValues(document.getElementById('guest-preferences').value),
+        photos_b64: []
       };
       const button = document.getElementById('btn-register-guest');
       button.disabled = true;
       try {
+        payload.photos_b64 = await Promise.all(registrationPhotos.map(blobAsBase64));
         const resp = await fetch('/v1/dashboard/guests', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -427,10 +923,20 @@ DASHBOARD_HTML = """<!DOCTYPE html>
         const data = await resp.json();
         if (!resp.ok) throw new Error(data.detail || resp.statusText);
         registrationForm.reset();
+        registrationPhotos.splice(0);
+        renderGuestPhotoPreviews();
+        if (guestCameraStream) guestCameraStream.getTracks().forEach(track => track.stop());
+        guestCameraStream = null;
+        guestCameraVideo.srcObject = null;
+        guestCameraVideo.hidden = true;
+        updateGuestPhotoControls();
         await loadHotelGuests(data.guest_ref);
+        const photoMessage = payload.photos_b64.length
+          ? `${payload.photos_b64.length} reference photo${payload.photos_b64.length === 1 ? '' : 's'} saved.`
+          : 'No face reference photos were saved; the generated placeholder will not match a live face.';
         showRegistrationFeedback(
-          `Registered ${data.display_name}. Guest reference: ${data.guest_ref}`,
-          'success'
+          `Registered ${data.display_name}. Guest reference: ${data.guest_ref}. ${photoMessage}`,
+          payload.photos_b64.length ? 'success' : 'info'
         );
       } catch (err) {
         showRegistrationFeedback(`Could not register guest: ${err.message}`, 'error');

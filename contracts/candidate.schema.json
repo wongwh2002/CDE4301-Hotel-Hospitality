@@ -23,7 +23,18 @@
     },
     "photo_b64": {
       "type": "string",
-      "description": "Base64 encoded synthetic/consented JPEG; current scaffold validates and discards it without creating a face template"
+      "maxLength": 2800000,
+      "description": "Legacy single Base64 JPEG reference photo"
+    },
+    "photos_b64": {
+      "type": "array",
+      "maxItems": 3,
+      "items": {
+        "type": "string",
+        "minLength": 1,
+        "maxLength": 2800000
+      },
+      "description": "Up to three Base64 JPEG reference photos; source photos are discarded after deriving templates"
     }
   },
   "additionalProperties": false

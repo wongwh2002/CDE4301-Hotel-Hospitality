@@ -1,9 +1,11 @@
 """FastAPI mock hotel service.
 
-Provides synthetic guest profiles and synthetic reference photos
-for the Hotel Smart-Glasses POC.
+Provides synthetic guest profiles and local reference-photo storage for the
+Hotel Smart-Glasses POC.
 """
 
+import base64
+import binascii
 import sys
 from contextlib import asynccontextmanager
 from pathlib import Path
@@ -26,6 +28,8 @@ from db import (
     list_all_guests,
     register_guest,
 )
+
+MAX_REFERENCE_PHOTO_BYTES = 2 * 1024 * 1024
 
 
 @asynccontextmanager
@@ -64,10 +68,21 @@ async def get_lounge_profile(guest_ref: str):
 
 @app.get("/v1/guests/{guest_ref}/photo", tags=["Lounge Profiles"])
 async def get_guest_photo(guest_ref: str):
-    """Retrieve synthetic reference photo for candidate template derivation."""
+    """Retrieve the primary reference photo for candidate template derivation."""
     photo_bytes = get_guest_photo_bytes(guest_ref)
     if not photo_bytes:
         raise HTTPException(status_code=404, detail=f"Photo for guest '{guest_ref}' not found")
+    return Response(content=photo_bytes, media_type="image/jpeg")
+
+
+@app.get("/v1/guests/{guest_ref}/photos/{photo_index}", tags=["Lounge Profiles"])
+async def get_guest_reference_photo(guest_ref: str, photo_index: int):
+    """Retrieve one indexed reference photo for face-template enrollment."""
+    if photo_index < 0 or photo_index > 2:
+        raise HTTPException(status_code=404, detail="Reference photo not found")
+    photo_bytes = get_guest_photo_bytes(guest_ref, photo_index)
+    if not photo_bytes:
+        raise HTTPException(status_code=404, detail="Reference photo not found")
     return Response(content=photo_bytes, media_type="image/jpeg")
 
 
@@ -84,15 +99,41 @@ async def list_guests():
     tags=["Lounge Profiles"],
 )
 async def register_new_guest(request: GuestRegistrationRequest):
-    """Register a new synthetic guest with synthetic photo fixture."""
+    """Register a synthetic guest with up to three optional reference photos."""
     clean_display_name = request.display_name.strip()
     if not clean_display_name:
         raise HTTPException(status_code=422, detail="display_name cannot be empty")
+    photo_bytes_list = []
+    for index, photo_b64 in enumerate(request.photos_b64):
+        try:
+            photo_bytes = base64.b64decode(photo_b64, validate=True)
+        except (ValueError, binascii.Error) as exc:
+            raise HTTPException(
+                status_code=400,
+                detail=f"Reference photo {index + 1} is not valid base64",
+            ) from exc
+        if len(photo_bytes) > MAX_REFERENCE_PHOTO_BYTES:
+            raise HTTPException(
+                status_code=413,
+                detail=f"Reference photo {index + 1} exceeds the 2 MiB limit",
+            )
+        if (
+            len(photo_bytes) < 4
+            or photo_bytes[:2] != b"\xff\xd8"
+            or photo_bytes[-2:] != b"\xff\xd9"
+        ):
+            raise HTTPException(
+                status_code=400,
+                detail=f"Reference photo {index + 1} must be a JPEG image",
+            )
+        photo_bytes_list.append(photo_bytes)
+
     profile = register_guest(
         display_name=clean_display_name,
         allergies=request.allergies,
         preferences=request.preferences,
         room_number=request.room_number,
         vip_tier=request.vip_tier,
+        photo_bytes_list=photo_bytes_list,
     )
     return profile

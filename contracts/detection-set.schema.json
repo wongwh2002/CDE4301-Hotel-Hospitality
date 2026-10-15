@@ -1,0 +1,43 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://hotel-hospitality.internal/contracts/v1/detection-set.schema.json",
+  "title": "DetectionSetMessage",
+  "description": "Current stable, identified guests on one lounge camera stream",
+  "type": "object",
+  "required": ["type", "stream_id", "people", "emitted_at"],
+  "properties": {
+    "type": {
+      "const": "detection_set"
+    },
+    "stream_id": {
+      "type": "string",
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]{0,63}$"
+    },
+    "people": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["track_id", "display_name"],
+        "properties": {
+          "track_id": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]{0,63}$"
+          },
+          "display_name": {
+            "type": "string",
+            "minLength": 1
+          },
+          "alert": {
+            "type": "string"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    "emitted_at": {
+      "type": "string",
+      "format": "date-time"
+    }
+  },
+  "additionalProperties": false
+}

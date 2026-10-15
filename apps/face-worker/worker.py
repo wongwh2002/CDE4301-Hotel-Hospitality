@@ -25,7 +25,7 @@ logger = logging.getLogger("face_worker")
 
 MAX_FRAME_SIZE_BYTES = int(os.environ.get("MAX_FRAME_SIZE_BYTES", 5 * 1024 * 1024))
 QUEUE_MAXSIZE = int(os.environ.get("QUEUE_MAXSIZE", 5))
-MATCH_THRESHOLD = float(os.environ.get("FACE_MATCH_THRESHOLD", "0.50"))
+MATCH_THRESHOLD = float(os.environ.get("FACE_MATCH_THRESHOLD", "0.65"))
 MATCH_MARGIN = float(os.environ.get("FACE_MATCH_MARGIN", "0.10"))
 STABLE_FRAME_COUNT = max(2, int(os.environ.get("FACE_STABLE_FRAMES", "3")))
 TRACK_MAX_MISSES = 3
@@ -35,7 +35,7 @@ TRACK_TTL_SECONDS = 2.5
 @dataclass
 class CandidateState:
     expires_at: datetime
-    embedding: Any = None
+    embeddings: List[Any] = field(default_factory=list)
     template_status: str = "unavailable"
 
 
@@ -74,22 +74,33 @@ def _parse_expiry(expires_at: str) -> datetime:
     return parsed.astimezone(timezone.utc)
 
 
-def enroll_candidate(candidate_id: str, photo_bytes: bytes, expires_at: str) -> str:
-    """Derive and retain only a single face embedding, never the source photo."""
-    embedding = None
+def enroll_candidate(
+    candidate_id: str,
+    photo_bytes: bytes | List[bytes],
+    expires_at: str,
+) -> str:
+    """Derive up to three face embeddings and retain no source photos."""
+    photos = photo_bytes if isinstance(photo_bytes, list) else [photo_bytes]
+    embeddings: List[Any] = []
     template_status = "recognition_disabled"
-    if _face_engine is not None and photo_bytes:
-        try:
-            embedding = _face_engine.create_template(photo_bytes)
-            template_status = "ready"
-        except FaceCountError:
+    if _face_engine is not None and photos:
+        for image_bytes in photos[:3]:
+            if not image_bytes:
+                continue
+            try:
+                embeddings.append(_face_engine.create_template(image_bytes))
+            except FaceCountError:
+                continue
+            except InvalidImage:
+                raise
+        if embeddings:
+            template_status = "ready" if len(embeddings) == len(photos) else "ready_partial"
+        else:
             template_status = "no_single_face"
-        except InvalidImage:
-            raise
 
     _candidates[candidate_id] = CandidateState(
         expires_at=_parse_expiry(expires_at),
-        embedding=embedding,
+        embeddings=embeddings,
         template_status=template_status,
     )
     return template_status
@@ -109,6 +120,7 @@ def get_candidate(candidate_id: str) -> Optional[Dict[str, Any]]:
     return {
         "expires_at": candidate.expires_at.isoformat(),
         "template_status": candidate.template_status,
+        "reference_count": len(candidate.embeddings),
     }
 
 
@@ -173,9 +185,12 @@ def _best_candidate(embedding: Any) -> tuple[Optional[str], Optional[float]]:
         return None, None
     matches = []
     for candidate_id, candidate in _candidates.items():
-        if candidate.embedding is None:
+        if not candidate.embeddings:
             continue
-        score = _face_engine.cosine_similarity(embedding, candidate.embedding)
+        score = max(
+            _face_engine.cosine_similarity(embedding, reference)
+            for reference in candidate.embeddings
+        )
         matches.append((candidate_id, score))
     matches.sort(key=lambda item: item[1], reverse=True)
     if not matches or matches[0][1] < MATCH_THRESHOLD:
@@ -238,7 +253,11 @@ def _process_frame(
         assigned_track_ids.add(track.track_id)
         track.bbox = detection.bbox
         track.last_seen = now
-        candidate_id, score = _best_candidate(detection.embedding)
+        candidate_id, score = (
+            _best_candidate(detection.embedding)
+            if detection.embedding is not None
+            else (None, None)
+        )
         track.last_score = score
         track.misses = 0 if candidate_id else track.misses + 1
         track.evidence.append(candidate_id)
@@ -352,7 +371,7 @@ def get_stats() -> Dict[str, Any]:
         **_stats,
         "active_candidates": len(_candidates),
         "recognition_ready_candidates": sum(
-            candidate.embedding is not None for candidate in _candidates.values()
+            bool(candidate.embeddings) for candidate in _candidates.values()
         ),
         "active_streams": len(_stream_queues),
         "face_engine_ready": _face_engine is not None,

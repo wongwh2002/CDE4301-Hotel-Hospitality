@@ -15,6 +15,7 @@ from pydantic import BaseModel, ConfigDict, Field, StringConstraints, model_vali
 IDENTIFIER_PATTERN = r"^[A-Za-z0-9][A-Za-z0-9._-]{0,63}$"
 _IDENTIFIER_PATTERN = re.compile(IDENTIFIER_PATTERN)
 Identifier = Annotated[str, StringConstraints(min_length=1, max_length=64, pattern=IDENTIFIER_PATTERN)]
+Base64Jpeg = Annotated[str, StringConstraints(min_length=1, max_length=2_800_000)]
 
 
 def is_valid_identifier(value: str) -> bool:
@@ -85,7 +86,7 @@ class MatchEvent(ContractModel):
 class CuePayload(ContractModel):
     """Display cue payload for glasses lens."""
     headline: str = Field(..., description="First row: icon + check + name (e.g. '🟢 ✅ ALEX')")
-    alert: Optional[str] = Field(None, description="Second row: warning + note (e.g. '🔴 ⚠️ PEANUT ALLERGY')")
+    alert: Optional[str] = Field(None, description="Second row: warning + optional allergen emoji + explicit note")
     guest_ref: Optional[Identifier] = None
     color: str = "green"
     secondary_color: Optional[str] = None
@@ -101,6 +102,21 @@ class CueMessage(ContractModel):
     emitted_at: str = Field(default_factory=utc_now_iso)
 
 
+class DetectedPerson(ContractModel):
+    """A stable guest match included in a stream's current detection set."""
+    track_id: Identifier
+    display_name: str = Field(..., min_length=1)
+    alert: Optional[str] = None
+
+
+class DetectionSetMessage(ContractModel):
+    """Snapshot of currently stable, identified guests on one camera stream."""
+    type: Literal["detection_set"]
+    stream_id: Identifier
+    people: List[DetectedPerson] = Field(default_factory=list)
+    emitted_at: str = Field(default_factory=utc_now_iso)
+
+
 class LoungeProfile(ContractModel):
     """Permitted minimal guest profile exposed by mock-hotel."""
     guest_ref: Identifier
@@ -110,13 +126,15 @@ class LoungeProfile(ContractModel):
     allergies: List[str] = Field(default_factory=list)
     preferences: List[str] = Field(default_factory=list)
     photo_url: Optional[str] = None
+    photo_urls: List[str] = Field(default_factory=list)
 
 
 class CandidateEnrollment(ContractModel):
     """Candidate enrollment into face-worker memory."""
     candidate_id: Identifier
     expires_at: str
-    photo_b64: Optional[str] = None
+    photo_b64: Optional[Base64Jpeg] = None
+    photos_b64: List[Base64Jpeg] = Field(default_factory=list, max_length=3)
 
 
 class GuestRegistrationRequest(ContractModel):
@@ -126,6 +144,7 @@ class GuestRegistrationRequest(ContractModel):
     vip_tier: Optional[str] = None
     allergies: List[str] = Field(default_factory=list)
     preferences: List[str] = Field(default_factory=list)
+    photos_b64: List[Base64Jpeg] = Field(default_factory=list, max_length=3)
 
 
 class RosterEntry(ContractModel):

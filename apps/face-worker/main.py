@@ -7,7 +7,14 @@ import sys
 from contextlib import asynccontextmanager
 from pathlib import Path
 from typing import List, Optional
-from fastapi import Depends, FastAPI, Header, HTTPException, Request, status
+from fastapi import (
+    Depends,
+    FastAPI,
+    Header,
+    HTTPException,
+    Request,
+    status,
+)
 
 # Ensure local module directory and repo root are in path
 MODULE_DIR = Path(__file__).resolve().parent
@@ -19,8 +26,7 @@ if str(REPO_ROOT) not in sys.path:
 
 import asyncio
 from contracts.models import CandidateEnrollment, is_valid_identifier
-from download_models import ensure_models
-from vision import InvalidImage, OpenCVFaceEngine
+from vision import InvalidImage, InsightFaceEngine
 from worker import (
     MAX_FRAME_SIZE_BYTES,
     cv_worker_loop,
@@ -36,18 +42,13 @@ from worker import (
 FACE_RECOGNITION_ENABLED = os.environ.get("FACE_RECOGNITION_ENABLED", "false").lower() in {
     "1", "true", "yes", "on"
 }
-FACE_MODELS_DIR = os.environ.get("FACE_MODELS_DIR", "/models")
+FACE_MODELS_DIR = os.environ.get("FACE_MODELS_DIR", "/models/insightface")
 
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     if FACE_RECOGNITION_ENABLED:
-        model_paths = await asyncio.to_thread(ensure_models, FACE_MODELS_DIR)
-        engine = await asyncio.to_thread(
-            OpenCVFaceEngine,
-            model_paths["yunet.onnx"],
-            model_paths["sface.onnx"],
-        )
+        engine = await asyncio.to_thread(InsightFaceEngine, FACE_MODELS_DIR)
         set_face_engine(engine)
 
     worker_task = asyncio.create_task(cv_worker_loop())
@@ -62,7 +63,7 @@ async def lifespan(app: FastAPI):
 
 app = FastAPI(
     title="Face Worker Service",
-    description="Interface and validation skeleton for face detection and matching",
+    description="Local face detection and transient active-cohort matching service",
     version="0.1.0",
     lifespan=lifespan,
 )
@@ -110,21 +111,26 @@ async def put_candidate(
             detail="candidate_id in path does not match body",
         )
 
-    photo_bytes = b""
-    if payload.photo_b64:
+    photos_b64 = payload.photos_b64 or ([payload.photo_b64] if payload.photo_b64 else [])
+    photo_bytes_list = []
+    for index, photo_b64 in enumerate(photos_b64):
         try:
-            photo_bytes = base64.b64decode(payload.photo_b64, validate=True)
+            photo_bytes = base64.b64decode(photo_b64, validate=True)
         except Exception:
-            raise HTTPException(status_code=400, detail="Invalid base64 in photo_b64")
+            raise HTTPException(
+                status_code=400,
+                detail=f"Invalid base64 in reference photo {index + 1}",
+            )
         is_valid, error_msg = validate_frame(photo_bytes)
         if not is_valid:
             status_code = 413 if "exceeds maximum limit" in (error_msg or "") else 400
             raise HTTPException(status_code=status_code, detail=error_msg)
+        photo_bytes_list.append(photo_bytes)
 
     try:
         template_status = enroll_candidate(
             candidate_id=candidate_id,
-            photo_bytes=photo_bytes,
+            photo_bytes=photo_bytes_list,
             expires_at=payload.expires_at,
         )
     except InvalidImage as exc:

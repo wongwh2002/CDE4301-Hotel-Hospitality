@@ -16,6 +16,7 @@ The design separates access events, guest context, image processing, and display
 - Run `lounge-control` and `face-worker` as separate containers, with small versioned HTTP interfaces between them. Keep inference inside a bounded worker loop in `face-worker`; do not run it in an async request handler.
 - For the RV101 working path, pair the glasses to an Android phone running the Rokid app/CXR-L integration. The phone sends camera data over the lounge network to the laptop and receives cues for display on the glasses. Keep this bridge behind a vendor-specific interface.
 - Keep the camera transport as a validation gate: the public CXR-L sample currently demonstrates still-photo capture, not a continuous frame stream. Do not claim the end-to-end CV flow is viable until continuous or sufficiently frequent image delivery is proven on the RV101. ([CXR-L sample mirror](https://github.com/e7naq3y/CXR-L-SDK), [photo sample source](https://github.com/e7naq3y/CXR-L-SDK/blob/main/cxrlsample101/app/src/main/java/com/rokid/cxrlsample/activities/photo/PhotoUsageViewModel.kt))
+- If the paired phone receives a live preview, it may run a lightweight face-presence detector there as an upload trigger. Send a short burst of distinct JPEG frames when a face appears; keep identity matching and guest-profile lookup on the laptop. The current worker needs three stable observations by default, so one still image is not enough for its normal cue path. If the RV101 exposes only still-photo capture, a detector can filter photos after capture but cannot trigger the shutter from a preview; keep that limitation visible until the camera path is validated. Do not assume custom model execution on the glasses. Meta's Device Access Toolkit extends an iOS/Android app to compatible glasses, and the RV101 CXR-L sample cited above does not establish continuous frames or custom on-glasses inference. ([Meta Wearables Device Access Toolkit](https://developers.meta.com/wearables/device-access-toolkit/))
 - Send discrete tap events over HTTP; give each paired phone its own authenticated WebSocket to `lounge-control` for sampled JPEG frames and cue updates. One `lounge-control` instance can manage multiple phone connections; do not start one control container per phone. `lounge-control` forwards frames to `face-worker` over an internal HTTP interface. Use WebRTC or the glasses SDK's native stream if continuous video is needed and supported by the selected device.
 - Do not add Kafka for the POC. Keep frames transient and use a bounded in-memory queue inside `face-worker` that drops old frames when recognition is busy.
 - Keep guest display context and active guest references in `lounge-control`; keep only opaque candidate IDs and derived face templates in `face-worker`. Both are memory-only and expire. Do not persist camera frames or face crops.
@@ -33,7 +34,7 @@ flowchart LR
     Cohort[Active lounge cohort<br/>in-memory, expiring]
     Vision[Python face-worker<br/>detect, track, match]
     Queue[Bounded latest-frame queue<br/>inside face-worker]
-    Bridge[Glasses companion / vendor SDK app]
+    Bridge[Companion phone app<br>vendor SDK + optional face trigger]
     Glasses[Smart glasses<br/>camera + display]
 
     Reader -->|Entry event| Adapter
@@ -41,8 +42,8 @@ flowchart LR
     Control <--> GuestData
     Control --> Cohort
     Control -->|Candidate enrollment / expiry| Vision
-    Glasses -->|Camera frames via SDK| Bridge
-    Bridge -->|Sampled JPEG / WebSocket| Control
+    Glasses -->|Preview frames or photos via SDK| Bridge
+    Bridge -->|Positive-detection JPEG burst / WebSocket| Control
     Control -->|Internal HTTP frame handoff| Vision
     Queue --> Vision
     Cohort --> Vision
@@ -56,9 +57,9 @@ The guest data adapter can use a mock local profile store at first. Later it can
 ## End-to-end flow
 
 1. **Guest taps in.** The reader adapter sends `event_id`, `reader_id`, a hotel-internal `guest_ref`, event type, and event timestamp to `POST /v1/lounge/taps`.
-2. **Resolve the guest.** The profile adapter retrieves only the fields needed for the lounge use case and the reference photo. For the POC, use synthetic profiles and a local mock adapter.
-3. **Create a temporary candidate.** The service derives a face template from the reference photo and places the guest reference, limited display fields, template, and expiry in the active cohort. It does not need to keep the photo in the cohort.
-4. **Capture and send frames.** The companion app obtains camera frames through the selected glasses SDK. For the first test, it resizes/compresses and sends sampled frames to the laptop. The exact frame size and sampling rate must be measured at actual lounge distances.
+2. **Resolve the guest.** The profile adapter retrieves only the fields needed for the lounge use case and up to three reference photos. For the POC, use synthetic or consented demo photos in the local mock adapter.
+3. **Create a temporary candidate.** The worker validates each reference photo contains one detectable face, derives one embedding per usable photo, and retains up to three embeddings for the active candidate. It discards the submitted photo bytes after enrollment; the mock hotel keeps the original references in its local SQLite volume for later re-enrollment.
+4. **Capture and send frames.** The companion app obtains camera frames through the selected glasses SDK. If a preview stream is available, a lightweight phone-side detector gates uploads; the phone sends a short burst of distinct compressed JPEG frames for each face-positive event. The exact frame size, sampling rate, and trigger cooldown must be measured at actual lounge distances. The phone detector reports only presence; it does not decide guest identity.
 5. **Match all visible people.** The CV worker detects faces, tracks each face between frames, computes a query template, and compares it only with the active cohort. It waits for a stable, unique top match across multiple observations before publishing a cue.
 6. **Show a cue automatically.** The API sends a short cue to that worker's connected companion app. No guest-confirmation screen or worker confirmation action is part of the normal path.
 7. **Clear temporary state.** Exit events, check-out, or a configured presence timeout remove the candidate and its derived template. Lost device sessions clear their display cues.
@@ -76,21 +77,21 @@ Docker Compose
 │   ├── device-session manager
 │   └── cue composer: role/task filtering and display payload
 ├── face-worker
-│   ├── candidate enrollment: photo → transient face template
+│   ├── candidate enrollment: up to 3 photos → transient face templates
 │   ├── frame intake and validation
 │   ├── bounded per-stream queue: keep latest, discard stale
 │   └── CV loop: detect, track, compare, post match callback
 └── mock-hotel
     ├── FastAPI profile API
     └── SQLite file on a named Docker volume
-        └── synthetic guest profiles and reference photos
+        └── synthetic guest profiles and up to 3 reference photos per guest
 
 Outside Docker
 ├── Card-reader/access-controller adapter (if vendor integration requires it)
 └── Companion app on the paired phone, using the RV101 CXR-L integration
 ```
 
-The first deployment uses separate containers so the team can own and develop the control and vision modules independently. It does not need Kafka, Redis, PySpark, or a separate database server. `mock-hotel` exposes a small FastAPI API backed by a seeded SQLite file on a named Docker volume; the database contains synthetic records only. Production profile data remains behind the profile adapter. If an external hotel API is available, replace the mock adapter without changing the device or vision interfaces.
+The first deployment uses separate containers so the team can own and develop the control and vision modules independently. It does not need Kafka, Redis, PySpark, or a separate database server. `mock-hotel` exposes a small FastAPI API backed by a seeded SQLite file on a named Docker volume. The local POC database can retain up to three guest reference photos for later re-enrollment; use synthetic or consented demo images and remove the Docker volume when finished. Production profile data remains behind the profile adapter. If an external hotel API is available, replace the mock adapter without changing the device or vision interfaces.
 
 ## Microarchitecture and team development
 
@@ -99,8 +100,8 @@ Use a small number of deep modules with narrow interfaces. A teammate can change
 | Module | Owns | Stable interface | Data it receives |
 |---|---|---|---|
 | `lounge-control` | Tap handling, profile lookup, active guest state, device sessions, cue composition | `POST /v1/lounge/taps`; one device WebSocket per paired phone; internal match callback | Guest reference, permitted profile fields, device and stream IDs, recognition results |
-| `face-worker` | Face detection/tracking, template enrollment, matching, temporal stability, frame backpressure | `PUT /internal/v1/candidates/{id}`; `DELETE /internal/v1/candidates/{id}`; `POST /internal/v1/frames`; `POST /internal/v1/matches` callback | Reference photo at enrollment, opaque candidate IDs, lounge/stream IDs, transient frames; no names, preferences, or allergies |
-| `mock-hotel` | Development profiles and synthetic guest photos; SQLite persistence and profile API | `GET /v1/guests/{guest_ref}/lounge-profile` | Synthetic records only |
+| `face-worker` | Face detection/tracking, template enrollment, matching, temporal stability, frame backpressure | `PUT /internal/v1/candidates/{id}`; `DELETE /internal/v1/candidates/{id}`; `POST /internal/v1/frames`; `POST /internal/v1/matches` callback | Up to three reference photos at enrollment, opaque candidate IDs, lounge/stream IDs, transient frames; no names, preferences, or allergies |
+| `mock-hotel` | Development profiles and reference photos; SQLite persistence and profile API | `GET /v1/guests/{guest_ref}/lounge-profile` | Synthetic or consented demo records only |
 | `glasses-bridge` | Vendor SDK integration, camera access, display rendering, reconnect behavior | Device WebSocket contract and cue payload schema | Frames from camera; short cue payloads |
 | `tap-simulator` | Simulated entry/exit events | Same tap-event interface as the reader adapter | Synthetic guest references |
 | `frame-replay` | One-shot deterministic CV integration input | Sends a prepared frame fixture once through the same device-frame interface as the bridge | Consented/synthetic test images; never real guest data in source control |
@@ -131,8 +132,8 @@ Keep each module's implementation in its own directory. Put only shared message 
 | Caller → receiver | Interface | Expected behavior |
 |---|---|---|
 | Reader adapter → `lounge-control` | `POST /v1/lounge/taps` | Idempotent on `event_id`; accepts entry/exit events and returns promptly |
-| `lounge-control` → `mock-hotel` or hotel adapter | `GET /v1/guests/{guest_ref}/lounge-profile` | Returns a minimal permitted profile and reference photo; mock uses synthetic fixtures |
-| `lounge-control` → `face-worker` | `PUT /internal/v1/candidates/{candidate_id}` | Accepts one reference photo plus expiry; derives a template, stores it in RAM, discards the photo; repeated PUT is safe |
+| `lounge-control` → `mock-hotel` or hotel adapter | `GET /v1/guests/{guest_ref}/lounge-profile` and indexed photo URLs | Returns a minimal permitted profile and up to three reference photos; mock uses synthetic or consented demo images |
+| `lounge-control` → `face-worker` | `PUT /internal/v1/candidates/{candidate_id}` | Accepts up to three JPEG references plus expiry; keeps embeddings in RAM, discards submitted photo bytes, and remains safe to retry |
 | `lounge-control` → `face-worker` | `DELETE /internal/v1/candidates/{candidate_id}` | Removes candidate template and any pending match state |
 | `lounge-control` → `face-worker` | `POST /internal/v1/frames` | Binary JPEG body plus `device_id`, `stream_id`, `sequence`, `captured_at`; queues latest frame and returns `202` |
 | `face-worker` → `lounge-control` | `POST /internal/v1/matches` | Sends opaque candidate ID, device/stream/track IDs, capture time, and quality state after temporal stability |
@@ -142,7 +143,7 @@ The HTTP route names are proposed contracts. Store their request/response schema
 
 ### Internal call sequence
 
-1. `lounge-control` resolves the tap to a guest profile and sends `face-worker` an opaque candidate ID, the reference image, and expiry. `face-worker` derives and stores a template in memory, then discards the image.
+1. `lounge-control` resolves the tap to a guest profile and sends `face-worker` an opaque candidate ID, up to three reference images, and expiry. `face-worker` keeps one embedding per usable image in memory, then discards the submitted image bytes.
 2. The phone bridge opens a device WebSocket to `lounge-control`. The control module forwards sampled binary frames to `face-worker` using an internal HTTP call; it does not retain the frame.
 3. `face-worker` processes the frame on its bounded queue. For a stable match it posts only the opaque candidate ID, stream ID, track ID, capture time, and quality status to the match callback.
 4. `lounge-control` checks that the candidate and device session are still active, looks up the allowed display fields, and sends the cue to that device's WebSocket.
@@ -177,7 +178,7 @@ Docker provides runtime isolation, but it does not prevent Git edits from confli
 
 The backend and mock hotel data start with the default Compose command. The `sim` profile makes the tap simulator available; frame replay is run explicitly as a one-shot command. The actual glasses SDK app generally runs on its paired phone, and a physical card reader remains external hardware. Those parts need a companion-app build/install or a device connection step; Docker can start their local backend interfaces and simulators, but it cannot replace the vendor SDK or hardware. Meta's toolkit targets iOS/Android companion apps, and Rokid's SDK is specific to its device family. ([Meta Device Access Toolkit](https://developers.meta.com/wearables/device-access-toolkit/), [Rokid Glass3 SDK](https://x-docs.rokid.com/docs/en/terminal-sdk/glasses/))
 
-This repo currently has documentation but no app modules or Dockerfiles, so the proposed startup command is a target workflow rather than a runnable script today. The architecture is viable; implement it after the module skeletons and contracts exist.
+The repository now includes app modules, Dockerfiles, shared contracts, and `compose.yaml`; see [README](../../README.md) for the current development commands. These implement parts of the proposal. RV101 camera delivery, physical card-reader integration, and performance during hotel service still require validation.
 
 ### Running the companion app in an Android emulator
 
@@ -218,6 +219,10 @@ Make `event_id` idempotent so reader retries do not create duplicate active entr
 ### Device stream
 
 Use one authenticated WebSocket per paired phone/glasses session, for example `/v1/devices/{device_id}/stream`. Send a small metadata message before each binary JPEG frame containing a sequence number, capture time, and stream ID. Return cue updates on the same connection. If the actual SDK provides a media stream rather than discrete frames, keep the media path separate from the control/cue messages.
+
+The POC wire format is defined in [`contracts/device-stream.schema.json`](../../contracts/device-stream.schema.json): send `frame_meta` JSON with `device_id`, `stream_id`, monotonically increasing `sequence`, `captured_at`, and `format: image/jpeg`, followed immediately by the raw JPEG bytes as a WebSocket binary message. In the standard lounge flow, `lounge-control` forwards the transient image to `face-worker`; a stable match cue returns on the same WebSocket.
+
+The video WebSocket is available on host `VIDEO_STREAM_PORT` (default `8003`) at `/v1/video/stream/{device_id}`. It enters the same `lounge-control` container as host port `8000`, uses the `device-stream-v1` and `device-token.<DEVICE_AUTH_TOKEN>` subprotocols, and forwards sampled JPEG frames to `face-worker`. After the first frame metadata for a stream and each worker stable-match or clear callback, `lounge-control` sends a `detection_set` snapshot containing the full current set of stable, identified guest tracks on that stream. Each `track_id` is a temporary face-track key, not a guest identifier. Per-track cue/clear messages remain available for existing clients. Unknown or unconfirmed faces are not included as named people. The message schema is [`contracts/detection-set.schema.json`](../../contracts/detection-set.schema.json).
 
 FastAPI officially supports WebSocket endpoints and Docker deployment. The glasses SDK boundary is vendor-specific: Meta's toolkit connects an iOS/Android app to compatible glasses, and Rokid documents app/phone SDK paths for its device families. Validate capture, display, and local-network permissions against the exact SKU before committing to this interface. ([FastAPI WebSockets](https://fastapi.tiangolo.com/advanced/websockets/), [FastAPI in Docker](https://fastapi.tiangolo.com/deployment/docker/), [Meta Device Access Toolkit](https://developers.meta.com/wearables/device-access-toolkit/), [Rokid Open Platform](https://open.rokid.com/))
 

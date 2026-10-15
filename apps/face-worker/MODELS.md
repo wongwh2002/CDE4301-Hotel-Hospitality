@@ -1,12 +1,10 @@
-# Face worker model baseline
+# Face worker model
 
-The first local CPU baseline uses OpenCV DNN through `opencv-contrib-python-headless`:
+The POC uses InsightFace's **`buffalo_l`** package through `FaceAnalysis` and CPU ONNX Runtime:
 
-- **YuNet** detects and aligns faces: `face_detection_yunet_2023mar.onnx`.
-- **SFace** derives a 128-element face embedding: `face_recognition_sface_2021dec.onnx`.
+- **SCRFD-10GF** detects faces and five-point landmarks.
+- **ResNet-50 / ArcFace** creates a normalized 512-value face embedding.
 
-Model bytes are downloaded on first startup into the Compose `face-model-cache` volume and checked against pinned SHA-256 digests. They are not stored in Git, the mock-hotel database, or the frame queue. OpenCV Zoo lists separate licenses for its models; preserve the model-specific license notice if distributing them. See the [YuNet model folder](https://github.com/opencv/opencv_zoo/tree/main/models/face_detection_yunet) and [SFace model folder](https://github.com/opencv/opencv_zoo/tree/main/models/face_recognition_sface).
+The package includes other analysis models, but the worker enables only `detection` and `recognition`. Model weights are downloaded on first startup into the Compose `face-model-cache` volume, under `/models/insightface/models/buffalo_l`; they are not stored in Git or the mock-hotel database. The volume must have enough disk space and the first startup needs network access. The InsightFace model table reports 326 MB for the full package and 97.25 IJB-C (E4), 99.33 CFP-FP, and 98.23 AgeDB-30 for `buffalo_l`. These are upstream benchmark figures, not expected POC accuracy. [InsightFace model zoo](https://github.com/deepinsight/insightface/blob/master/python-package/docs/model_zoo.md)
 
-The current matching settings (`0.50` cosine score, `0.10` best-versus-next margin, and three stable frames) are initial engineering guardrails, not validated operating thresholds. The worker stores only normalized embeddings for active candidates in RAM; frames and reference photos are discarded after inference. Seeded Alex has a fictional generated face for the local frame-replay smoke demo; the other seeded profiles use a person-free JPEG and cannot be enrolled for face matching. This fixture checks only that one reference matches its identical replay image, not recognition accuracy or generalization.
-
-The SFace folder's Apache-2.0 notice covers the model files, but the model's training-data provenance has an open question in the [OpenCV Zoo issue tracker](https://github.com/opencv/opencv_zoo/issues/313). Treat it as a development baseline; review provenance and intended-use terms before deploying beyond this local POC.
+Matching uses a provisional `0.65` cosine threshold, a `0.10` margin over the next candidate, and three stable observations. The threshold is an initial POC setting based on the official example, not a locally validated operating point; tune it against the lounge's open-set matching task before interpreting cues. The worker stores normalized embeddings for active candidates in RAM; frames and reference photos are discarded after inference. Seeded Alex has a fictional generated face for frame replay; other seeded profiles use a person-free JPEG and cannot be enrolled for face matching. The replay checks pipeline wiring with the same synthetic image, not recognition accuracy or generalization. [InsightFace face-recognition example](https://github.com/deepinsight/insightface/blob/master/examples/face_recognition/insightface_app.py)
