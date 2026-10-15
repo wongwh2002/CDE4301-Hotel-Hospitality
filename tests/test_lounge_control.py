@@ -165,6 +165,10 @@ def test_one_control_routes_cues_to_multiple_phone_sessions(lounge_control_clien
                 "sequence": 1,
                 "captured_at": "2026-10-07T12:00:00Z",
             })
+            initial_set = ws.receive_json()
+            assert initial_set["type"] == "detection_set"
+            assert initial_set["stream_id"] == stream_id
+            assert initial_set["people"] == []
             ws.send_json({"type": "ping"})
             assert ws.receive_json()["type"] == "pong"
 
@@ -188,7 +192,15 @@ def test_one_control_routes_cues_to_multiple_phone_sessions(lounge_control_clien
             assert response.status_code == 200
             assert response.json()["status"] == "delivered"
             recipient = phone_a if stream_id == "stream-a" else phone_b
-            cue = recipient.receive_json()["cue"]
+            detected = recipient.receive_json()
+            assert detected["type"] == "detection_set"
+            assert detected["stream_id"] == stream_id
+            assert detected["people"] == [
+                {"track_id": "track-01", "display_name": display_name}
+            ]
+            cue_message = recipient.receive_json()
+            assert cue_message["type"] == "cue"
+            cue = cue_message["cue"]
             assert display_name in cue["headline"]
             assert "guest_ref" not in cue
 
@@ -230,6 +242,10 @@ def test_non_stable_match_sends_clear_without_guest_profile(
             "sequence": 1,
             "captured_at": "2026-10-07T12:00:00Z",
         })
+        initial_set = phone.receive_json()
+        assert initial_set["type"] == "detection_set"
+        assert initial_set["stream_id"] == "stream-uncertain"
+        assert initial_set["people"] == []
         phone.send_json({"type": "ping"})
         assert phone.receive_json()["type"] == "pong"
 
@@ -245,6 +261,10 @@ def test_non_stable_match_sends_clear_without_guest_profile(
         assert clear["cue"] is None
         assert "Alex" not in str(clear)
         assert "Peanut allergy" not in str(clear)
+        cleared_set = phone.receive_json()
+        assert cleared_set["type"] == "detection_set"
+        assert cleared_set["stream_id"] == "stream-uncertain"
+        assert cleared_set["people"] == []
 
 
 def test_device_websocket_authenticated_and_frame_exchange(lounge_control_client):
@@ -272,6 +292,10 @@ def test_device_websocket_authenticated_and_frame_exchange(lounge_control_client
                 "captured_at": "2026-10-07T12:00:00Z",
             }
             ws.send_json(meta)
+            initial_set = ws.receive_json()
+            assert initial_set["type"] == "detection_set"
+            assert initial_set["stream_id"] == "stream-glasses-01"
+            assert initial_set["people"] == []
 
             # 3. Send raw binary JPEG frame
             ws.send_bytes(SYNTHETIC_JPEG_BYTES)
@@ -549,6 +573,7 @@ def test_dashboard_routes(lounge_control_client):
         "allergies": ["Dairy"],
         "preferences": ["Still water"],
         "photo_url": "/v1/guests/guest-taylor-a1b2c3/photo",
+        "photo_urls": [],
     }
     registration_resp = MagicMock()
     registration_resp.status_code = 201
