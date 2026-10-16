@@ -8,6 +8,7 @@ import asyncio
 import base64
 import hashlib
 import hmac
+from html import escape as escape_html
 import json
 import logging
 import os
@@ -49,6 +50,7 @@ from contracts.models import (
     DeviceStreamMessage,
     FaceCropMessage,
     GuestRegistrationRequest,
+    GuestUpdateRequest,
     LoungeProfile,
     MatchEvent,
     TapEvent,
@@ -222,7 +224,12 @@ async def sse_roster_events(request: Request):
 @app.get("/dashboard", response_class=HTMLResponse, tags=["Dashboard"])
 async def get_dashboard():
     """Laptop dashboard for staff access control and active roster."""
-    return HTMLResponse(content=DASHBOARD_HTML, media_type="text/html")
+    device_token = escape_html(
+        os.environ.get("DEVICE_AUTH_TOKEN", "gedi-4301"),
+        quote=True,
+    )
+    dashboard_html = DASHBOARD_HTML.replace("__DEVICE_AUTH_TOKEN__", device_token)
+    return HTMLResponse(content=dashboard_html, media_type="text/html")
 
 
 @app.get("/v1/dashboard/guests", tags=["Dashboard"])
@@ -266,6 +273,35 @@ async def register_dashboard_guest(request: GuestRegistrationRequest):
         result = {}
     if resp.status_code >= 400:
         error_detail = result.get("detail", "mock-hotel guest registration failed")
+        status_code = resp.status_code if resp.status_code < 500 else 502
+        raise HTTPException(status_code=status_code, detail=error_detail)
+    return result
+
+
+@app.patch(
+    "/v1/dashboard/guests/{guest_ref}",
+    response_model=LoungeProfile,
+    tags=["Dashboard"],
+)
+async def update_dashboard_guest(guest_ref: str, request: GuestUpdateRequest):
+    """Edit a mock guest through the same-origin dashboard API."""
+    if not http_client:
+        raise HTTPException(status_code=503, detail="mock-hotel client is unavailable")
+    try:
+        resp = await http_client.patch(
+            f"{MOCK_HOTEL_URL}/v1/guests/{guest_ref}",
+            json=request.model_dump(exclude_unset=True),
+        )
+    except Exception as e:
+        logger.warning("Failed to update guest through mock-hotel: %s", e)
+        raise HTTPException(status_code=502, detail="Failed to connect to mock-hotel")
+
+    try:
+        result = resp.json()
+    except ValueError:
+        result = {}
+    if resp.status_code >= 400:
+        error_detail = result.get("detail", "mock-hotel guest update failed")
         status_code = resp.status_code if resp.status_code < 500 else 502
         raise HTTPException(status_code=status_code, detail=error_detail)
     return result
@@ -561,6 +597,7 @@ async def post_match(
     detected_person = {
         "guest_id": public_guest_id(candidate["guest_ref"]),
         "display_name": display_name,
+        "confidence": event.confidence,
         "preferences": list(candidate.get("preferences", [])),
         "allergies": list(allergies),
         "crop_id": event.crop_id,

@@ -29,7 +29,8 @@ generated = set()
 updated = []
 for line in lines:
     key, separator, value = line.partition("=")
-    if separator and key in tokens and not value.strip():
+    is_placeholder = value.strip() in {"replace-with-a-random-secret", "changeme"}
+    if separator and key in tokens and (not value.strip() or is_placeholder):
         line = f"{key}={tokens[key]}"
         generated.add(key)
     updated.append(line)

@@ -404,7 +404,12 @@ DASHBOARD_HTML = """<!DOCTYPE html>
 
     <!-- Mock Hotel Guest Registration Card -->
     <div class="card">
-      <h2>Register Mock Hotel Guest</h2>
+      <h2 id="guest-form-title">Register Mock Hotel Guest</h2>
+      <div class="btn-row">
+        <button type="button" class="btn-secondary" id="btn-edit-selected-guest">Edit selected guest</button>
+        <button type="button" class="btn-secondary" id="btn-cancel-guest-edit" hidden>Cancel edit</button>
+      </div>
+      <p class="help-text">Choose the guest in the selector above, then edit their name, room, preferences, or allergies here.</p>
       <form id="guest-registration-form">
         <div class="form-group">
           <label for="guest-name">Guest name</label>
@@ -422,6 +427,7 @@ DASHBOARD_HTML = """<!DOCTYPE html>
           <label for="guest-preferences">Preferences (optional, comma-separated)</label>
           <input type="text" id="guest-preferences" placeholder="e.g. still water, quiet table" />
         </div>
+        <div id="guest-photo-section">
         <div class="form-group">
           <label for="guest-photo-files">Face reference photos (up to 3)</label>
           <input type="file" id="guest-photo-files" accept="image/*" capture="user" multiple />
@@ -435,6 +441,7 @@ DASHBOARD_HTML = """<!DOCTYPE html>
         <video id="guest-camera-preview" class="media-preview" autoplay playsinline muted hidden></video>
         <div class="help-text" id="guest-photo-count">0 of 3 photos selected</div>
         <div id="guest-photo-previews" class="photo-grid" aria-live="polite"></div>
+        </div>
         <button type="submit" class="btn-register" id="btn-register-guest">Register guest</button>
       </form>
       <div id="registration-feedback" class="feedback" role="status" aria-live="polite"></div>
@@ -475,7 +482,7 @@ DASHBOARD_HTML = """<!DOCTYPE html>
       <h2>Face Recognition Test</h2>
       <div class="form-group">
         <label for="cv-device-token">Device token from local .env</label>
-        <input type="password" id="cv-device-token" autocomplete="off" placeholder="DEVICE_AUTH_TOKEN" />
+        <input type="password" id="cv-device-token" value="__DEVICE_AUTH_TOKEN__" autocomplete="off" placeholder="DEVICE_AUTH_TOKEN" />
       </div>
       <div class="form-group">
         <label for="cv-device-id">Test device ID</label>
@@ -515,6 +522,11 @@ DASHBOARD_HTML = """<!DOCTYPE html>
     const rosterCount = document.getElementById('roster-count');
     const tapFeedback = document.getElementById('tap-feedback');
     const registrationForm = document.getElementById('guest-registration-form');
+    const guestFormTitle = document.getElementById('guest-form-title');
+    const guestPhotoSection = document.getElementById('guest-photo-section');
+    const editGuestButton = document.getElementById('btn-edit-selected-guest');
+    const cancelGuestEditButton = document.getElementById('btn-cancel-guest-edit');
+    const submitGuestButton = document.getElementById('btn-register-guest');
     const registrationFeedback = document.getElementById('registration-feedback');
     const guestPhotoInput = document.getElementById('guest-photo-files');
     const guestPhotoCount = document.getElementById('guest-photo-count');
@@ -554,6 +566,8 @@ DASHBOARD_HTML = """<!DOCTYPE html>
     let cvRunActive = false;
     const registrationPhotos = [];
     let guestCameraStream = null;
+    let hotelGuests = [];
+    let editingGuestRef = null;
 
     function showFeedback(message, type) {
       tapFeedback.textContent = message;
@@ -596,6 +610,9 @@ DASHBOARD_HTML = """<!DOCTYPE html>
         title.textContent = person.display_name;
         details.append(title);
         const fields = [
+          ['Confidence', person.confidence == null
+            ? 'Unavailable'
+            : `${(person.confidence * 100).toFixed(1)}% cosine similarity`],
           ['Guest ID', person.guest_id],
           ['Track ID', person.track_id],
           ['Preferences', (person.preferences || []).join(', ') || 'None listed'],
@@ -695,7 +712,7 @@ DASHBOARD_HTML = """<!DOCTYPE html>
       return new Promise((resolve, reject) => {
         const token = cvTokenInput.value.trim();
         if (!token) {
-          reject(new Error('Enter DEVICE_AUTH_TOKEN from the local .env file.'));
+          reject(new Error('DEVICE_AUTH_TOKEN is not configured in lounge-control.'));
           return;
         }
         if (!/^[A-Za-z0-9][A-Za-z0-9._-]{0,63}$/.test(deviceId)) {
@@ -715,7 +732,6 @@ DASHBOARD_HTML = """<!DOCTYPE html>
           return;
         }
         cvSocket = socket;
-        cvTokenInput.value = '';
         timeoutId = setTimeout(() => {
           if (!settled) {
             settled = true;
@@ -920,6 +936,7 @@ DASHBOARD_HTML = """<!DOCTYPE html>
         const resp = await fetch('/v1/dashboard/guests');
         if (resp.ok) {
           const guests = await resp.json();
+          hotelGuests = guests;
           guestDropdown.innerHTML = '<option value="">-- Choose guest or type reference below --</option>';
           guests.forEach(g => {
             const opt = document.createElement('option');
@@ -945,6 +962,45 @@ DASHBOARD_HTML = """<!DOCTYPE html>
 
     function commaSeparatedValues(value) {
       return value.split(',').map(item => item.trim()).filter(Boolean);
+    }
+
+    function finishGuestEdit() {
+      editingGuestRef = null;
+      registrationForm.reset();
+      registrationPhotos.splice(0);
+      renderGuestPhotoPreviews();
+      guestPhotoSection.hidden = false;
+      cancelGuestEditButton.hidden = true;
+      editGuestButton.hidden = false;
+      guestFormTitle.textContent = 'Register Mock Hotel Guest';
+      submitGuestButton.textContent = 'Register guest';
+    }
+
+    function startGuestEdit() {
+      const guestRef = guestDropdown.value;
+      const guest = hotelGuests.find(item => item.guest_ref === guestRef);
+      if (!guest) {
+        showRegistrationFeedback('Select a registered guest above before editing.', 'error');
+        return;
+      }
+      if (guestCameraStream) guestCameraStream.getTracks().forEach(track => track.stop());
+      guestCameraStream = null;
+      guestCameraVideo.srcObject = null;
+      guestCameraVideo.hidden = true;
+      editingGuestRef = guest.guest_ref;
+      document.getElementById('guest-name').value = guest.display_name || '';
+      document.getElementById('guest-room').value = guest.room_number || '';
+      document.getElementById('guest-allergies').value = (guest.allergies || []).join(', ');
+      document.getElementById('guest-preferences').value = (guest.preferences || []).join(', ');
+      registrationPhotos.splice(0);
+      renderGuestPhotoPreviews();
+      guestPhotoSection.hidden = true;
+      editGuestButton.hidden = true;
+      cancelGuestEditButton.hidden = false;
+      guestFormTitle.textContent = `Edit ${guest.display_name}`;
+      submitGuestButton.textContent = 'Save guest changes';
+      showRegistrationFeedback(`Editing ${guest.display_name}. Face reference photos will be kept unchanged.`, 'info');
+      registrationForm.scrollIntoView({ behavior: 'smooth', block: 'center' });
     }
 
     function updateGuestPhotoControls() {
@@ -1079,48 +1135,55 @@ DASHBOARD_HTML = """<!DOCTYPE html>
         return;
       }
 
+      const isEditing = Boolean(editingGuestRef);
       const payload = {
         display_name: displayName,
         room_number: document.getElementById('guest-room').value.trim() || null,
         allergies: commaSeparatedValues(document.getElementById('guest-allergies').value),
-        preferences: commaSeparatedValues(document.getElementById('guest-preferences').value),
-        photos_b64: []
+        preferences: commaSeparatedValues(document.getElementById('guest-preferences').value)
       };
-      const button = document.getElementById('btn-register-guest');
-      button.disabled = true;
+      if (!isEditing) payload.photos_b64 = [];
+      submitGuestButton.disabled = true;
       try {
-        payload.photos_b64 = await Promise.all(registrationPhotos.map(blobAsBase64));
-        const resp = await fetch('/v1/dashboard/guests', {
-          method: 'POST',
+        if (!isEditing) payload.photos_b64 = await Promise.all(registrationPhotos.map(blobAsBase64));
+        const resp = await fetch(isEditing
+          ? `/v1/dashboard/guests/${encodeURIComponent(editingGuestRef)}`
+          : '/v1/dashboard/guests', {
+          method: isEditing ? 'PATCH' : 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(payload)
         });
         const data = await resp.json();
         if (!resp.ok) throw new Error(data.detail || resp.statusText);
-        registrationForm.reset();
-        registrationPhotos.splice(0);
-        renderGuestPhotoPreviews();
+        finishGuestEdit();
         if (guestCameraStream) guestCameraStream.getTracks().forEach(track => track.stop());
         guestCameraStream = null;
         guestCameraVideo.srcObject = null;
         guestCameraVideo.hidden = true;
         updateGuestPhotoControls();
         await loadHotelGuests(data.guest_ref);
-        const photoMessage = payload.photos_b64.length
+        const photoMessage = isEditing
+          ? ' Face reference photos were kept unchanged.'
+          : payload.photos_b64.length
           ? `${payload.photos_b64.length} reference photo${payload.photos_b64.length === 1 ? '' : 's'} saved.`
           : 'No face reference photos were saved; the generated placeholder will not match a live face.';
         showRegistrationFeedback(
-          `Registered ${data.display_name}. Guest reference: ${data.guest_ref}. ${photoMessage}`,
-          payload.photos_b64.length ? 'success' : 'info'
+          `${isEditing ? 'Updated' : 'Registered'} ${data.display_name}. Guest reference: ${data.guest_ref}.${photoMessage}`,
+          isEditing || payload.photos_b64.length ? 'success' : 'info'
         );
       } catch (err) {
         showRegistrationFeedback(`Could not register guest: ${err.message}`, 'error');
       } finally {
-        button.disabled = false;
+        submitGuestButton.disabled = false;
       }
     }
 
     registrationForm.addEventListener('submit', registerGuest);
+    editGuestButton.addEventListener('click', startGuestEdit);
+    cancelGuestEditButton.addEventListener('click', () => {
+      finishGuestEdit();
+      showRegistrationFeedback('Guest edit cancelled.', 'info');
+    });
 
     guestDropdown.addEventListener('change', (e) => {
       if (e.target.value) {

@@ -122,6 +122,12 @@ class DetectedPerson(ContractModel):
     track_id: Identifier
     guest_id: Identifier
     display_name: str = Field(..., min_length=1)
+    confidence: Optional[float] = Field(
+        None,
+        ge=0.0,
+        le=1.0,
+        description="Face embedding cosine similarity; not a calibrated probability",
+    )
     preferences: List[str] = Field(default_factory=list)
     allergies: List[str] = Field(default_factory=list)
     crop_id: Identifier
@@ -175,6 +181,15 @@ class GuestRegistrationRequest(ContractModel):
     allergies: List[str] = Field(default_factory=list)
     preferences: List[str] = Field(default_factory=list)
     photos_b64: List[Base64Jpeg] = Field(default_factory=list, max_length=3)
+
+
+class GuestUpdateRequest(ContractModel):
+    """Fields that can be changed on an existing mock guest profile."""
+    display_name: Optional[str] = Field(None, min_length=1, max_length=100)
+    room_number: Optional[str] = None
+    vip_tier: Optional[str] = None
+    allergies: Optional[List[str]] = None
+    preferences: Optional[List[str]] = None
 
 
 class RosterEntry(ContractModel):

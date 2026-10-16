@@ -65,12 +65,12 @@ Shared Pydantic models are defined in [`contracts/models.py`](contracts/models.p
 
 #### 1. Setup Environment Configuration
 
-On first run, `./scripts/dev-up.sh` creates a private `.env` file and generates the internal service token. The temporary POC device token is `gedi-4301`. To configure Compose manually, copy `.env.example` to `.env`, generate a value for `INTERNAL_API_TOKEN`, and then start the stack. Keep `.env` private; it is excluded from Git.
+On first run, `./scripts/dev-up.sh` creates a private `.env` file with the POC device token set to `gedi-4301` and generates a separate random `INTERNAL_API_TOKEN`. The dashboard loads the configured `DEVICE_AUTH_TOKEN` automatically, so staff do not need to type it into the face test. To configure Compose manually, copy `.env.example` to `.env` and generate an `INTERNAL_API_TOKEN`. Keep `.env` private; it is excluded from Git.
 
 ```bash
 cp .env.example .env
 openssl rand -hex 32
-# Copy the output into INTERNAL_API_TOKEN in .env; DEVICE_AUTH_TOKEN is already set.
+# Put the output into INTERNAL_API_TOKEN in .env.
 ```
 
 #### 2. Start Core Stack
@@ -92,7 +92,7 @@ On first startup, `face-worker` downloads the InsightFace `buffalo_l` model pack
 
 #### 3. Open the Laptop Dashboard
 
-Open `http://127.0.0.1:8000/` on the laptop. The dashboard starts with a seeded guest selected, lets you edit the guest reference, register mock guests with up to three uploaded or camera-captured face photos, send entry/exit taps, and view the active roster. For phone or other laptop access on the trusted Wi-Fi, use `http://<laptop-lan-ip>:8000/` after setting `HOST_BIND_ADDRESS` as described below. The local mock-hotel SQLite volume retains reference photos for re-enrollment; use synthetic or consented demo images.
+Open `http://127.0.0.1:8000/` on the laptop. The dashboard starts with a seeded guest selected, lets you edit the guest reference, register mock guests with up to three uploaded or camera-captured face photos, edit an existing guest's name, room, preferences, and allergies, send entry/exit taps, and view the active roster. Editing a profile keeps its saved face reference photos unchanged. For phone or other laptop access on the trusted Wi-Fi, use `http://<laptop-lan-ip>:8000/` after setting `HOST_BIND_ADDRESS` as described below. The local mock-hotel SQLite volume retains reference photos for re-enrollment; use synthetic or consented demo images.
 
 #### 4. Verify Health
 
@@ -124,12 +124,12 @@ Each paired phone companion app opens one authenticated WebSocket per phone. Use
 
 ```text
 ws://<laptop-lan-ip>:8003/v1/video/stream/<device_id>
-WebSocket subprotocols: device-stream-v1, device-token.gedi-4301
+WebSocket subprotocols: device-stream-v1, device-token.<DEVICE_AUTH_TOKEN>
 ```
 
 Port `8003` is another published port for the existing `lounge-control` container, not a separate service. The compatibility route `ws://<laptop-lan-ip>:8000/v1/devices/<device_id>/stream` reaches the same handler and service.
 
-- **Authentication:** The temporary POC token is `gedi-4301`, configured as `DEVICE_AUTH_TOKEN` in `.env`. Send it as the `device-token.gedi-4301` WebSocket subprotocol; unauthorized connections are rejected with WebSocket close code `1008` (Policy Violation).
+- **Authentication:** The POC default is `gedi-4301`, configured as `DEVICE_AUTH_TOKEN` in `.env`. The dashboard preloads the configured value. Phone clients read the token from `.env` and send it as the `device-token.<DEVICE_AUTH_TOKEN>` WebSocket subprotocol; unauthorized connections are rejected with WebSocket close code `1008` (Policy Violation).
 - **Service authentication:** Internal face-worker routes require the separate `INTERNAL_API_TOKEN`. Compose passes it between services in an HTTP header; phone clients do not use it.
 - **Multi-Phone Support:** A single `lounge-control` container manages multiple concurrent phone WebSockets, keeping sessions, stream mappings, and frame metadata distinct per device.
 - **Disconnect Cleanup:** Disconnected devices are automatically deregistered, clearing active stream associations and preventing stale cue delivery.
@@ -158,7 +158,7 @@ If the SDK only provides still-photo capture, there is no preview frame on which
 
 #### WebSocket frame format
 
-Pass `device-stream-v1` and `device-token.gedi-4301` as WebSocket subprotocols. Do not put the token in the URL. The server selects `device-stream-v1` for the connection; the token subprotocol is used only to authenticate it. `INTERNAL_API_TOKEN` is a separate service-to-service credential and must not be sent by the phone.
+Pass `device-stream-v1` and `device-token.<DEVICE_AUTH_TOKEN>` (with the actual local token value) as WebSocket subprotocols. Do not put the token in the URL. The server selects `device-stream-v1` for the connection; the token subprotocol is used only to authenticate it. `INTERNAL_API_TOKEN` is a separate service-to-service credential and must not be sent by the phone.
 
 After the server replies with `session_ack`, send this JSON text message immediately before each frame's binary JPEG message:
 
@@ -190,6 +190,7 @@ After the first `frame_meta` message for a stream, the server sends an initial e
       "track_id": "track-a81b2c3d4e5f",
       "guest_id": "guest-a81b2c3d4e5f0123456789abcd",
       "display_name": "ALEX",
+      "confidence": 0.82,
       "preferences": ["Sparkling water"],
       "allergies": ["Peanut allergy"],
       "crop_id": "crop-0123456789abcdef01234567",
@@ -199,6 +200,7 @@ After the first `frame_meta` message for a stream, the server sends an initial e
       "track_id": "track-0123456789ab",
       "guest_id": "guest-0123456789abcdef0123456789ab",
       "display_name": "JORDAN",
+      "confidence": 0.74,
       "preferences": [],
       "allergies": [],
       "crop_id": "crop-89abcdef0123456701234567"
@@ -208,12 +210,13 @@ After the first `frame_meta` message for a stream, the server sends an initial e
 }
 ```
 
-Each item in `people` is the per-person dictionary the phone can display. The wire protocol sends the profile fields in `detection_set` and the cropped JPEG in a separate `face_crop` message; the phone joins them by `crop_id` and keeps one display card per `track_id`. For example, a phone-side card can be assembled as:
+Each item in `people` is the per-person dictionary the phone can display. `confidence` is the face embedding cosine-similarity score from 0 to 1, not a calibrated probability. The wire protocol sends the profile fields in `detection_set` and the cropped JPEG in a separate `face_crop` message; the phone joins them by `crop_id` and keeps one display card per `track_id`. For example, a phone-side card can be assembled as:
 
 ```json
 {
   "guest_id": "guest-a81b2c3d4e5f0123456789abcd",
   "display_name": "ALEX",
+  "confidence": 0.82,
   "track_id": "track-a81b2c3d4e5f",
   "cropped_face": "<JPEG cached using crop_id>",
   "preferences": ["Sparkling water"],

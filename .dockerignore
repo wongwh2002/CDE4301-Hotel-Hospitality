@@ -1,6 +1,15 @@
 .git
 .agents
 skills-lock.json
+# Only ship repository-owned synthetic fixtures. Local images placed in
+# fixtures/ must stay out of Docker build contexts and service images.
+fixtures/*
+!fixtures/__init__.py
+!fixtures/synthetic_data.py
+!fixtures/synthetic_face.jpg
+!fixtures/synthetic_guest_left.jpg
+!fixtures/synthetic_guest_right.jpg
+!fixtures/synthetic_multi_face.png
 __pycache__
 *.pyc
 *.pyo

@@ -20,13 +20,14 @@ if str(MODULE_DIR) not in sys.path:
 if str(REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(REPO_ROOT))
 
-from contracts.models import GuestRegistrationRequest, LoungeProfile
+from contracts.models import GuestRegistrationRequest, GuestUpdateRequest, LoungeProfile
 from db import (
     get_guest_photo_bytes,
     get_guest_profile,
     init_db,
     list_all_guests,
     register_guest,
+    update_guest,
 )
 
 MAX_REFERENCE_PHOTO_BYTES = 2 * 1024 * 1024
@@ -136,4 +137,24 @@ async def register_new_guest(request: GuestRegistrationRequest):
         vip_tier=request.vip_tier,
         photo_bytes_list=photo_bytes_list,
     )
+    return profile
+
+
+@app.patch(
+    "/v1/guests/{guest_ref}",
+    response_model=LoungeProfile,
+    tags=["Lounge Profiles"],
+)
+async def update_existing_guest(guest_ref: str, request: GuestUpdateRequest):
+    """Edit profile fields while retaining the guest's stored reference photos."""
+    updates = request.model_dump(exclude_unset=True)
+    if "display_name" in updates:
+        display_name = (updates["display_name"] or "").strip()
+        if not display_name:
+            raise HTTPException(status_code=422, detail="display_name cannot be empty")
+        updates["display_name"] = display_name
+
+    profile = update_guest(guest_ref, updates)
+    if profile is None:
+        raise HTTPException(status_code=404, detail=f"Guest reference '{guest_ref}' not found")
     return profile

@@ -339,3 +339,40 @@ def register_guest(
         }
     finally:
         conn.close()
+
+
+def update_guest(guest_ref: str, updates: Dict[str, Any]) -> Optional[Dict[str, Any]]:
+    """Update permitted profile fields without changing stored reference photos."""
+    column_map = {
+        "display_name": "display_name",
+        "room_number": "room_number",
+        "vip_tier": "vip_tier",
+        "allergies": "allergies_json",
+        "preferences": "preferences_json",
+    }
+    assignments = []
+    values = []
+    for field, column in column_map.items():
+        if field not in updates:
+            continue
+        value = updates[field]
+        if field in {"allergies", "preferences"}:
+            value = json.dumps(value or [])
+        assignments.append(f"{column} = ?")
+        values.append(value)
+
+    conn = get_connection()
+    try:
+        cursor = conn.execute("SELECT 1 FROM guests WHERE guest_ref = ?", (guest_ref,))
+        if not cursor.fetchone():
+            return None
+        if assignments:
+            values.append(guest_ref)
+            with conn:
+                conn.execute(
+                    f"UPDATE guests SET {', '.join(assignments)} WHERE guest_ref = ?",
+                    values,
+                )
+        return get_guest_profile(guest_ref)
+    finally:
+        conn.close()
