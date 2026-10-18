@@ -185,6 +185,7 @@
     .flow-frame { stroke: var(--blue); }
     .flow-cue { stroke: var(--green); }
     .flow-internal { stroke: var(--violet); }
+    .flow-debug { stroke: var(--violet); stroke-dasharray: 4 4; }
     .flow-device { stroke: #687a91; stroke-dasharray: 5 5; }
     .flow-label-bg { fill: #fbfcfe; stroke: #dce4ee; stroke-width: 1; }
     .flow-label { font-size: 10.5px; font-weight: 750; fill: #34465e !important; }
@@ -213,6 +214,7 @@
     .swatch.frame { background: var(--blue); }
     .swatch.cue { background: var(--green); }
     .swatch.internal { background: var(--violet); }
+    .swatch.debug { height: 0; border-top: 2px dashed var(--violet); }
     .swatch.device { height: 0; border-top: 2px dashed #687a91; }
 
     .output-contract {
@@ -309,7 +311,7 @@
       <div class="diagram-shell">
         <svg class="architecture" id="architecture" viewBox="0 0 1380 820" role="img" aria-labelledby="svg-title svg-desc" data-focus="all" xmlns="http://www.w3.org/2000/svg">
           <title id="svg-title">Hotel lounge smart-glasses proposed architecture</title>
-          <desc id="svg-desc">A card reader sends entry events through an adapter to FastAPI lounge-control inside Docker. The control service looks up synthetic guest profiles from a SQLite-backed mock-hotel API and keeps active guest context in memory. One or more Android companion phones connect over the private lounge network, each using its own authenticated WebSocket to send camera frames and receive full detection-set snapshots plus separate cropped-face messages joined by crop ID. The control service forwards frames to a Python face-worker. All three service ports are published only on the private local network for this proof of concept.</desc>
+          <desc id="svg-desc">A card reader sends entry events through an adapter to FastAPI lounge-control inside Docker. The control service looks up synthetic guest profiles from a SQLite-backed mock-hotel API and keeps active guest context in memory. One or more Android companion phones connect over the private lounge network, each using its own authenticated WebSocket to send camera frames and receive full detection-set snapshots plus separate cropped-face messages joined by crop ID. The control service forwards frames to a Python face-worker, which rejects captures older than two seconds, drops queue waits over one second, and can return all raw face detections and timings in opt-in debug mode. Lounge-control retries pending enrollment and restores active templates after worker restarts from stored reference photos. All three service ports are published only on the private local network for this proof of concept.</desc>
           <defs>
             <marker id="arrow-teal" viewBox="0 0 10 10" refX="8.4" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" class="flow-arrow-teal"/></marker>
             <marker id="arrow-blue" viewBox="0 0 10 10" refX="8.4" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" class="flow-arrow-blue"/></marker>
@@ -360,7 +362,7 @@
             <rect x="649" y="312" width="282" height="55" rx="10" fill="#fff" stroke="#c6d7f5"/>
             <text x="663" y="335" class="node-code">/v1/video/stream/{device_id} · :8003</text>
             <text x="663" y="354" class="node-small">Frames in · people, crops, cues out</text>
-            <text x="649" y="384" class="node-small">5s match TTL; frames and crops are transient</text>
+            <text x="649" y="384" class="node-small">5s match TTL · enrollment retry + restore</text>
           </g>
 
           <g class="node node-violet node-tap-only" aria-label="Mock hotel profile API backed by SQLite">
@@ -372,7 +374,7 @@
             <text x="1078" y="260" class="node-copy">Preferences + reference photo</text>
             <rect x="1078" y="280" width="224" height="72" rx="10" class="sqlite-box"/>
             <text x="1092" y="304" class="sqlite-title">SQLite file · named volume</text>
-            <text x="1092" y="324" class="sqlite-copy">Embedded in this service</text>
+            <text x="1092" y="324" class="sqlite-copy">JPEG BLOBs · up to 3 photos</text>
             <text x="1092" y="341" class="sqlite-copy">No separate DB server</text>
           </g>
 
@@ -381,23 +383,28 @@
           <text x="971" y="207" class="flow-label-small">profile lookup</text>
 
           <g class="node node-violet node-recognition" aria-label="Python face worker">
-            <rect x="625" y="505" width="330" height="220" rx="17" class="node-bg"/>
+            <rect x="625" y="505" width="330" height="250" rx="17" class="node-bg"/>
             <text x="649" y="541" class="node-title">face-worker</text>
             <text x="649" y="564" class="node-subtitle">Python · independent container</text>
             <line x1="649" y1="578" x2="931" y2="578" stroke="#d5c9f2"/>
             <text x="649" y="601" class="node-copy">Bounded latest-frame queue</text>
             <text x="649" y="622" class="node-copy">Detect → track → compare active cohort</text>
-            <text x="649" y="643" class="node-copy">Match each face; return stable tracks + crops</text>
-            <text x="649" y="668" class="node-code">POST /internal/v1/matches</text>
-            <text x="649" y="698" class="node-small">Drops stale frames; does not persist images</text>
+            <text x="649" y="643" class="node-copy">Confirm identity in 2 of 3 observations</text>
+            <text x="649" y="663" class="node-small">Active 512-value embeddings live in RAM</text>
+            <text x="649" y="685" class="node-code">POST /internal/v1/matches</text>
+            <text x="649" y="705" class="node-code">POST /internal/v1/debug/frames · opt-in</text>
+            <text x="649" y="730" class="node-small">Drops captures &gt;2s old / queue waits &gt;1s</text>
           </g>
 
           <path d="M715 395 V505" class="flow flow-internal node-recognition" marker-end="url(#arrow-violet)"/>
           <path d="M765 505 V395" class="flow flow-cue node-recognition" marker-end="url(#arrow-green)"/>
+          <path d="M825 505 V395" class="flow flow-debug node-recognition" marker-end="url(#arrow-violet)"/>
           <rect x="778" y="410" width="164" height="26" rx="7" class="flow-label-bg node-recognition"/>
           <text x="788" y="427" class="flow-label-small node-recognition">candidate updates + frames ↓</text>
           <rect x="778" y="453" width="144" height="26" rx="7" class="flow-label-bg node-recognition"/>
           <text x="788" y="470" class="flow-label-small node-recognition">match callback ↑</text>
+          <rect x="830" y="479" width="132" height="26" rx="7" class="flow-label-bg node-recognition"/>
+          <text x="836" y="496" class="flow-label-small node-recognition">raw debug + timing ↑</text>
 
           <!-- Glasses and companion phone -->
           <text x="35" y="545" class="zone-title">WORKER DEVICE</text>
@@ -442,6 +449,7 @@
         <span class="legend-item"><i class="swatch frame" aria-hidden="true"></i>Sampled camera frames</span>
         <span class="legend-item"><i class="swatch cue" aria-hidden="true"></i>Match result / worker cue</span>
         <span class="legend-item"><i class="swatch internal" aria-hidden="true"></i>Candidate enrollment / internal handoff</span>
+        <span class="legend-item"><i class="swatch debug" aria-hidden="true"></i>Opt-in raw detections + timings</span>
         <span class="legend-item"><i class="swatch device" aria-hidden="true"></i>Glasses ↔ phone</span>
       </div>
     </section>
@@ -463,6 +471,9 @@
   "allergies": ["Peanut allergy"]
 }</code></pre>
         <p>The image is not repeated in every snapshot. Clients cache crops by <code>crop_id</code> and discard them when the track leaves the set or its five-second TTL expires.</p>
+        <p>Before inference, the worker rechecks capture age, rejects duplicate or out-of-order sequence numbers, and favors the newest queued frame. A returned face crop is attached only to a candidate identity supported by that detection.</p>
+        <p>Enrollment reports a status to the dashboard. Temporary worker outages are retried every five seconds, and active templates are rebuilt from stored reference photos after a worker restart. SQLite holds the reference photos; active embeddings stay in memory, so pgvector is not needed for this small POC cohort.</p>
+        <p>Clients can opt in with <code>debug_faces: true</code> to receive transient crops for every face returned by the model, including faces below the identity-match threshold. The debug response includes detector scores and worker timings; lounge-control also reports the frame handoff time. Docker logs show the same scores and timing metadata without image bytes.</p>
       </div>
     </section>
 
@@ -476,6 +487,7 @@
 
     <div class="decisions" aria-label="Architecture decisions">
       <span class="badge">SQLite file, no DB server</span>
+      <span class="badge">No vector database for the active POC cohort</span>
       <span class="badge">No Kafka or PySpark in the live POC path</span>
       <span class="badge">Frames and face templates stay transient</span>
       <span class="badge">Uncertain match → no personal cue</span>

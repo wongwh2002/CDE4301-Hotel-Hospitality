@@ -341,8 +341,12 @@ def register_guest(
         conn.close()
 
 
-def update_guest(guest_ref: str, updates: Dict[str, Any]) -> Optional[Dict[str, Any]]:
-    """Update permitted profile fields without changing stored reference photos."""
+def update_guest(
+    guest_ref: str,
+    updates: Dict[str, Any],
+    photo_bytes_list: Optional[List[bytes]] = None,
+) -> Optional[Dict[str, Any]]:
+    """Update profile fields and optionally replace all reference photos."""
     column_map = {
         "display_name": "display_name",
         "room_number": "room_number",
@@ -366,13 +370,31 @@ def update_guest(guest_ref: str, updates: Dict[str, Any]) -> Optional[Dict[str, 
         cursor = conn.execute("SELECT 1 FROM guests WHERE guest_ref = ?", (guest_ref,))
         if not cursor.fetchone():
             return None
-        if assignments:
-            values.append(guest_ref)
+        if assignments or photo_bytes_list is not None:
             with conn:
-                conn.execute(
-                    f"UPDATE guests SET {', '.join(assignments)} WHERE guest_ref = ?",
-                    values,
-                )
+                if assignments:
+                    values.append(guest_ref)
+                    conn.execute(
+                        f"UPDATE guests SET {', '.join(assignments)} WHERE guest_ref = ?",
+                        values,
+                    )
+                if photo_bytes_list is not None:
+                    conn.execute(
+                        "UPDATE guests SET photo_bytes = ? WHERE guest_ref = ?",
+                        (photo_bytes_list[0], guest_ref),
+                    )
+                    conn.execute(
+                        "DELETE FROM guest_reference_photos WHERE guest_ref = ?",
+                        (guest_ref,),
+                    )
+                    conn.executemany(
+                        """INSERT INTO guest_reference_photos
+                           (guest_ref, photo_index, photo_bytes) VALUES (?, ?, ?)""",
+                        [
+                            (guest_ref, index, image_bytes)
+                            for index, image_bytes in enumerate(photo_bytes_list[1:], start=1)
+                        ],
+                    )
         return get_guest_profile(guest_ref)
     finally:
         conn.close()

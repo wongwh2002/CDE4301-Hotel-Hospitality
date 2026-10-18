@@ -1,0 +1,45 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://hotel-hospitality.internal/contracts/v1/debug-frame.schema.json",
+  "title": "DebugFrameMessage",
+  "description": "Opt-in transient diagnostics for every face detected in one input frame",
+  "type": "object",
+  "required": [
+    "type", "device_id", "stream_id", "sequence", "captured_at",
+    "queue_wait_ms", "detect_ms", "association_ms", "processing_ms", "faces"
+  ],
+  "properties": {
+    "type": {"const": "debug_frame"},
+    "device_id": {"type": "string", "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]{0,63}$"},
+    "stream_id": {"type": "string", "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]{0,63}$"},
+    "sequence": {"type": "integer", "minimum": 0},
+    "captured_at": {"type": "string"},
+    "queue_wait_ms": {"type": "number", "minimum": 0},
+    "detect_ms": {"type": "number", "minimum": 0},
+    "association_ms": {"type": "number", "minimum": 0},
+    "processing_ms": {"type": "number", "minimum": 0},
+    "faces": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["track_id", "bbox", "detector_score", "candidate_match"],
+        "properties": {
+          "track_id": {"type": "string", "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]{0,63}$"},
+          "bbox": {
+            "type": "array",
+            "prefixItems": [{"type": "number"}, {"type": "number"}, {"type": "number"}, {"type": "number"}],
+            "minItems": 4,
+            "maxItems": 4
+          },
+          "detector_score": {"type": "number", "minimum": 0, "maximum": 1},
+          "match_score": {"type": ["number", "null"], "minimum": -1, "maximum": 1},
+          "candidate_match": {"type": "boolean"},
+          "crop_id": {"type": "string", "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]{0,63}$"},
+          "crop_b64": {"type": "string", "minLength": 1, "maxLength": 2800000, "description": "Transient base64 JPEG face crop; never logged or persisted"}
+        },
+        "additionalProperties": false
+      }
+    }
+  },
+  "additionalProperties": false
+}

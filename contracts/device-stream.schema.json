@@ -31,6 +31,11 @@
       "format": "date-time",
       "description": "ISO-8601 capture timestamp at device"
     },
+    "debug_faces": {
+      "type": "boolean",
+      "default": false,
+      "description": "Opt in to transient crops and scores for every detected face, regardless of identity-match threshold"
+    },
     "format": {
       "type": "string",
       "enum": ["image/jpeg"],

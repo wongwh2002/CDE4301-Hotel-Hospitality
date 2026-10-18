@@ -2,6 +2,8 @@
 
 import asyncio
 import json
+import logging
+import time
 from datetime import datetime, timedelta, timezone
 from unittest.mock import AsyncMock, MagicMock, patch
 import pytest
@@ -632,9 +634,10 @@ def test_non_stable_match_sends_clear_without_guest_profile(
         assert cleared_set["people"] == []
 
 
-def test_device_websocket_authenticated_and_frame_exchange(lounge_control_client):
+def test_device_websocket_authenticated_and_frame_exchange(lounge_control_client, caplog):
     """Test authenticated WebSocket receives session_ack, sends frame, handles disconnect."""
     valid_token = "test-secret-token"
+    caplog.set_level(logging.INFO, logger="lounge_control")
 
     with patch("apps_lounge_control.http_client") as mock_client:
         mock_post = AsyncMock()
@@ -669,6 +672,75 @@ def test_device_websocket_authenticated_and_frame_exchange(lounge_control_client
             ws.send_json({"type": "ping"})
             pong = ws.receive_json()
             assert pong["type"] == "pong"
+
+            # Streaming clients can see each incoming frame in lounge-control logs.
+            assert any(
+                record.name == "lounge_control"
+                and record.getMessage()
+                == (
+                    "frame_received device_id=device-test-1 stream_id=stream-glasses-01 "
+                    f"sequence=1 frame_bytes={len(SYNTHETIC_JPEG_BYTES)} "
+                    "captured_at=2026-10-07T12:00:00Z"
+                )
+                for record in caplog.records
+            )
+
+
+def test_device_websocket_forwards_sustained_jpeg_frames_on_one_connection(
+    lounge_control_client, caplog
+):
+    """Accepts a sampled camera feed as JPEG frames over one persistent WebSocket."""
+    # Raise only the capture handler: don't change the application's logger
+    # level, since the test should catch INFO records suppressed by the app.
+    caplog.handler.setLevel(logging.INFO)
+    frame_count = 15
+
+    with patch("apps_lounge_control.http_client") as mock_client:
+        mock_response = MagicMock(status_code=202)
+        mock_client.post = AsyncMock(return_value=mock_response)
+
+        with lounge_control_client.websocket_connect(
+            "/v1/video/stream/phone-stream-test?token=test-secret-token"
+        ) as phone:
+            assert phone.receive_json()["type"] == "session_ack"
+
+            for sequence in range(1, frame_count + 1):
+                phone.send_json({
+                    "type": "frame_meta",
+                    "stream_id": "stream-sustained-test",
+                    "sequence": sequence,
+                    "captured_at": f"2026-10-16T10:00:{sequence:02d}Z",
+                })
+                if sequence == 1:
+                    initial_set = phone.receive_json()
+                    assert initial_set["type"] == "detection_set"
+                    assert initial_set["stream_id"] == "stream-sustained-test"
+                    assert initial_set["people"] == []
+                phone.send_bytes(SYNTHETIC_JPEG_BYTES)
+                if sequence < frame_count:
+                    time.sleep(0.2)  # 5 JPEG frames per second over the same socket.
+
+            # The pong follows all preceding frame messages, so it synchronizes
+            # the assertion with lounge-control's frame receive loop.
+            phone.send_json({"type": "ping"})
+            assert phone.receive_json() == {"type": "pong"}
+
+    frame_logs = [
+        record.getMessage()
+        for record in caplog.records
+        if record.getMessage().startswith(
+            "frame_received device_id=phone-stream-test stream_id=stream-sustained-test "
+        )
+    ]
+    assert len(frame_logs) == frame_count
+    sequence_logged = [
+        f"sequence={sequence} " in message
+        for sequence, message in enumerate(frame_logs, 1)
+    ]
+    assert sequence_logged == [True] * frame_count
+    expected_size = f"frame_bytes={len(SYNTHETIC_JPEG_BYTES)} "
+    assert all(expected_size in message for message in frame_logs)
+    assert mock_client.post.await_count == frame_count
 
 
 def test_match_callback_generates_emoji_cue(lounge_control_client):

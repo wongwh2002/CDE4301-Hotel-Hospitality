@@ -49,6 +49,7 @@ class DeviceStreamMessage(ContractModel):
     sequence: Optional[int] = Field(None, ge=0)
     captured_at: Optional[str] = None
     format: Literal["image/jpeg"] = "image/jpeg"
+    debug_faces: bool = False
     token: Optional[str] = None
     payload_b64: Optional[str] = None
     message: Optional[str] = None
@@ -153,6 +154,31 @@ class FaceCropMessage(ContractModel):
     emitted_at: str = Field(default_factory=utc_now_iso)
 
 
+class DebugFaceDetection(ContractModel):
+    """One raw model detection, including faces below the identity threshold."""
+    track_id: Identifier
+    bbox: tuple[float, float, float, float]
+    detector_score: float = Field(..., ge=0.0, le=1.0)
+    match_score: Optional[float] = Field(None, ge=-1.0, le=1.0)
+    candidate_match: bool = False
+    crop_id: Optional[Identifier] = None
+    crop_b64: Optional[Base64Jpeg] = None
+
+
+class DebugFrameMessage(ContractModel):
+    """Opt-in per-frame diagnostics for every detected face and model timing."""
+    type: Literal["debug_frame"]
+    device_id: Identifier
+    stream_id: Identifier
+    sequence: int = Field(..., ge=0)
+    captured_at: str
+    queue_wait_ms: float = Field(..., ge=0.0)
+    detect_ms: float = Field(..., ge=0.0)
+    association_ms: float = Field(..., ge=0.0)
+    processing_ms: float = Field(..., ge=0.0)
+    faces: List[DebugFaceDetection] = Field(default_factory=list)
+
+
 class LoungeProfile(ContractModel):
     """Permitted minimal guest profile exposed by mock-hotel."""
     guest_ref: Identifier
@@ -190,6 +216,7 @@ class GuestUpdateRequest(ContractModel):
     vip_tier: Optional[str] = None
     allergies: Optional[List[str]] = None
     preferences: Optional[List[str]] = None
+    photos_b64: Optional[List[Base64Jpeg]] = Field(None, min_length=1, max_length=3)
 
 
 class RosterEntry(ContractModel):

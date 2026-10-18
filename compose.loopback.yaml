@@ -1,0 +1,7 @@
+# Optional override for a stack whose HOST_BIND_ADDRESS is a private LAN IP.
+# It adds localhost access to lounge-control while preserving the LAN bindings.
+services:
+  lounge-control:
+    ports:
+      - "127.0.0.1:${LOUNGE_CONTROL_PORT:-8000}:8000"
+      - "127.0.0.1:${VIDEO_STREAM_PORT:-8003}:8000"

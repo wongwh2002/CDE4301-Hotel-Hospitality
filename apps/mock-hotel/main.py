@@ -146,15 +146,43 @@ async def register_new_guest(request: GuestRegistrationRequest):
     tags=["Lounge Profiles"],
 )
 async def update_existing_guest(guest_ref: str, request: GuestUpdateRequest):
-    """Edit profile fields while retaining the guest's stored reference photos."""
+    """Edit guest fields and replace saved reference photos when supplied."""
     updates = request.model_dump(exclude_unset=True)
+    photos_b64 = updates.pop("photos_b64", None)
+    photo_bytes_list = None
     if "display_name" in updates:
         display_name = (updates["display_name"] or "").strip()
         if not display_name:
             raise HTTPException(status_code=422, detail="display_name cannot be empty")
         updates["display_name"] = display_name
 
-    profile = update_guest(guest_ref, updates)
+    if photos_b64 is not None:
+        photo_bytes_list = []
+        for index, photo_b64 in enumerate(photos_b64):
+            try:
+                photo_bytes = base64.b64decode(photo_b64, validate=True)
+            except (ValueError, binascii.Error) as exc:
+                raise HTTPException(
+                    status_code=400,
+                    detail=f"Reference photo {index + 1} is not valid base64",
+                ) from exc
+            if len(photo_bytes) > MAX_REFERENCE_PHOTO_BYTES:
+                raise HTTPException(
+                    status_code=413,
+                    detail=f"Reference photo {index + 1} exceeds the 2 MiB limit",
+                )
+            if (
+                len(photo_bytes) < 4
+                or photo_bytes[:2] != b"\xff\xd8"
+                or photo_bytes[-2:] != b"\xff\xd9"
+            ):
+                raise HTTPException(
+                    status_code=400,
+                    detail=f"Reference photo {index + 1} must be a JPEG image",
+                )
+            photo_bytes_list.append(photo_bytes)
+
+    profile = update_guest(guest_ref, updates, photo_bytes_list=photo_bytes_list)
     if profile is None:
         raise HTTPException(status_code=404, detail=f"Guest reference '{guest_ref}' not found")
     return profile

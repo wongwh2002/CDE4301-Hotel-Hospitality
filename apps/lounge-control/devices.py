@@ -43,6 +43,8 @@ class DeviceSessionManager:
         self._device_to_streams: Dict[str, Set[str]] = {}
         # stream_id -> device_id
         self._stream_to_device: Dict[str, str] = {}
+        # Streams opted into raw per-frame face diagnostics.
+        self._debug_streams: Set[str] = set()
         # device_id -> most recent frame_meta dict
         self._pending_meta: Dict[str, Dict[str, Any]] = {}
         # stream_id -> track_id -> person metadata and last stable observation
@@ -69,6 +71,7 @@ class DeviceSessionManager:
         stream_ids = self._device_to_streams.pop(device_id, set())
         for sid in stream_ids:
             self._stream_to_device.pop(sid, None)
+            self._debug_streams.discard(sid)
             self._detected_people.pop(sid, None)
         logger.info("Cleaned up device session: %s (cleared %d streams)", device_id, len(stream_ids))
 
@@ -87,13 +90,29 @@ class DeviceSessionManager:
         """Return whether a stream is already bound to an authenticated device."""
         return stream_id in self._stream_to_device
 
+    def owns_stream(self, device_id: str, stream_id: str) -> bool:
+        """Return whether a device owns the requested stream mapping."""
+        return self._stream_to_device.get(stream_id) == device_id
+
     def set_pending_meta(self, device_id: str, meta: Dict[str, Any]) -> bool:
         """Store stream metadata preceding a binary JPEG frame."""
         stream_id = meta.get("stream_id")
         if not stream_id or not self.bind_stream(device_id, stream_id):
             return False
+        self.set_debug_faces(stream_id, bool(meta.get("debug_faces", False)))
         self._pending_meta[device_id] = meta
         return True
+
+    def set_debug_faces(self, stream_id: str, enabled: bool) -> None:
+        """Enable or disable raw detection diagnostics for a bound stream."""
+        if enabled:
+            self._debug_streams.add(stream_id)
+        else:
+            self._debug_streams.discard(stream_id)
+
+    def debug_faces_enabled(self, stream_id: str) -> bool:
+        """Return whether a stream requested per-frame debug crops and timings."""
+        return stream_id in self._debug_streams
 
     def get_and_clear_pending_meta(self, device_id: str) -> Optional[Dict[str, Any]]:
         """Retrieve and clear pending metadata for an incoming binary frame."""

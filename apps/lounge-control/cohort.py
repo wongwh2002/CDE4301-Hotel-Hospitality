@@ -46,6 +46,7 @@ class ActiveCohortManager:
         allergies: List[str],
         preferences: List[str],
         expires_at: str,
+        recognition_status: str = "enrollment_pending",
     ) -> Dict[str, Any]:
         """Admit a guest into the active lounge cohort.
 
@@ -68,6 +69,7 @@ class ActiveCohortManager:
             "preferences": list(preferences),
             "admitted_at": now_iso,
             "expires_at": expires_at,
+            "recognition_status": recognition_status,
         }
         self._cohort[candidate_id] = record
 
@@ -90,6 +92,27 @@ class ActiveCohortManager:
     def get_candidate(self, candidate_id: str) -> Optional[Dict[str, Any]]:
         self.clean_expired()
         return self._cohort.get(candidate_id)
+
+    def get_candidates(self) -> List[Dict[str, Any]]:
+        """Return active candidates for transient face-worker reconciliation."""
+        self.clean_expired()
+        return [dict(record) for record in self._cohort.values()]
+
+    def set_recognition_status(self, candidate_id: str, status: str) -> bool:
+        """Update whether an active presence has a usable face-worker template."""
+        self.clean_expired()
+        candidate = self._cohort.get(candidate_id)
+        if candidate is None:
+            return False
+        candidate["recognition_status"] = status
+        return True
+
+    def pending_recognition_count(self) -> int:
+        self.clean_expired()
+        return sum(
+            candidate.get("recognition_status") == "enrollment_pending"
+            for candidate in self._cohort.values()
+        )
 
     def clean_expired(self) -> List[str]:
         """Remove candidates whose presence TTL has expired."""

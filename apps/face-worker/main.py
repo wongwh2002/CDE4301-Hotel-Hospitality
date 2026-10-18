@@ -2,8 +2,10 @@
 
 import base64
 import hmac
+import logging
 import os
 import sys
+import time
 from contextlib import asynccontextmanager
 from pathlib import Path
 from typing import List, Optional
@@ -28,16 +30,25 @@ import asyncio
 from contracts.models import CandidateEnrollment, is_valid_identifier
 from vision import InvalidImage, InsightFaceEngine
 from worker import (
+    MATCH_MARGIN,
+    MATCH_THRESHOLD,
     MAX_FRAME_SIZE_BYTES,
+    STABLE_FRAME_COUNT,
+    STABLE_MATCH_COUNT,
     cv_worker_loop,
     enqueue_frame,
     enroll_candidate,
+    get_candidate,
     get_stats,
     list_candidate_ids,
     remove_candidate,
     set_face_engine,
     validate_frame,
 )
+
+# Send application diagnostics, including worker progress, to container logs.
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger("face_worker")
 
 FACE_RECOGNITION_ENABLED = os.environ.get("FACE_RECOGNITION_ENABLED", "false").lower() in {
     "1", "true", "yes", "on"
@@ -47,12 +58,35 @@ FACE_MODELS_DIR = os.environ.get("FACE_MODELS_DIR", "/models/insightface")
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
+    logger.info(
+        "service_starting recognition_enabled=%s match_threshold=%.3f margin_required=%.3f "
+        "stable_confirmation=%s_of_%s",
+        FACE_RECOGNITION_ENABLED,
+        MATCH_THRESHOLD,
+        MATCH_MARGIN,
+        STABLE_MATCH_COUNT,
+        STABLE_FRAME_COUNT,
+    )
     if FACE_RECOGNITION_ENABLED:
-        engine = await asyncio.to_thread(InsightFaceEngine, FACE_MODELS_DIR)
+        model_started = time.perf_counter()
+        logger.info("model_initialization_started model=buffalo_l models_dir=%s", FACE_MODELS_DIR)
+        try:
+            engine = await asyncio.to_thread(InsightFaceEngine, FACE_MODELS_DIR)
+        except Exception:
+            logger.exception("model_initialization_failed model=buffalo_l")
+            raise
         set_face_engine(engine)
+        logger.info(
+            "model_ready model=buffalo_l elapsed_seconds=%.2f",
+            time.perf_counter() - model_started,
+        )
+    else:
+        logger.warning("face_recognition_disabled frames_will_not_be_matched=true")
 
     worker_task = asyncio.create_task(cv_worker_loop())
+    logger.info("processing_loop_started")
     yield
+    logger.info("processing_loop_stopping")
     worker_task.cancel()
     try:
         await worker_task
@@ -127,14 +161,37 @@ async def put_candidate(
             raise HTTPException(status_code=status_code, detail=error_msg)
         photo_bytes_list.append(photo_bytes)
 
+    enrollment_started = time.perf_counter()
+    logger.info(
+        "candidate_enrollment_started candidate_id=%s reference_photos=%s model_ready=%s",
+        candidate_id,
+        len(photo_bytes_list),
+        get_stats()["face_engine_ready"],
+    )
     try:
-        template_status = enroll_candidate(
-            candidate_id=candidate_id,
-            photo_bytes=photo_bytes_list,
-            expires_at=payload.expires_at,
+        # Keep InsightFace inference out of the ASGI event loop. Its model lock
+        # serializes enrollment with live detection while HTTP/health handlers
+        # remain responsive.
+        template_status = await asyncio.to_thread(
+            enroll_candidate,
+            candidate_id,
+            photo_bytes_list,
+            payload.expires_at,
         )
     except InvalidImage as exc:
+        logger.warning(
+            "candidate_enrollment_failed candidate_id=%s reason=invalid_image error=%s",
+            candidate_id,
+            exc,
+        )
         raise HTTPException(status_code=400, detail=str(exc)) from exc
+    logger.info(
+        "candidate_enrolled candidate_id=%s reference_photos=%s template_status=%s elapsed_ms=%.2f",
+        candidate_id,
+        len(photo_bytes_list),
+        template_status,
+        (time.perf_counter() - enrollment_started) * 1000,
+    )
     return {
         "status": "enrolled",
         "candidate_id": candidate_id,
@@ -156,6 +213,7 @@ async def delete_candidate(
     if not is_valid_identifier(candidate_id):
         raise HTTPException(status_code=400, detail="Invalid candidate_id")
     existed = remove_candidate(candidate_id)
+    logger.info("candidate_removed candidate_id=%s existed=%s", candidate_id, existed)
     return {"status": "removed", "candidate_id": candidate_id, "existed": existed}
 
 
@@ -169,6 +227,23 @@ async def list_candidates(_: None = Depends(require_internal_token)):
     return list_candidate_ids()
 
 
+@app.get(
+    "/internal/v1/candidates/{candidate_id}",
+    tags=["Candidate Cohort"],
+)
+async def get_candidate_status(
+    candidate_id: str,
+    _: None = Depends(require_internal_token),
+):
+    """Return transient enrollment status for lounge-control reconciliation."""
+    if not is_valid_identifier(candidate_id):
+        raise HTTPException(status_code=400, detail="Invalid candidate_id")
+    candidate = get_candidate(candidate_id)
+    if candidate is None:
+        raise HTTPException(status_code=404, detail="Candidate not found")
+    return {"candidate_id": candidate_id, **candidate}
+
+
 @app.post(
     "/internal/v1/frames",
     status_code=status.HTTP_202_ACCEPTED,
@@ -178,8 +253,9 @@ async def post_frame(
     request: Request,
     x_stream_id: Optional[str] = Header(None, alias="X-Stream-Id"),
     x_device_id: Optional[str] = Header(None, alias="X-Device-Id"),
-    x_sequence: Optional[int] = Header(0, alias="X-Sequence"),
+    x_sequence: Optional[int] = Header(None, alias="X-Sequence"),
     x_captured_at: Optional[str] = Header(None, alias="X-Captured-At"),
+    x_debug_faces: bool = Header(False, alias="X-Debug-Faces"),
     _: None = Depends(require_internal_token),
 ):
     """Ingest a binary JPEG frame.
@@ -189,20 +265,46 @@ async def post_frame(
     Discards frame payloads after validation (never persists to disk).
     """
     if not x_stream_id:
+        logger.warning("frame_rejected_missing_stream_id device_id=%s", x_device_id or "unknown")
         raise HTTPException(status_code=400, detail="Missing required X-Stream-Id header")
     if not x_device_id:
+        logger.warning("frame_rejected_missing_device_id stream_id=%s", x_stream_id)
         raise HTTPException(status_code=400, detail="Missing required X-Device-Id header")
     if not is_valid_identifier(x_stream_id) or not is_valid_identifier(x_device_id):
+        logger.warning(
+            "frame_rejected_invalid_identifier device_id=%s stream_id=%s",
+            x_device_id,
+            x_stream_id,
+        )
         raise HTTPException(status_code=400, detail="Invalid device or stream identifier")
     if request.headers.get("content-type", "").split(";", 1)[0].strip().lower() != "image/jpeg":
+        logger.warning(
+            "frame_rejected_content_type device_id=%s stream_id=%s content_type=%s",
+            x_device_id,
+            x_stream_id,
+            request.headers.get("content-type", "missing"),
+        )
         raise HTTPException(status_code=415, detail="Content-Type must be image/jpeg")
 
     content_length = request.headers.get("content-length")
     if content_length:
         try:
             if int(content_length) > MAX_FRAME_SIZE_BYTES:
+                logger.warning(
+                    "frame_rejected_oversized_content_length device_id=%s stream_id=%s "
+                    "content_length=%s max_bytes=%s",
+                    x_device_id,
+                    x_stream_id,
+                    content_length,
+                    MAX_FRAME_SIZE_BYTES,
+                )
                 raise HTTPException(status_code=413, detail="Frame exceeds maximum size")
         except ValueError:
+            logger.warning(
+                "frame_rejected_invalid_content_length device_id=%s stream_id=%s",
+                x_device_id,
+                x_stream_id,
+            )
             raise HTTPException(status_code=400, detail="Invalid Content-Length")
 
     chunks = []
@@ -210,25 +312,43 @@ async def post_frame(
     async for chunk in request.stream():
         total_bytes += len(chunk)
         if total_bytes > MAX_FRAME_SIZE_BYTES:
+            logger.warning(
+                "frame_rejected_oversized_body device_id=%s stream_id=%s bytes=%s max_bytes=%s",
+                x_device_id,
+                x_stream_id,
+                total_bytes,
+                MAX_FRAME_SIZE_BYTES,
+            )
             raise HTTPException(status_code=413, detail="Frame exceeds maximum size")
         chunks.append(chunk)
     body = b"".join(chunks)
     is_valid, error_msg = validate_frame(body)
     if not is_valid:
+        logger.warning(
+            "frame_rejected_invalid_jpeg device_id=%s stream_id=%s sequence=%s "
+            "bytes=%s reason=%s",
+            x_device_id,
+            x_stream_id,
+            x_sequence,
+            len(body),
+            error_msg,
+        )
         if "exceeds maximum limit" in (error_msg or ""):
             raise HTTPException(status_code=413, detail=error_msg)
         raise HTTPException(status_code=400, detail=error_msg)
 
-    enqueue_frame(
+    accepted = enqueue_frame(
         stream_id=x_stream_id,
         device_id=x_device_id,
-        sequence=x_sequence or 0,
+        sequence=x_sequence,
         captured_at=x_captured_at or "",
         frame_bytes=body,
+        debug_faces=x_debug_faces,
     )
 
     return {
-        "status": "accepted",
+        "status": "accepted" if accepted else "dropped",
+        "reason": None if accepted else "stale_or_out_of_order",
         "stream_id": x_stream_id,
         "sequence": x_sequence,
     }

@@ -34,10 +34,10 @@ flowchart LR
 2. `lounge-control` sends the photos and an opaque candidate ID to `face-worker`. The worker derives one embedding per usable photo and keeps those templates in memory while the guest is in the active lounge cohort; submitted photo bytes are discarded after enrollment.
 3. The phone sends sampled JPEG frames plus stream metadata to `lounge-control` over its WebSocket.
 4. `lounge-control` validates each frame and forwards it over internal HTTP to the worker's bounded queue. If inference falls behind, the queue drops old frames rather than building latency.
-5. `face-worker` detects faces, tracks them between frames, and compares their embeddings with templates for the active lounge cohort. A unique candidate must remain stable for three observations before a match is emitted.
+5. `face-worker` detects faces, tracks them between frames, and compares their embeddings with templates for the active lounge cohort. The same unique candidate must pass the score and separation checks in at least two of the latest three observations before a match is emitted.
 6. `lounge-control` turns a match into a short cue and returns it to the phone over that same WebSocket. Exit or expiry removes the candidate template.
 
-The browser dashboard is a separate staff control surface: it sends tap and guest-registration requests over HTTP and receives roster updates over SSE. Its local **Face Recognition Test** is also a diagnostic WebSocket client: it displays each `face_crop` image beside its matching `detection_set` guest entry, including guest ID, temporary track ID, preferences, and allergies. This is a preview of the data a phone client should join and render; there is not yet an Android glasses companion app.
+The browser dashboard is a separate staff control surface: it sends tap and guest-registration requests over HTTP and receives roster updates over SSE. Its local **Face Recognition Test** is also a diagnostic WebSocket client: it displays each stable `face_crop` image beside its matching `detection_set` guest entry, including guest ID, temporary track ID, preferences, and allergies. The test opts into raw detections and displays all model-returned face crops with detector and identity scores plus service timings, including faces below the identity-match threshold. This is a preview of the data a phone client should join and render; there is not yet an Android glasses companion app.
 
 ## Models
 
@@ -48,7 +48,7 @@ The worker uses InsightFace with CPU ONNX Runtime on the laptop; it does not cal
 
 InsightFace downloads the model package on first startup into the named `face-model-cache` Docker volume. The container installs InsightFace 2.1.0 with the CPU `onnxruntime` and headless OpenCV packages.
 
-Current POC settings are a `0.65` cosine threshold, a `0.10` margin over the next candidate, and three stable observations. `0.65` follows the official recognition example as a starting point; it is not validated on the project's images and must be tuned on varied, consented test images. [InsightFace example](https://github.com/deepinsight/insightface/blob/master/examples/face_recognition/insightface_app.py)
+Current POC settings are a `0.65` cosine threshold, a `0.10` margin over the next candidate, and confirmation when the same candidate passes in at least two of three observations. `0.65` follows the official recognition example as a starting point; it is not validated on the project's images and must be tuned on varied, consented test images. [InsightFace example](https://github.com/deepinsight/insightface/blob/master/examples/face_recognition/insightface_app.py)
 
 ## Local demo
 
@@ -65,9 +65,11 @@ The one-shot replay sends three frames through the same WebSocket route used by 
 The staff page is served at `/` by `lounge-control`. Its visible sections are:
 
 - **Guest Tap Ingress:** select a seeded guest, edit the guest reference, and send Admit or Depart taps.
-- **Register Mock Hotel Guest:** add a synthetic profile and upload/capture up to three reference photos. Use clear, single-face images; the local mock-hotel database retains them for re-enrollment.
+- **Register Mock Hotel Guest:** add a synthetic profile and upload/capture up to three reference photos. Use clear, single-face images; the local mock-hotel database retains them for re-enrollment. Editing a guest shows the saved reference photos; selecting replacement photos replaces the saved set. Depart and re-admit an active guest to refresh its in-memory face template after profile edits.
 - **Active Lounge Roster:** see admitted guest names and admission times, refreshed through SSE.
-- **Face Recognition Test:** send a picture or three distinct camera frames through the device WebSocket and view the returned crops and metadata together. Results stay in the browser until the next test; server-side detections and crops expire after five seconds.
+- **Face Recognition Test:** send a picture or three distinct camera frames through the device WebSocket and view stable matches plus raw model detections. Results stay in the browser until the next test; server-side detections and crops are transient.
+
+For container-side diagnostics, run `docker compose logs -f lounge-control face-worker`. In debug mode, the logs show per-frame handoff/processing times and every returned detection's bounding box, detector score, identity similarity, and transient crop ID. Image bytes are not written to logs.
 
 ### Synthetic two-person test
 
@@ -80,7 +82,7 @@ The repository contains a generated two-person lounge scene and a single-person 
 3. In **Face Recognition Test**, choose `fixtures/synthetic_multi_face.png`, enter the device token from `.env`, and select **Send picture test**.
 4. Inspect **People returned to this client**. Each stable match should appear as its own card with the cropped face, `guest_id`, `track_id`, name, preferences, and allergies. The images arrive as separate `face_crop` messages and are joined to people in `detection_set` by `crop_id` (with `track_id` linking the person to a live face track).
 
-The picture button sends the same synthetic still three times so the existing three-observation stability gate can be exercised. This is a repeatable wiring/demo check, not an accuracy evaluation or evidence that three independent camera observations were captured. The mock-hotel registration stores these synthetic reference photos in its Docker volume; `docker compose down -v` removes the local database and cached model along with other named volumes. Because a `face_crop` and its `detection_set` reference may have an unrelated periodic snapshot between them, clients retain unreferenced crops for up to five seconds and refresh that timer when a snapshot references the crop.
+The picture button sends the same synthetic still three times so the 2-of-3 observation gate can be exercised. This is a repeatable wiring/demo check, not an accuracy evaluation or evidence that three independent camera observations were captured. The mock-hotel registration stores these synthetic reference photos in its Docker volume; `docker compose down -v` removes the local database and cached model along with other named volumes. Because a `face_crop` and its `detection_set` reference may have an unrelated periodic snapshot between them, clients retain unreferenced crops for up to five seconds and refresh that timer when a snapshot references the crop.
 
 The current `test_one_stream_returns_multiple_guest_profiles_and_face_crops` test verifies the two-person WebSocket contract using controlled face-worker callbacks: two guest entries, two crop images, and two cues. It does not run the recognition model on `synthetic_multi_face.png`. A real model-backed image test requires the face-worker dependencies and model cache to run in Docker.
 
