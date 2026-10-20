@@ -916,7 +916,7 @@ async def device_stream_endpoint(
     """Authenticated WebSocket for paired phone companion app / frame replay.
 
     - Authenticates explicitly via query parameter or Authorization header
-    - Accepts frame metadata and binary JPEG frames
+    - Accepts frame metadata and binary JPEG or JPEG XL frames
     - Forwards transient frames via internal HTTP to face-worker
     - Pushes per-track cues, transient face crops, and current detection sets to the phone
     - Cleans up session and stream state upon disconnect
@@ -1013,6 +1013,7 @@ async def device_stream_endpoint(
                         sequence=device_message.sequence,
                         captured_at=device_message.captured_at or utc_now_iso(),
                         frame_bytes=frame_bytes,
+                        image_format=device_message.format,
                     )
                     del frame_bytes
                 elif device_message.type == "ping":
@@ -1021,7 +1022,7 @@ async def device_stream_endpoint(
                     await websocket.send_json({"type": "error", "message": "Unsupported device message"})
 
             elif "bytes" in message:
-                # Raw binary JPEG frame preceded by frame_meta
+                # Raw binary frame preceded by frame_meta
                 frame_bytes = message["bytes"]
                 meta = device_manager.get_and_clear_pending_meta(device_id)
                 if not meta:
@@ -1037,6 +1038,7 @@ async def device_stream_endpoint(
                     sequence=meta["sequence"],
                     captured_at=meta["captured_at"],
                     frame_bytes=frame_bytes,
+                    image_format=meta.get("format", "image/jpeg"),
                 )
                 del frame_bytes
 
@@ -1054,6 +1056,7 @@ async def forward_frame_to_worker(
     sequence: int,
     captured_at: str,
     frame_bytes: bytes,
+    image_format: str = "image/jpeg",
 ) -> None:
     """Forward transient frame to face-worker via internal HTTP.
 
@@ -1064,18 +1067,19 @@ async def forward_frame_to_worker(
         return
 
     logger.info(
-        "frame_received device_id=%s stream_id=%s sequence=%s frame_bytes=%d captured_at=%s",
+        "frame_received device_id=%s stream_id=%s sequence=%s frame_bytes=%d format=%s captured_at=%s",
         device_id,
         stream_id,
         sequence,
         len(frame_bytes),
+        image_format,
         captured_at,
     )
     if not http_client:
         return
 
     headers = {
-        "Content-Type": "image/jpeg",
+        "Content-Type": image_format,
         "X-Device-Id": device_id,
         "X-Stream-Id": stream_id,
         "X-Sequence": str(sequence),

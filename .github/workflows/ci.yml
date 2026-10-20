@@ -61,6 +61,19 @@ jobs:
           grep -q 'guest-registration-form' /tmp/dashboard.html
           curl --fail --silent http://127.0.0.1:8000/v1/lounge/roster
 
+      - name: Verify OpenCV JPEG XL decode and frame intake in face-worker image
+        run: |
+          docker compose exec -T face-worker python -c 'import cv2, imagecodecs, numpy as np; from pathlib import Path; from vision import InsightFaceEngine; rgb=np.zeros((8, 10, 3), dtype=np.uint8); rgb[0, 0]=[11, 73, 201]; frame=imagecodecs.jpegxl_encode(rgb, lossless=True); info="\\n".join(line for line in cv2.getBuildInformation().splitlines() if "JPEG XL" in line); print(info or "JPEG XL missing from OpenCV build information"); decoded=cv2.imdecode(np.frombuffer(frame, dtype=np.uint8), cv2.IMREAD_COLOR); assert decoded is not None and decoded[0, 0].tolist() == [201, 73, 11]; vision_decoded=InsightFaceEngine._decode(frame, "image/jxl"); assert vision_decoded[0, 0].tolist() == [201, 73, 11]; Path("/tmp/ci-frame.jxl").write_bytes(frame)'
+          docker compose cp face-worker:/tmp/ci-frame.jxl /tmp/ci-frame.jxl
+          curl --fail --silent --show-error \
+            -H "X-Internal-Token: ${INTERNAL_API_TOKEN}" \
+            -H 'Content-Type: image/jxl' \
+            -H 'X-Stream-Id: ci-jxl-stream' \
+            -H 'X-Device-Id: ci-jxl-device' \
+            -H "X-Captured-At: $(date -u +'%Y-%m-%dT%H:%M:%SZ')" \
+            --data-binary @/tmp/ci-frame.jxl \
+            http://127.0.0.1:8001/internal/v1/frames
+
       - name: Stop services and remove test data
         if: always()
         run: docker compose down --volumes --remove-orphans

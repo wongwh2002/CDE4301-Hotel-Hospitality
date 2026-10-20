@@ -38,9 +38,9 @@
     },
     "format": {
       "type": "string",
-      "enum": ["image/jpeg"],
+      "enum": ["image/jpeg", "image/jxl"],
       "default": "image/jpeg",
-      "description": "MIME type of frame encoding"
+      "description": "MIME type of incoming frame encoding; the current client may send JPEG or JPEG XL"
     },
     "token": {
       "type": "string",

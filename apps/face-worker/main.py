@@ -258,7 +258,7 @@ async def post_frame(
     x_debug_faces: bool = Header(False, alias="X-Debug-Faces"),
     _: None = Depends(require_internal_token),
 ):
-    """Ingest a binary JPEG frame.
+    """Ingest a binary JPEG or JPEG XL frame.
 
     Rejects malformed or oversized input; queues valid frames on a bounded
     per-stream queue that drops stale frames under backpressure.
@@ -277,14 +277,18 @@ async def post_frame(
             x_stream_id,
         )
         raise HTTPException(status_code=400, detail="Invalid device or stream identifier")
-    if request.headers.get("content-type", "").split(";", 1)[0].strip().lower() != "image/jpeg":
+    image_format = request.headers.get("content-type", "").split(";", 1)[0].strip().lower()
+    if image_format not in {"image/jpeg", "image/jxl"}:
         logger.warning(
             "frame_rejected_content_type device_id=%s stream_id=%s content_type=%s",
             x_device_id,
             x_stream_id,
             request.headers.get("content-type", "missing"),
         )
-        raise HTTPException(status_code=415, detail="Content-Type must be image/jpeg")
+        raise HTTPException(
+            status_code=415,
+            detail="Content-Type must be image/jpeg or image/jxl",
+        )
 
     content_length = request.headers.get("content-length")
     if content_length:
@@ -322,14 +326,15 @@ async def post_frame(
             raise HTTPException(status_code=413, detail="Frame exceeds maximum size")
         chunks.append(chunk)
     body = b"".join(chunks)
-    is_valid, error_msg = validate_frame(body)
+    is_valid, error_msg = validate_frame(body, image_format)
     if not is_valid:
         logger.warning(
-            "frame_rejected_invalid_jpeg device_id=%s stream_id=%s sequence=%s "
+            "frame_rejected_invalid_image device_id=%s stream_id=%s sequence=%s format=%s "
             "bytes=%s reason=%s",
             x_device_id,
             x_stream_id,
             x_sequence,
+            image_format,
             len(body),
             error_msg,
         )
@@ -344,6 +349,7 @@ async def post_frame(
         captured_at=x_captured_at or "",
         frame_bytes=body,
         debug_faces=x_debug_faces,
+        image_format=image_format,
     )
 
     return {

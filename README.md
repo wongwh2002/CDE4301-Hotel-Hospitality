@@ -34,7 +34,7 @@ Docker Compose
 │   └── Compact glanceable cue composer (🟢 ✅ ALEX / 🔴 ⚠️ PEANUT ALLERGY)
 ├── face-worker (port 8001)
 │   ├── Candidate enrollment (PUT /internal/v1/candidates/{id}, RAM only, photo discarded)
-│   ├── Frame intake & validation (POST /internal/v1/frames, binary JPEG, bounds check)
+│   ├── Frame intake & validation (POST /internal/v1/frames, JPEG/JPEG XL, bounds check)
 │   ├── Per-stream freshest-frame processing (drops stale and out-of-order frames)
 │   └── CPU face detection and active-cohort matching with buffalo_l
 └── mock-hotel (port 8002)
@@ -88,7 +88,7 @@ docker compose up --build --wait
 ```
 
 The three core services (`lounge-control`, `face-worker`, `mock-hotel`) start and await healthcheck readiness before Compose returns. Host ports `8000` and `8003` both map to the same `lounge-control` container (container port `8000`); port `8003` is a convenient video-stream address, not another container. `lounge-control` forwards frames internally to `face-worker`.
-On first startup, `face-worker` downloads the InsightFace `buffalo_l` model pack into the `face-model-cache` Compose volume. This one-time download needs internet access. Alex's seeded profile uses a fictional, generated test face so the optional frame replay can exercise a local stable match; other seeded profiles keep person-free placeholder images. See the [mobile-friendly architecture and demo guide](docs/architecture/face-recognition-demo.md) and [`apps/face-worker/MODELS.md`](apps/face-worker/MODELS.md) for more detail.
+The first face-worker build compiles a custom OpenCV wheel with JPEG XL support; this took about eight minutes in the tested M1 Docker build. Docker caches the wheel-build layer on subsequent builds unless the Dockerfile or base image changes. On first startup, `face-worker` downloads the InsightFace `buffalo_l` model pack into the `face-model-cache` Compose volume. This one-time download needs internet access. Alex's seeded profile uses a fictional, generated test face so the optional frame replay can exercise a local stable match; other seeded profiles keep person-free placeholder images. See the [mobile-friendly architecture and demo guide](docs/architecture/face-recognition-demo.md) and [`apps/face-worker/MODELS.md`](apps/face-worker/MODELS.md) for more detail.
 
 #### 3. Open the Laptop Dashboard
 
@@ -156,7 +156,7 @@ The phone receives `debug_timing` after frame handoff from lounge-control, then 
 docker compose -p hotel-poc logs -f lounge-control face-worker
 ```
 
-Logs contain detector boxes, scores, crop IDs, and timing values; they never contain JPEG bytes. “All detections” means all faces returned by the model's configured detector. The identity matching threshold does not filter this debug view.
+Logs contain detector boxes, scores, crop IDs, and timing values; they never contain incoming frame bytes or JPEG crops. “All detections” means all faces returned by the model's configured detector. The identity matching threshold does not filter this debug view.
 
 For verbose face-worker progress, set `FACE_WORKER_LOG_LEVEL=DEBUG` in `.env`, then rebuild and recreate the service with `docker compose -p hotel-poc up -d --build --force-recreate face-worker`. Follow the logs with:
 
@@ -164,7 +164,7 @@ For verbose face-worker progress, set `FACE_WORKER_LOG_LEVEL=DEBUG` in `.env`, t
 docker compose -p hotel-poc logs -f --tail=200 face-worker lounge-control
 ```
 
-At `DEBUG`, face-worker logs frame queueing and dequeue, detector start/completion, per-face best-candidate score and rejection reason, the rolling stability votes, and match-callback results. At `INFO`, it logs model startup, candidate enrollment/removal, stable-match/clear callbacks, queue drops, and the existing opt-in raw-detection summaries. These logs use opaque candidate and track IDs; guest names, embeddings, JPEG frames, and face crops are not logged.
+At `DEBUG`, face-worker logs frame queueing and dequeue, detector start/completion, per-face best-candidate score and rejection reason, the rolling stability votes, and match-callback results. At `INFO`, it logs model startup, candidate enrollment/removal, stable-match/clear callbacks, queue drops, and the existing opt-in raw-detection summaries. These logs use opaque candidate and track IDs; guest names, embeddings, frame bytes, and face crops are not logged.
 
 Frame freshness defaults are `MAX_FRAME_AGE_SECONDS=2.0` and `MAX_FRAME_QUEUE_AGE_SECONDS=1.0`. A parseable ISO-8601 `captured_at` older than two seconds is rejected at intake and checked again immediately before inference; frames that wait over one second in the worker queue are dropped before inference. Each stream must use increasing sequence numbers; duplicate or older sequences are rejected. When inference falls behind, the worker selects the newest queued frame and discards older queued frames. Keep phone and laptop clocks synchronized for capture-time rejection; if `captured_at` is absent or unparseable, the worker still applies the local queue-age and sequence checks. Tune these defaults only after measuring capture-to-cue delay on the target phone and laptop. With `debug_faces: true`, the timing row also shows whether the worker accepted or dropped a frame; stale and out-of-order reasons are logged by face-worker.
 
@@ -197,20 +197,20 @@ The worker response looks like this; `crop_b64` carries the transient JPEG bytes
 
 The phone app is the bridge between the glasses camera/display and the laptop. For the first POC, run a small **face-presence trigger on the paired phone** when the glasses SDK exposes preview frames. Keep identity matching on the laptop in `face-worker`; the phone detector only decides whether a frame should be uploaded. Meta's toolkit connects a phone app to compatible glasses. For the physical Rokid RV101, the CXR-L sample currently documented in this repo demonstrates still-photo capture, but does not prove a continuous preview stream or custom model execution on the glasses. Treat that camera capability as a device-validation gate. ([Meta Device Access Toolkit](https://developers.meta.com/wearables/device-access-toolkit/), [RV101 CXR-L photo sample](https://github.com/e7naq3y/CXR-L-SDK/blob/main/cxrlsample101/app/src/main/java/com/rokid/cxrlsample/activities/photo/PhotoUsageViewModel.kt))
 
-The phone sends JPEG frame messages to `lounge-control` over the WebSocket on host port `8003`. The same endpoint supports these capture patterns:
+The phone sends JPEG or JPEG XL frame messages to `lounge-control` over the WebSocket on host port `8003`. JPEG remains the default and browser dashboard format; JPEG XL is an optional incoming-frame format for phone clients with a JXL encoder:
 
-- **One still image:** connect, send one `frame_meta` message followed by its binary JPEG, wait for a response or timeout, then close. The frame is accepted, but one image cannot fill the default three-observation window; a guest is returned after the same candidate passes in at least two of those three observations.
+- **One still image:** connect, send one `frame_meta` message followed by its binary JPEG or JPEG XL bytes, wait for a response or timeout, then close. The frame is accepted, but one image cannot fill the default three-observation window; a guest is returned after the same candidate passes in at least two of those three observations.
 - **Short burst:** open one WebSocket for a capture event, send three distinct frames with increasing sequence numbers and the same `stream_id`, wait for the match result or timeout, then close. That brief connect-send-wait-close cycle is what “one short connection” means; you do not keep it open between capture events.
-- **Ongoing sampled feed:** keep the WebSocket open during the camera session and send repeated `frame_meta`/JPEG pairs. Start around 1 frame per second on the current laptop Docker setup; higher rates may queue or drop frames depending on inference speed. This behaves like a live feed made from still frames.
+- **Ongoing sampled feed:** keep the WebSocket open during the camera session and send repeated `frame_meta`/image pairs. Start around 1 frame per second on the current laptop Docker setup; higher rates may queue or drop frames depending on inference speed. This behaves like a live feed made from still frames.
 
 Each frame is sent separately; this endpoint does not accept raw RTSP or H.264 video. Lounge-control forwards frames to `face-worker`. The repo contains the server endpoint and a replay client, but does not yet include an Android companion app that captures from the glasses and sends frames.
 
 #### Recommended capture flow
 
 1. Connect the glasses to the companion phone using the vendor SDK. If the SDK supplies a live preview, run a lightweight face detector on downscaled preview frames on the phone. Do not assume the detector runs on the glasses themselves.
-2. When the detector first sees a face, send a short burst of **three distinct frames** to the laptop, then apply a cooldown until the face leaves or the trigger resets. The worker confirms an identity when the same guest passes matching checks in at least two of the three observations. Do not resend the same JPEG three times as if they were independent observations.
-3. Send the full scene JPEG for each selected frame. The laptop worker detects and tracks every visible face, then matches only against currently active lounge candidates. The phone does not send guest names, allergies, card numbers, or a claimed identity. The face-presence result stays local and is not part of the current wire contract.
-4. `lounge-control` forwards each transient JPEG to `face-worker`. Stable matches return on the same WebSocket as a full per-person snapshot, separate cropped-face messages, and the existing per-track cue/clear updates; the phone joins the person and image data and renders it through the glasses SDK.
+2. When the detector first sees a face, send a short burst of **three distinct frames** to the laptop, then apply a cooldown until the face leaves or the trigger resets. The worker confirms an identity when the same guest passes matching checks in at least two of the three observations. Do not resend the same image three times as if they were independent observations.
+3. Send the full scene JPEG or JPEG XL frame for each selected capture. The laptop worker detects and tracks every visible face, then matches only against currently active lounge candidates. The phone does not send guest names, allergies, card numbers, or a claimed identity. The face-presence result stays local and is not part of the current wire contract.
+4. `lounge-control` forwards each transient JPEG or JPEG XL frame to `face-worker`. Stable matches return on the same WebSocket as a full per-person snapshot, separate cropped-face messages, and the existing per-track cue/clear updates; the phone joins the person and image data and renders it through the glasses SDK.
 
 If the SDK only provides still-photo capture, there is no preview frame on which to run a pre-capture trigger. You can run the detector on each requested photo and upload only photos containing a face, but that filters network traffic after capture; it does not trigger the shutter. A single still also cannot fill the current three-observation confirmation window. Validate continuous preview or a burst of distinct photos on the exact glasses/SDK before promising automatic detection-triggered cues.
 
@@ -218,7 +218,7 @@ If the SDK only provides still-photo capture, there is no preview frame on which
 
 Pass `device-stream-v1` and `device-token.<DEVICE_AUTH_TOKEN>` (with the actual local token value) as WebSocket subprotocols. Do not put the token in the URL. The server selects `device-stream-v1` for the connection; the token subprotocol is used only to authenticate it. `INTERNAL_API_TOKEN` is a separate service-to-service credential and must not be sent by the phone.
 
-After the server replies with `session_ack`, send this JSON text message immediately before each frame's binary JPEG message:
+After the server replies with `session_ack`, send this JSON text message immediately before each frame's binary image message. Use `image/jpeg` for JPEG or `image/jxl` for JPEG XL:
 
 ```json
 {
@@ -232,7 +232,7 @@ After the server replies with `session_ack`, send this JSON text message immedia
 }
 ```
 
-Then send the JPEG bytes as a **WebSocket binary message**, not as base64 JSON. Send each metadata/binary pair back-to-back before sending the next frame's metadata. Increment `sequence` for every frame on that stream and use that frame's capture time. Keep each image below `MAX_FRAME_SIZE_BYTES` (5 MiB by default). The `device_id` in metadata is optional; if included, it must match the ID in the WebSocket path. `debug_faces` is optional and defaults to `false`; use `true` only while diagnosing detection. See [`contracts/device-stream.schema.json`](contracts/device-stream.schema.json).
+Then send the encoded image bytes as a **WebSocket binary message**, not as base64 JSON. A JPEG XL client must send actual JPEG XL bytes and set `format` to `image/jxl`; changing only the MIME type is not enough. Send each metadata/binary pair back-to-back before sending the next frame's metadata. Increment `sequence` for every frame on that stream and use that frame's capture time. Keep each image below `MAX_FRAME_SIZE_BYTES` (5 MiB by default). The `device_id` in metadata is optional; if included, it must match the ID in the WebSocket path. `debug_faces` is optional and defaults to `false`; use `true` only while diagnosing detection. JPEG remains the default for frame-replay, the dashboard, guest reference photos, and returned face crops. The Docker face-worker builds a custom headless OpenCV wheel against libjxl and uses it to decode incoming JXL. `imagecodecs` remains as a fallback for local environments with a prebuilt OpenCV wheel that lacks JXL. See [`contracts/device-stream.schema.json`](contracts/device-stream.schema.json) and the [JPEG XL comparison and implementation notes](docs/research/jpeg-xl-for-lounge-poc.md).
 
 The phone should listen for JSON messages on this same connection. An active cue has `type: "cue"`, `status: "active"`, and a nested `cue` object containing `headline` plus an optional `alert`; a clear/suppressed cue uses `type: "clear"`. See [`contracts/cue.schema.json`](contracts/cue.schema.json). Do not let a cue from an old `stream_id` remain displayed after disconnect or session change.
 
@@ -345,5 +345,7 @@ To run the automated tests outside of AGY:
 
 ```bash
 python3 -m pip install -r requirements-test.txt
-python3 -m pytest
+python3 -m pytest -q
 ```
+
+Run `python3 -m pytest -q` before pushing a change; GitHub Actions runs the same test command. The Compose CI job also checks JXL decoding inside the built face-worker image and posts a JXL frame to its intake endpoint.

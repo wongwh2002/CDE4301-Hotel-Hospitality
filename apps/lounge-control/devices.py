@@ -95,7 +95,7 @@ class DeviceSessionManager:
         return self._stream_to_device.get(stream_id) == device_id
 
     def set_pending_meta(self, device_id: str, meta: Dict[str, Any]) -> bool:
-        """Store stream metadata preceding a binary JPEG frame."""
+        """Store stream metadata preceding a binary frame."""
         stream_id = meta.get("stream_id")
         if not stream_id or not self.bind_stream(device_id, stream_id):
             return False

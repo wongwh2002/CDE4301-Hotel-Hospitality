@@ -13,7 +13,7 @@ from typing import Any, Optional
 
 
 class InvalidImage(ValueError):
-    """Raised when a JPEG cannot be decoded as an image."""
+    """Raised when an incoming JPEG or JPEG XL frame cannot be decoded."""
 
 
 class FaceCountError(ValueError):
@@ -47,19 +47,66 @@ class InsightFaceEngine:
         self._model_lock = Lock()
 
     @staticmethod
-    def _decode(image_bytes: bytes):
-        import cv2
+    def _decode(image_bytes: bytes, image_format: str = "image/jpeg"):
         import numpy as np
+        import cv2
 
-        image = cv2.imdecode(np.frombuffer(image_bytes, dtype=np.uint8), cv2.IMREAD_COLOR)
+        if image_format == "image/jxl":
+            # The Docker image builds OpenCV against libjxl, so prefer the same
+            # decoder used for JPEG. Keep imagecodecs as a fallback for local
+            # Python environments whose prebuilt OpenCV wheel lacks JXL.
+            encoded = np.frombuffer(image_bytes, dtype=np.uint8)
+            image = cv2.imdecode(encoded, cv2.IMREAD_COLOR)
+            if image is not None and image.size:
+                return image
+
+            import imagecodecs
+
+            try:
+                image = imagecodecs.jpegxl_decode(image_bytes)
+            except Exception as exc:
+                raise InvalidImage("JPEG XL could not be decoded") from exc
+            if image is None or image.size == 0:
+                raise InvalidImage("JPEG XL decoded to an empty image")
+            if image.dtype != np.uint8:
+                raise InvalidImage(
+                    f"JPEG XL must decode to 8-bit pixels, got {image.dtype}"
+                )
+            if image.ndim == 2:
+                image = np.repeat(image[:, :, None], 3, axis=2)
+            elif image.ndim == 3:
+                channels = image.shape[2]
+                if channels in (1, 2):
+                    image = np.repeat(image[:, :, :1], 3, axis=2)
+                elif channels == 4:
+                    image = image[:, :, :3]
+                elif channels != 3:
+                    raise InvalidImage(
+                        f"JPEG XL must have 1, 2, 3, or 4 channels, got {channels}"
+                    )
+            else:
+                raise InvalidImage(
+                    f"JPEG XL must decode to a 2D or 3D image, got {image.ndim} dimensions"
+                )
+            # imagecodecs returns RGB(A); InsightFace/OpenCV expects BGR.
+            return np.ascontiguousarray(image[:, :, :3][:, :, ::-1])
+
+        if image_format != "image/jpeg":
+            raise InvalidImage(f"Unsupported image format: {image_format}")
+
+        image = cv2.imdecode(
+            np.frombuffer(image_bytes, dtype=np.uint8), cv2.IMREAD_COLOR
+        )
         if image is None or image.size == 0:
             raise InvalidImage("JPEG could not be decoded")
         return image
 
-    def detect(self, image_bytes: bytes) -> list[DetectedFace]:
+    def detect(
+        self, image_bytes: bytes, image_format: str = "image/jpeg"
+    ) -> list[DetectedFace]:
         import cv2
 
-        image = self._decode(image_bytes)
+        image = self._decode(image_bytes, image_format)
         faces: list[DetectedFace] = []
         # Lounge matching and direct phone streams share this model instance.
         # Serialize inference to bound contention across incoming frames.

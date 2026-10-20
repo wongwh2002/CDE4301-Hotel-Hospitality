@@ -640,8 +640,9 @@ def test_device_websocket_authenticated_and_frame_exchange(lounge_control_client
     caplog.set_level(logging.INFO, logger="lounge_control")
 
     with patch("apps_lounge_control.http_client") as mock_client:
-        mock_post = AsyncMock()
+        mock_post = MagicMock()
         mock_post.status_code = 202
+        mock_post.json.return_value = {"status": "accepted"}
         mock_client.post = AsyncMock(return_value=mock_post)
 
         with lounge_control_client.websocket_connect(
@@ -680,6 +681,7 @@ def test_device_websocket_authenticated_and_frame_exchange(lounge_control_client
                 == (
                     "frame_received device_id=device-test-1 stream_id=stream-glasses-01 "
                     f"sequence=1 frame_bytes={len(SYNTHETIC_JPEG_BYTES)} "
+                    "format=image/jpeg "
                     "captured_at=2026-10-07T12:00:00Z"
                 )
                 for record in caplog.records
@@ -740,7 +742,48 @@ def test_device_websocket_forwards_sustained_jpeg_frames_on_one_connection(
     assert sequence_logged == [True] * frame_count
     expected_size = f"frame_bytes={len(SYNTHETIC_JPEG_BYTES)} "
     assert all(expected_size in message for message in frame_logs)
+    assert all("format=image/jpeg" in message for message in frame_logs)
     assert mock_client.post.await_count == frame_count
+
+
+def test_device_websocket_forwards_jpeg_xl_content_type(lounge_control_client):
+    import base64
+    import imagecodecs
+    import numpy as np
+
+    rgb = np.zeros((8, 10, 3), dtype=np.uint8)
+    frame = imagecodecs.jpegxl_encode(rgb, lossless=True)
+    with patch("apps_lounge_control.http_client") as mock_client:
+        mock_client.post = AsyncMock(return_value=MagicMock(status_code=202))
+        with lounge_control_client.websocket_connect(
+            "/v1/video/stream/phone-jxl?token=test-secret-token"
+        ) as phone:
+            assert phone.receive_json()["type"] == "session_ack"
+            phone.send_json({
+                "type": "frame_meta",
+                "stream_id": "stream-jxl-forward",
+                "sequence": 1,
+                "captured_at": fresh_match_time(),
+                "format": "image/jxl",
+            })
+            assert phone.receive_json()["type"] == "detection_set"
+            phone.send_bytes(frame)
+            phone.send_json({
+                "type": "frame",
+                "stream_id": "stream-jxl-forward",
+                "sequence": 2,
+                "captured_at": fresh_match_time(),
+                "format": "image/jxl",
+                "payload_b64": base64.b64encode(frame).decode("ascii"),
+            })
+            phone.send_json({"type": "ping"})
+            assert phone.receive_json() == {"type": "pong"}
+
+    assert mock_client.post.await_count == 2
+    assert all(
+        call.kwargs["headers"]["Content-Type"] == "image/jxl"
+        for call in mock_client.post.await_args_list
+    )
 
 
 def test_match_callback_generates_emoji_cue(lounge_control_client):
@@ -907,6 +950,7 @@ async def test_concurrent_entry_taps_for_same_guest_create_one_presence(lounge_c
     photo_resp.content = SYNTHETIC_JPEG_BYTES
     worker_resp = MagicMock()
     worker_resp.status_code = 200
+    worker_resp.json.return_value = {"template_status": "ready"}
 
     async def mock_get(url, *args, **kwargs):
         return profile_resp if "lounge-profile" in url else photo_resp

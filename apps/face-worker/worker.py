@@ -198,17 +198,30 @@ def _capture_age_seconds(captured_at: str) -> Optional[float]:
     return (datetime.now(timezone.utc) - capture_time).total_seconds()
 
 
-def validate_frame(frame_bytes: bytes) -> Tuple[bool, Optional[str]]:
-    """Check payload bounds and JPEG start/end markers."""
+def validate_frame(
+    frame_bytes: bytes, image_format: str = "image/jpeg"
+) -> Tuple[bool, Optional[str]]:
+    """Check payload bounds and the declared JPEG or JPEG XL encoding."""
     if len(frame_bytes) > MAX_FRAME_SIZE_BYTES:
         return False, f"Frame size {len(frame_bytes)} exceeds maximum limit {MAX_FRAME_SIZE_BYTES}"
     if len(frame_bytes) < 4:
         return False, "Frame payload too small to be a valid image"
-    if frame_bytes[:2] != b"\xff\xd8":
-        return False, "Malformed JPEG frame: missing Start Of Image marker (0xFFD8)"
-    if frame_bytes[-2:] != b"\xff\xd9":
-        return False, "Malformed JPEG frame: missing End Of Image marker (0xFFD9)"
-    return True, None
+    if image_format == "image/jpeg":
+        if frame_bytes[:2] != b"\xff\xd8":
+            return False, "Malformed JPEG frame: missing Start Of Image marker (0xFFD8)"
+        if frame_bytes[-2:] != b"\xff\xd9":
+            return False, "Malformed JPEG frame: missing End Of Image marker (0xFFD9)"
+        return True, None
+    if image_format == "image/jxl":
+        try:
+            import imagecodecs
+
+            if imagecodecs.jpegxl_check(frame_bytes):
+                return True, None
+        except Exception as exc:
+            return False, f"Malformed JPEG XL frame: {exc}"
+        return False, "Malformed JPEG XL frame: invalid JPEG XL payload"
+    return False, f"Unsupported frame format: {image_format}"
 
 
 def enqueue_frame(
@@ -218,8 +231,9 @@ def enqueue_frame(
     captured_at: str,
     frame_bytes: bytes,
     debug_faces: bool = False,
+    image_format: str = "image/jpeg",
 ) -> bool:
-    """Queue a transient JPEG unless it is stale or older than this stream's last frame."""
+    """Queue a transient image unless it is stale or older than this stream's last frame."""
     _stats["frames_received"] += 1
     now_monotonic = time.monotonic()
     expired_sequence_streams = [
@@ -272,7 +286,16 @@ def enqueue_frame(
     if dropped_oldest:
         _stats["frames_dropped"] += 1
     queue.append(
-        (device_id, stream_id, sequence, captured_at, debug_faces, now_monotonic, frame_bytes)
+        (
+            device_id,
+            stream_id,
+            sequence,
+            captured_at,
+            debug_faces,
+            now_monotonic,
+            image_format,
+            frame_bytes,
+        )
     )
     if dropped_oldest:
         logger.warning(
@@ -760,7 +783,7 @@ async def _report_debug_frame(client: httpx.AsyncClient, frame: Dict[str, Any]) 
 
 
 async def cv_worker_loop() -> None:
-    """Process each stream's newest queued JPEG without blocking the API loop."""
+    """Process each stream's newest queued image without blocking the API loop."""
     async with httpx.AsyncClient(timeout=3.0) as client:
         while True:
             try:
@@ -779,6 +802,7 @@ async def cv_worker_loop() -> None:
                         captured_at,
                         debug_enabled,
                         enqueued_at,
+                        image_format,
                         frame_bytes,
                     ) = queue[-1]
                     queue.clear()
@@ -828,11 +852,12 @@ async def cv_worker_loop() -> None:
                     engine = _face_engine
                     logger.debug(
                         "frame_processing_started device_id=%s stream_id=%s sequence=%s "
-                        "bytes=%s queue_wait_ms=%.2f model_ready=%s debug_faces=%s",
+                        "bytes=%s image_format=%s queue_wait_ms=%.2f model_ready=%s debug_faces=%s",
                         device_id,
                         stream_id,
                         sequence,
                         len(frame_bytes),
+                        image_format,
                         queue_wait_ms,
                         engine is not None,
                         debug_enabled,
@@ -846,7 +871,7 @@ async def cv_worker_loop() -> None:
                             sequence,
                         )
                         detections = (
-                            await asyncio.to_thread(engine.detect, frame_bytes)
+                            await asyncio.to_thread(engine.detect, frame_bytes, image_format)
                             if engine is not None
                             else []
                         )

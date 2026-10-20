@@ -68,7 +68,7 @@ def test_frame_intake_valid_jpeg(face_worker_client):
         "X-Stream-Id": "stream-test-1",
         "X-Device-Id": "device-test-1",
         "X-Sequence": "1",
-        "X-Captured-At": "2026-10-07T12:00:00Z",
+        "X-Captured-At": datetime.now(timezone.utc).isoformat(),
     }
     resp = face_worker_client.post(
         "/internal/v1/frames",
@@ -117,6 +117,76 @@ def test_frame_intake_requires_jpeg_content_type(face_worker_client):
     assert resp.status_code == 415
 
 
+def test_frame_intake_accepts_jpeg_xl(face_worker_client):
+    import imagecodecs
+    import numpy as np
+
+    sample = np.zeros((16, 24, 3), dtype=np.uint8)
+    sample[:, :, 0] = 40
+    frame = imagecodecs.jpegxl_encode(sample, lossless=True)
+    response = face_worker_client.post(
+        "/internal/v1/frames",
+        content=frame,
+        headers={
+            "Content-Type": "image/jxl",
+            "X-Stream-Id": "stream-jxl-test",
+            "X-Device-Id": "device-jxl-test",
+            "X-Sequence": "1",
+            "X-Captured-At": datetime.now(timezone.utc).isoformat(),
+        },
+    )
+
+    assert response.status_code == 202
+    assert response.json()["status"] == "accepted"
+
+
+def test_jpeg_xl_decoder_returns_bgr_pixels():
+    import imagecodecs
+    import numpy as np
+
+    from vision import InsightFaceEngine
+
+    rgb = np.zeros((3, 4, 3), dtype=np.uint8)
+    rgb[0, 0] = [11, 73, 201]
+    encoded = imagecodecs.jpegxl_encode(rgb, lossless=True)
+
+    decoded = InsightFaceEngine._decode(encoded, "image/jxl")
+
+    assert decoded.shape == (3, 4, 3)
+    assert decoded.dtype == np.uint8
+    assert decoded[0, 0].tolist() == [201, 73, 11]
+
+
+def test_jpeg_xl_decoder_expands_grayscale_to_bgr():
+    import imagecodecs
+    import numpy as np
+
+    from vision import InsightFaceEngine
+
+    gray = np.full((3, 4), 83, dtype=np.uint8)
+    encoded = imagecodecs.jpegxl_encode(gray, lossless=True)
+
+    decoded = InsightFaceEngine._decode(encoded, "image/jxl")
+
+    assert decoded.shape == (3, 4, 3)
+    assert decoded[0, 0].tolist() == [83, 83, 83]
+
+
+def test_frame_intake_rejects_malformed_jpeg_xl(face_worker_client):
+    response = face_worker_client.post(
+        "/internal/v1/frames",
+        content=b"not a JPEG XL frame",
+        headers={
+            "Content-Type": "image/jxl",
+            "X-Stream-Id": "stream-jxl-invalid",
+            "X-Device-Id": "device-jxl-test",
+        },
+    )
+
+    assert response.status_code == 400
+    assert "Malformed JPEG XL" in response.json()["detail"]
+
+
 def test_frame_intake_malformed_jpeg(face_worker_client):
     """Test 400 Bad Request on invalid/corrupted frame bytes."""
     corrupted_bytes = b"not a valid jpeg frame"
@@ -162,10 +232,18 @@ def test_face_worker_queue_is_bounded_and_keeps_latest_frame(monkeypatch):
 
     stream_id = "queue-bound-test"
     for sequence in range(3):
-        worker.enqueue_frame(stream_id, "device-test-1", sequence, "now", bytes([sequence]))
+        worker.enqueue_frame(
+            stream_id,
+            "device-test-1",
+            sequence,
+            "now",
+            bytes([sequence]),
+            image_format="image/jxl",
+        )
 
     queue = worker._stream_queues[stream_id]
     assert len(queue) == 2
+    assert queue[-1][-2] == "image/jxl"
     assert queue[-1][-1] == b"\x02"
     assert worker.get_stats()["frames_dropped"] == 1
 
@@ -296,6 +374,8 @@ def test_worker_retries_crop_until_lounge_control_confirms_delivery(monkeypatch)
             raise worker.httpx.ConnectError("lounge-control offline")
 
     class SuccessResponse:
+        status_code = 200
+
         def raise_for_status(self):
             return None
 

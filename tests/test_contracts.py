@@ -80,6 +80,13 @@ def test_device_stream_message_model():
     dumped = msg.model_dump()
     assert dumped["type"] == "frame_meta"
     assert dumped["format"] == "image/jpeg"
+    assert DeviceStreamMessage(
+        type="frame_meta",
+        stream_id="stream-jxl",
+        sequence=1,
+        captured_at="2026-10-07T12:00:00Z",
+        format="image/jxl",
+    ).format == "image/jxl"
 
     # Negative sequence must fail
     with pytest.raises(ValidationError):

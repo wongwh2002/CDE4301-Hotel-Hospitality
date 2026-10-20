@@ -48,7 +48,7 @@ class DeviceStreamMessage(ContractModel):
     device_id: Optional[Identifier] = None
     sequence: Optional[int] = Field(None, ge=0)
     captured_at: Optional[str] = None
-    format: Literal["image/jpeg"] = "image/jpeg"
+    format: Literal["image/jpeg", "image/jxl"] = "image/jpeg"
     debug_faces: bool = False
     token: Optional[str] = None
     payload_b64: Optional[str] = None
