@@ -1,6 +1,16 @@
 # Face worker model
 
-The POC uses InsightFace's **`buffalo_l`** package through `FaceAnalysis` and CPU ONNX Runtime:
+The POC uses InsightFace's **`buffalo_l`** package through `FaceAnalysis` and ONNX Runtime. Docker Compose selects `CPUExecutionProvider` by default. On an Apple Silicon Mac, the opt-in native worker can select Core ML and keep CPU fallback enabled:
+
+- `FACE_EXECUTION_PROVIDER=cpu` explicitly selects CPU (the default, including Docker).
+- `FACE_EXECUTION_PROVIDER=coreml` selects Core ML with `CPUAndGPU` compute units and ONNX Runtime CPU fallback. It fails at startup if Core ML is unavailable. On the tested M1, this assigned all profiled `buffalo_l` operations to the Core ML GPU; `CPUAndNeuralEngine` assigned them to Core ML CPU.
+- `FACE_EXECUTION_PROVIDER=auto` leaves provider selection to InsightFace / ONNX Runtime.
+- `COREML_COMPUTE_UNITS` supports `CPUOnly`, `CPUAndNeuralEngine`, `CPUAndGPU`, or `ALL`.
+- `COREML_PROFILE_COMPUTE_PLAN=true` asks ONNX Runtime to log the per-operation hardware compute plan. Check those logs to verify Neural Engine/GPU placement; the session's available provider list alone does not prove where each operation ran.
+
+The face-worker `/health` response reports its requested provider mode, available providers, provider list for every loaded model session, Core ML compute units/profile setting, model initialization duration, and active match thresholds. The native setup and paired benchmark workflow are documented in the repository [README](../../README.md#optional-run-the-face-worker-natively-on-an-m1-mac). Native macOS/Core ML inference runs outside Docker; lounge-control and mock-hotel can remain in Compose through `compose.m1-native.yaml`.
+
+The active models are:
 
 - **SCRFD-10GF** detects faces and five-point landmarks.
 - **ResNet-50 / ArcFace** creates a normalized 512-value face embedding.

@@ -311,7 +311,7 @@
       <div class="diagram-shell">
         <svg class="architecture" id="architecture" viewBox="0 0 1380 820" role="img" aria-labelledby="svg-title svg-desc" data-focus="all" xmlns="http://www.w3.org/2000/svg">
           <title id="svg-title">Hotel lounge smart-glasses proposed architecture</title>
-          <desc id="svg-desc">A card reader sends entry events through an adapter to FastAPI lounge-control inside Docker. The control service looks up synthetic guest profiles from a SQLite-backed mock-hotel API and keeps active guest context in memory. One or more Android companion phones connect over the private lounge network, each using its own authenticated WebSocket to send camera frames and receive full detection-set snapshots plus separate cropped-face messages joined by crop ID. The control service forwards frames to a Python face-worker, which rejects captures older than two seconds, drops queue waits over one second, and can return all raw face detections and timings in opt-in debug mode. Lounge-control retries pending enrollment and restores active templates after worker restarts from stored reference photos. All three service ports are published only on the private local network for this proof of concept.</desc>
+          <desc id="svg-desc">The default architecture runs lounge-control, mock-hotel, and a CPU face-worker in Docker. On Apple Silicon, an optional Compose overlay keeps lounge-control and mock-hotel in Docker and routes frame requests to a native macOS face-worker using ONNX Runtime Core ML with CPU fallback. One or more Android companion phones connect over the private lounge network, each using its own authenticated WebSocket to send camera frames and receive full detection-set snapshots plus separate cropped-face messages joined by crop ID. The worker rejects captures older than two seconds, drops queue waits over one second, and can return all raw face detections and timings in opt-in debug mode.</desc>
           <defs>
             <marker id="arrow-teal" viewBox="0 0 10 10" refX="8.4" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" class="flow-arrow-teal"/></marker>
             <marker id="arrow-blue" viewBox="0 0 10 10" refX="8.4" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" class="flow-arrow-blue"/></marker>
@@ -476,6 +476,14 @@
         <p>Clients can opt in with <code>debug_faces: true</code> to receive transient crops for every face returned by the model, including faces below the identity-match threshold. The debug response includes detector scores and worker timings; lounge-control also reports the frame handoff time. Docker logs show the same scores and timing metadata without image bytes.</p>
       </div>
     </section>
+
+    <aside class="validation" aria-label="Optional Apple Silicon inference benchmark">
+      <span class="validation-icon" aria-hidden="true">🧪</span>
+      <div>
+        <strong>Optional M1 inference benchmark</strong>
+        <p>The default Docker face-worker uses ONNX Runtime CPU for a portable baseline. On an Apple Silicon laptop, <code>compose.m1-native.yaml</code> keeps lounge-control and mock-hotel in Docker while routing frames to the native macOS worker using Core ML with CPU fallback. The worker health response reports its per-model providers and startup time; enabling <code>COREML_PROFILE_COMPUTE_PLAN=true</code> logs operation placement for Neural Engine/GPU/CPU verification. Use the README benchmark commands to compare identical frame/reference inputs, detection and match counts, p50/p95 latency, throughput, and dropped frames.</p>
+      </div>
+    </aside>
 
     <aside class="validation" aria-label="RV101 validation gate">
       <span class="validation-icon" aria-hidden="true">📷</span>

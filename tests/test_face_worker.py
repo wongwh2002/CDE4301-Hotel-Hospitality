@@ -17,6 +17,14 @@ def test_face_worker_health(face_worker_client):
     data = resp.json()
     assert data["status"] == "ok"
     assert data["service"] == "face-worker"
+    assert data["requested_execution_provider"] == "cpu"
+    assert data["service_startup_ms"] is not None
+    assert data["model_initialization_ms"] is None
+    assert isinstance(data["model_cache_warm_at_start"], bool)
+    assert data["model_runtime"] is None
+    assert data["match_threshold"] == 0.65
+    assert data["stable_frame_count"] == 3
+    assert data["stable_match_count"] == 2
 
 
 def test_internal_face_worker_routes_require_service_token(face_worker_client):

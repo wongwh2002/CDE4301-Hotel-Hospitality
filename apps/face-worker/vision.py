@@ -7,9 +7,12 @@ images before any real-world use; an uncertain result never becomes a match.
 from __future__ import annotations
 
 from dataclasses import dataclass
+import os
 from pathlib import Path
 from threading import Lock
 from typing import Any, Optional
+
+from execution_provider import select_execution_providers
 
 
 class InvalidImage(ValueError):
@@ -30,21 +33,82 @@ class DetectedFace:
 
 
 class InsightFaceEngine:
-    """CPU-first face detector and embedding model backed by InsightFace."""
+    """Face detector and embedding model backed by InsightFace."""
 
     def __init__(self, model_root: str | Path):
         import numpy as np
+        import onnxruntime
         from insightface.app import FaceAnalysis
 
+        provider_mode = os.environ.get("FACE_EXECUTION_PROVIDER", "cpu")
+        compute_units = os.environ.get(
+            "COREML_COMPUTE_UNITS", "CPUAndGPU"
+        )
+        profile_compute_plan = os.environ.get(
+            "COREML_PROFILE_COMPUTE_PLAN", "false"
+        ).strip().lower() in {"1", "true", "yes", "on"}
+        providers = select_execution_providers(
+            provider_mode,
+            available_providers=onnxruntime.get_available_providers(),
+            coreml_compute_units=compute_units,
+            profile_compute_plan=profile_compute_plan,
+        )
         self._np = np
         self._analysis = FaceAnalysis(
             name="buffalo_l",
             root=str(model_root),
             allowed_modules=["detection", "recognition"],
-            providers=["CPUExecutionProvider"],
+            providers=providers,
         )
-        self._analysis.prepare(ctx_id=-1)
+        # InsightFace interprets ctx_id < 0 as an instruction to reset each
+        # session to CPUExecutionProvider. A non-negative context preserves the
+        # providers passed above; CPU mode is still CPU-only by configuration.
+        self._analysis.prepare(ctx_id=0)
         self._model_lock = Lock()
+        providers_by_model = self._session_providers_by_model(self._analysis)
+        configured_providers = (
+            [
+                provider if isinstance(provider, str) else provider[0]
+                for provider in providers
+            ]
+            if providers is not None
+            else ["InsightFace/ONNX Runtime automatic selection"]
+        )
+        self.runtime_info = {
+            "requested_mode": provider_mode.strip().lower(),
+            "available_providers": onnxruntime.get_available_providers(),
+            "configured_providers": configured_providers,
+            "providers_by_model": providers_by_model,
+            "coreml_compute_units": (
+                compute_units
+                if provider_mode.strip().lower() == "coreml"
+                else None
+            ),
+            "coreml_profile_compute_plan": profile_compute_plan,
+            "coreml_session_count": sum(
+                "CoreMLExecutionProvider" in model_providers
+                for model_providers in providers_by_model.values()
+            ),
+        }
+
+    @staticmethod
+    def _session_providers_by_model(analysis) -> dict[str, list[str]]:
+        """Report each loaded model's actual ONNX Runtime session providers."""
+        result: dict[str, list[str]] = {}
+        for model_name, model in getattr(analysis, "models", {}).items():
+            session = next(
+                (
+                    getattr(model, attribute, None)
+                    for attribute in ("session", "sess", "_session")
+                    if callable(
+                        getattr(getattr(model, attribute, None), "get_providers", None)
+                    )
+                ),
+                None,
+            )
+            if session is not None:
+                result[str(model_name)] = list(session.get_providers())
+        return result
 
     @staticmethod
     def _decode(image_bytes: bytes, image_format: str = "image/jpeg"):

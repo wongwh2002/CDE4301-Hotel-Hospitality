@@ -90,6 +90,81 @@ docker compose up --build --wait
 The three core services (`lounge-control`, `face-worker`, `mock-hotel`) start and await healthcheck readiness before Compose returns. Host ports `8000` and `8003` both map to the same `lounge-control` container (container port `8000`); port `8003` is a convenient video-stream address, not another container. `lounge-control` forwards frames internally to `face-worker`.
 The first face-worker build compiles a custom OpenCV wheel with JPEG XL support; this took about eight minutes in the tested M1 Docker build. Docker caches the wheel-build layer on subsequent builds unless the Dockerfile or base image changes. On first startup, `face-worker` downloads the InsightFace `buffalo_l` model pack into the `face-model-cache` Compose volume. This one-time download needs internet access. Alex's seeded profile uses a fictional, generated test face so the optional frame replay can exercise a local stable match; other seeded profiles keep person-free placeholder images. See the [mobile-friendly architecture and demo guide](docs/architecture/face-recognition-demo.md) and [`apps/face-worker/MODELS.md`](apps/face-worker/MODELS.md) for more detail.
 
+#### Optional: run the face worker natively on an M1 Mac
+
+Docker Compose remains the default and portable setup. The M1 experiment keeps `lounge-control` and `mock-hotel` in Docker and runs only `face-worker` as a native macOS process using ONNX Runtime Core ML. The commands below use isolated ports: Docker CPU on `18200`–`18203`, and the native hybrid stack on `18100`–`18103`. This lets the normal `hotel-poc` stack continue running.
+
+Create the native settings file and install the separate ARM64 Python environment:
+
+```bash
+cp .env.m1.example .env.m1
+./scripts/setup-m1-native-worker.sh
+```
+
+Start the Docker CPU baseline in one terminal. The first model start downloads `buffalo_l` into that Compose project's volume.
+
+```bash
+FACE_EXECUTION_PROVIDER=cpu \
+LOUNGE_CONTROL_PORT=18200 VIDEO_STREAM_PORT=18203 \
+MOCK_HOTEL_PORT=18202 FACE_WORKER_PORT=18201 \
+docker compose -p hotel-poc-m1-docker --env-file .env --env-file .env.m1 \
+  -f compose.yaml up --build --wait
+```
+
+Start the native hybrid stack in a second terminal:
+
+```bash
+docker compose -p hotel-poc-m1-native --env-file .env --env-file .env.m1 \
+  -f compose.yaml -f compose.m1-native.yaml \
+  up --build --wait mock-hotel lounge-control
+```
+
+Start the native worker in a third terminal. It uses `~/.insightface` for its model files and Core ML compilation cache.
+
+```bash
+set -a
+source .env
+source .env.m1
+set +a
+FACE_EXECUTION_PROVIDER=coreml ./scripts/run-m1-face-worker.sh
+```
+
+The launcher defaults to Core ML `CPUAndGPU`, with ONNX Runtime's CPU provider as fallback. `FACE_EXECUTION_PROVIDER=cpu` selects CPU-only mode. Core ML mode exits with an error if the installed ONNX Runtime lacks `CoreMLExecutionProvider`. The worker's `/health` response reports actual providers per model, model initialization time, service startup time, and whether its model files were already cached at startup. Set `COREML_PROFILE_COMPUTE_PLAN=true` before launching to log per-operation placement. A provider appearing in a session's provider list does not prove every operation used it. On this M1, the profiled `buffalo_l` graphs assigned all 137 plan entries to Core ML's GPU with `CPUAndGPU`; `CPUAndNeuralEngine` assigned them to Core ML's CPU. This is why the tested native default is `CPUAndGPU`. See [ONNX Runtime's Core ML provider options](https://onnxruntime.ai/docs/execution-providers/CoreML-ExecutionProvider.html).
+
+With all three stacks ready, run the same synthetic two-face frame and two reference photos against both workers. The benchmark returns timings, face/match counts, and frame-drop counters. Its report contains input SHA-256 fingerprints but no image bytes, crops, names, candidate IDs, or embeddings.
+
+```bash
+set -a
+source .env
+source .env.m1
+set +a
+
+.venv-m1/bin/python scripts/m1_benchmark.py \
+  --label docker-cpu \
+  --ws-url ws://127.0.0.1:18203 \
+  --worker-url http://127.0.0.1:18201 \
+  --frame fixtures/synthetic_multi_face.png \
+  --reference synthetic-left=fixtures/synthetic_guest_left.jpg \
+  --reference synthetic-right=fixtures/synthetic_guest_right.jpg \
+  --frames 10 --interval-seconds 0.5 --result-timeout-seconds 20 \
+  --report-out /tmp/m1-docker.json
+
+.venv-m1/bin/python scripts/m1_benchmark.py \
+  --label native-coreml \
+  --ws-url ws://127.0.0.1:18103 \
+  --worker-url http://127.0.0.1:18101 \
+  --frame fixtures/synthetic_multi_face.png \
+  --reference synthetic-left=fixtures/synthetic_guest_left.jpg \
+  --reference synthetic-right=fixtures/synthetic_guest_right.jpg \
+  --frames 10 --interval-seconds 0.5 --result-timeout-seconds 20 \
+  --report-out /tmp/m1-native.json
+
+.venv-m1/bin/python scripts/compare_m1_benchmarks.py \
+  /tmp/m1-docker.json /tmp/m1-native.json
+```
+
+The reports are comparable only when frame/reference fingerprints, send interval, and worker match thresholds agree. The per-frame parity check compares detection counts and raw candidate-match decisions; it does not validate stable lounge identity snapshots or recognition accuracy. The first model initialization includes any missing model download and Core ML compilation; compare warm inference separately. In the measured synthetic 10-frame run at a 0.5-second send interval, native Core ML returned all 10 frames with zero drops (worker detect p50 about 87 ms; capture-to-result p50 about 167 ms). The Docker CPU baseline returned 5/10 frames (worker detect p50 about 941 ms; capture-to-result p50 about 1,342 ms) and dropped 5 stale frames because inference could not keep up with the send cadence. The Docker model cache was cold and its roughly 27.9-second initialization included downloading model files; the native cache was already warm, so those startup figures are not a fair comparison. This is a short synthetic POC check, not sustained-load or real-world recognition validation. Native Core ML uses macOS system frameworks and cannot run inside the Linux Docker container.
+
 #### 3. Open the Laptop Dashboard
 
 Open `http://127.0.0.1:8000/` on the laptop. The dashboard starts with a seeded guest selected, lets you edit the guest reference, register mock guests with up to three uploaded or camera-captured face photos, edit an existing guest's profile and saved photos, send entry/exit taps, and view the active roster. In edit mode, saved photos are shown; selecting new photos replaces the full saved set, while leaving the selection empty keeps it. If you change an already admitted guest's photos or profile fields, depart and admit them again to refresh the active face-worker candidate. For phone or other laptop access on the trusted Wi-Fi, use `http://<laptop-lan-ip>:8000/` after setting `HOST_BIND_ADDRESS` as described below. The local mock-hotel SQLite volume retains reference photos for re-enrollment; use synthetic or consented demo images.

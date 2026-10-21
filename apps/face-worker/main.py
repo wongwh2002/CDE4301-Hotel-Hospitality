@@ -54,18 +54,38 @@ FACE_RECOGNITION_ENABLED = os.environ.get("FACE_RECOGNITION_ENABLED", "false").l
     "1", "true", "yes", "on"
 }
 FACE_MODELS_DIR = os.environ.get("FACE_MODELS_DIR", "/models/insightface")
+FACE_EXECUTION_PROVIDER = os.environ.get("FACE_EXECUTION_PROVIDER", "cpu")
+FACE_PROCESS_STARTED_AT = time.perf_counter()
+FACE_SERVICE_STARTUP_MS: Optional[float] = None
+FACE_MODEL_INITIALIZATION_MS: Optional[float] = None
+FACE_MODEL_RUNTIME: Optional[dict] = None
+FACE_MODEL_CACHE_WARM_AT_START: Optional[bool] = None
+
+
+def _model_cache_is_warm() -> bool:
+    model_dir = Path(FACE_MODELS_DIR) / "models" / "buffalo_l"
+    required_models = ("det_10g.onnx", "w600k_r50.onnx")
+    return all(
+        (model_dir / model_name).is_file()
+        and (model_dir / model_name).stat().st_size > 0
+        for model_name in required_models
+    )
 
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
+    global FACE_MODEL_INITIALIZATION_MS, FACE_MODEL_RUNTIME
+    global FACE_MODEL_CACHE_WARM_AT_START, FACE_SERVICE_STARTUP_MS
+    FACE_MODEL_CACHE_WARM_AT_START = _model_cache_is_warm()
     logger.info(
         "service_starting recognition_enabled=%s match_threshold=%.3f margin_required=%.3f "
-        "stable_confirmation=%s_of_%s",
+        "stable_confirmation=%s_of_%s model_cache_warm_at_start=%s",
         FACE_RECOGNITION_ENABLED,
         MATCH_THRESHOLD,
         MATCH_MARGIN,
         STABLE_MATCH_COUNT,
         STABLE_FRAME_COUNT,
+        FACE_MODEL_CACHE_WARM_AT_START,
     )
     if FACE_RECOGNITION_ENABLED:
         model_started = time.perf_counter()
@@ -76,13 +96,37 @@ async def lifespan(app: FastAPI):
             logger.exception("model_initialization_failed model=buffalo_l")
             raise
         set_face_engine(engine)
+        FACE_MODEL_INITIALIZATION_MS = (time.perf_counter() - model_started) * 1000
+        FACE_MODEL_RUNTIME = engine.runtime_info
+        logger.info(
+            "model_runtime requested_provider=%s available_providers=%s "
+            "configured_providers=%s providers_by_model=%s coreml_compute_units=%s "
+            "coreml_profile_compute_plan=%s coreml_session_count=%s",
+            FACE_MODEL_RUNTIME["requested_mode"],
+            FACE_MODEL_RUNTIME["available_providers"],
+            FACE_MODEL_RUNTIME["configured_providers"],
+            FACE_MODEL_RUNTIME["providers_by_model"],
+            FACE_MODEL_RUNTIME["coreml_compute_units"],
+            FACE_MODEL_RUNTIME["coreml_profile_compute_plan"],
+            FACE_MODEL_RUNTIME["coreml_session_count"],
+        )
         logger.info(
             "model_ready model=buffalo_l elapsed_seconds=%.2f",
-            time.perf_counter() - model_started,
+            FACE_MODEL_INITIALIZATION_MS / 1000,
         )
     else:
         logger.warning("face_recognition_disabled frames_will_not_be_matched=true")
 
+    FACE_SERVICE_STARTUP_MS = (time.perf_counter() - FACE_PROCESS_STARTED_AT) * 1000
+    logger.info(
+        "service_ready startup_ms=%.2f model_initialization_ms=%s "
+        "model_cache_warm_at_start=%s",
+        FACE_SERVICE_STARTUP_MS,
+        "n/a"
+        if FACE_MODEL_INITIALIZATION_MS is None
+        else f"{FACE_MODEL_INITIALIZATION_MS:.2f}",
+        FACE_MODEL_CACHE_WARM_AT_START,
+    )
     worker_task = asyncio.create_task(cv_worker_loop())
     logger.info("processing_loop_started")
     yield
@@ -122,6 +166,15 @@ async def health():
         "status": "ok",
         "service": "face-worker",
         "recognition_enabled": FACE_RECOGNITION_ENABLED,
+        "requested_execution_provider": FACE_EXECUTION_PROVIDER,
+        "service_startup_ms": FACE_SERVICE_STARTUP_MS,
+        "model_initialization_ms": FACE_MODEL_INITIALIZATION_MS,
+        "model_cache_warm_at_start": FACE_MODEL_CACHE_WARM_AT_START,
+        "model_runtime": FACE_MODEL_RUNTIME,
+        "match_threshold": MATCH_THRESHOLD,
+        "match_margin": MATCH_MARGIN,
+        "stable_frame_count": STABLE_FRAME_COUNT,
+        "stable_match_count": STABLE_MATCH_COUNT,
         **stats,
     }
 

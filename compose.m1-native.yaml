@@ -1,0 +1,12 @@
+# Optional overlay: keep lounge-control and mock-hotel in Docker, but direct
+# lounge-control's face-worker calls to the native Apple Silicon process.
+services:
+  face-worker:
+    profiles: ["docker-worker"]
+
+  lounge-control:
+    environment:
+      - FACE_WORKER_URL=http://host.docker.internal:${NATIVE_FACE_WORKER_PORT:-18101}
+    depends_on: !override
+      mock-hotel:
+        condition: service_healthy

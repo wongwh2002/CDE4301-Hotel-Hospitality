@@ -26,6 +26,8 @@ replay_pid*
 # Local Python and Docker development state
 .env
 .venv/
+.venv-m1/
+.env.m1
 __pycache__/
 .pytest_cache/
 .ruff_cache/
