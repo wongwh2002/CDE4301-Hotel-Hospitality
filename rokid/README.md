@@ -2,6 +2,29 @@
 
 The glasses capture images; the Python server recognizes faces and returns names for the glasses to display.
 
+This folder contains a standalone demo with a Kotlin Android app running on the glasses and a Python FastAPI server running on a laptop. The app accesses the glasses camera directly through Android CameraX and sends images over HTTP on a reachable Wi-Fi network. Face detection and identity matching run on the laptop's CPU.
+
+## Components
+
+| Location | Purpose |
+| --- | --- |
+| `app/` | Android app for camera capture, server communication, and text display on the glasses. |
+| `app/src/main/java/com/example/rokid_app/MainActivity.kt` | Manages camera permission, automatic capture, connection retries, and displayed results. |
+| `app/src/main/java/com/example/rokid_app/FaceServerClient.kt` | Checks server health and uploads JPEGs for recognition. |
+| `server/app.py` | FastAPI server with `GET /health` and `POST /detect`, YuNet face detection, and SFace identity matching. |
+| `server/faces/` | Reference-photo gallery; each image filename supplies the person's name. |
+| `server/setup.py` | Creates the Python environment, installs dependencies, and downloads recognition models. |
+| `server/run.py` | Starts the server, normally on port 8000, with a configurable matching threshold. |
+| `gradle.properties` | Configures the laptop server address compiled into the Android app. |
+
+## Relationship to the hotel POC
+
+This demo currently operates separately from the [main hotel smart-glasses POC](../README.md). It uses its own server, reference-photo gallery, and YuNet/SFace models. It does not yet connect to `lounge-control`, `face-worker`, or `mock-hotel`.
+
+The demo compares detected faces against the entire local gallery. Lounge entry/exit events, the active lounge cohort, hotel guest profiles, and allergy or preference cues are not integrated. The glasses show recognition names and status text. Connecting this app to the hotel backend requires adapting its HTTP request/response flow to the backend's authenticated WebSocket frame and cue protocol.
+
+Both servers default to host port 8000. When running this server alongside the main Compose stack, choose another port with `python server/run.py --port 8010` and update `faceServerUrl` accordingly before rebuilding the app.
+
 ## Pipeline
 
 1. **Load the gallery:** At server startup, images in server/faces/ are converted into SFace feature vectors and cached in memory. Each filename becomes the person's name.
@@ -11,11 +34,20 @@ The glasses capture images; the Python server recognizes faces and returns names
 
 Gallery vectors are rebuilt on every server restart. Incoming camera images are processed in memory and are not saved.
 
+## Data handling
+
+- Reference photos remain on disk in `server/faces/`; model files are downloaded into `server/models/` by setup.
+- Derived gallery feature vectors are cached in server memory and rebuilt at startup. Restart the server after changing gallery photos.
+- Incoming camera JPEGs are processed in memory without being saved to disk.
+- The server returns detected face names, similarity scores, bounding boxes, and display text. Multiple detected faces can be included in one response.
+- Server logs include recognition names and scores. Android Logcat includes capture, request, and processing timings.
+- Matching uses a similarity threshold per image; it does not apply the main hotel worker's multi-observation stability checks. The reported latency measurements below do not establish recognition accuracy.
+
 ## Setup and start
 
 ### 1. Set up the server once
 
-Install Python **3.12**. From the project root, run:
+Install Python **3.12**. Run the following server commands from the `rokid/` directory:
 
 ~~~text
 python server/setup.py
