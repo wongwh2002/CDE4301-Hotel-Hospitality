@@ -11,9 +11,9 @@
 
 ## Executive summary
 
-Relevant personalization can make hospitality service feel more fitting to an individual guest. Some hotels record preferences and service history, but collection does not guarantee that accurate, authorized context reaches the employee who can act on it, at the right service moment, or results in an interaction the guest welcomes. Research and one local hotel visit make this a credible issue to investigate; they do not establish the same gap at PARKROYAL.
+Some hotels collect guest preferences and service history to support more personalized experiences, but having the information does not guarantee that frontline staff can use relevant, current, authorized context to adapt service at the right moment. Research makes this a credible hotel-service design question; it does not prove the same gap exists in every hotel or at PARKROYAL.
 
-This project will investigate the lounge workflow at PARKROYAL and design a low-disruption way to surface one useful guest cue during food-or-drink service. The proposed proof of concept begins with a guest tapping a lounge card at the entrance. A simulated tap adds the guest to a temporary active-lounge set. A staff-facing device could then associate a visible guest with that set, using face matching or a simpler selection method, and show one current preference plus an explicit allergy alert where relevant. An allergy cue would prompt staff to verify the current information and the food item; it would not make the decision for them.
+This project will investigate the question through a bounded test in PARKROYAL's club lounge, where the team has permission to use the lounge as a POC test setting. It will map the current workflow and design a low-disruption way to surface one useful guest cue during food-or-drink service. The proposed proof of concept begins with a guest tapping a lounge card at the entrance. A simulated tap adds the guest to a temporary active-lounge set. A staff-facing device could then associate a visible guest with that set, using face matching or a simpler selection method, and show one current preference plus an explicit allergy alert where relevant. An allergy cue would prompt staff to verify the current information and the food item; it would not make the decision for them.
 
 The main local prototype can simulate entry events, maintain a candidate set, match test images or a laptop-camera feed against synthetic profiles, and show diagnostic match cards. The repository also contains a separate Rokid Android/laptop face-identification demo. Its README reports 30 capture requests over Wi-Fi on 2026-10-22, with 944 ms average and 1,114 ms p95 capture-request-to-response latency; 11 samples contained a detected face. This is a latency measurement, not a recognition-accuracy result, and excludes the wait for the next capture and physical display presentation. The standalone demo is not connected to lounge entry, the active guest set, hotel profiles, or allergy/preference cues; the exact glasses SKU used still needs confirmation. A physical reader, live hotel data, and an employee service interaction are not demonstrated. The next phase should map the workflow, compare face matching with a manual alternative, and run a small simulated evaluation using synthetic or appropriately consenting demo data. Current evidence supports a bounded design investigation, not a claim of improved guest satisfaction, safer food service, or commercial return.
 
@@ -35,7 +35,7 @@ Food and drink is a bounded first use case because a current preference can chan
 
 ### Working problem statement
 
-> Some hospitality providers collect guest preferences and service history to support tailored service, but the presence of data does not guarantee that it reaches frontline staff in an accurate, usable form or results in service guests experience as relevant. Existing research and project visits make this a credible issue to investigate; the current PARKROYAL lounge workflow and its specific barriers are not yet established. This project will map that workflow and prototype a staff-facing way to make one authorized guest cue actionable during food-and-drink service.
+> Some hotels collect guest preferences and service history to support personalized experiences, but having the information does not guarantee that frontline staff can use relevant, current, authorized context to adapt service at the right moment. Research makes this a credible hotel-service design question, but does not prove the same gap exists in every hotel or at PARKROYAL. We will investigate it through a bounded test in PARKROYAL's club lounge and prototype whether a staff-facing cue can make one guest preference actionable during food-and-drink service.
 
 This statement distinguishes an evidence-supported industry question from a locally confirmed problem. The current evidence does not establish PARKROYAL's profile system, staff access path, or the exact point where relevant guest context does or does not change service.
 
@@ -44,9 +44,9 @@ This statement distinguishes an evidence-supported industry question from a loca
 | Evidence | What it supports | What it does not establish |
 |---|---|---|
 | Novotel Singapore on Stevens visit notes | A local lead about ACDC, role-dependent access, pre-arrival profile review, and reported F&B reliance on memory or a physical VIP board. | A measured rate of profile use, a causal explanation for any gap, or the same workflow at PARKROYAL. ACDC is an Accor system and must not be attributed to PARKROYAL. |
-| PARKROYAL visit notes | Stakeholder interest in VIP recognition in the club lounge; possible fields include name, allergies, and preferences; room-card entry and privacy/access concerns are relevant to the concept. | The full in-lounge F&B workflow, a finding that staff lack time for personalization, or the exact scope of permission for devices, real guest data, or staff testing. |
+| PARKROYAL visit notes | Stakeholder interest in VIP recognition in the club lounge; possible fields include name, allergies, and preferences; room-card entry and privacy/access concerns are relevant to the concept. | The full in-lounge F&B workflow, a finding that staff lack time for personalization, or detailed conditions for staff testing, devices, live guest records, images, or biometric processing. |
 
-The team reports that PARKROYAL's General Manager allowed a proof of concept. The visit notes record stakeholder interest but do not specify the permission boundaries. **To confirm:** whether the permission covers synthetic-data demonstration only, staff observation or testing, device use in the lounge, or any real guest information.
+The team has permission from PARKROYAL to use the club lounge as the POC test setting. This establishes the case location, not blanket approval for every test method. **To confirm:** conditions for dates and device use, staff observation or testing, customer presence, and any use of real guest records, images, or biometric processing. Use synthetic profiles and consenting demo participants until the relevant boundaries are agreed.
 
 ## 3. Project aim, research question, and scope
 
@@ -54,7 +54,9 @@ The team reports that PARKROYAL's General Manager allowed a proof of concept. Th
 
 **How might we:**
 
-> How might we help PARKROYAL lounge staff use relevant, authorized guest context during food-and-drink service so the interaction feels more fitting to the guest?
+> How might we help hotel frontline staff use relevant, authorized guest context to adapt a service interaction in a way that feels fitting to the guest?
+
+The project will explore this hotel-level design question through the permitted PARKROYAL club-lounge test setting.
 
 **Research question:**
 
@@ -158,7 +160,7 @@ If no participant evaluation is completed before the interim deadline, report th
 
 The strongest current rationale is that relevant guest context can support a more fitting service interaction, while the path from recorded information to a staff action is worth investigating. The evidence does not establish PARKROYAL's profile system, lounge staff access path, or exact local barrier. A correct face match would establish identification performance only; personalization additionally requires a suitable staff action and, ideally, evidence that the guest experiences the action as relevant.
 
-The local workflow evidence is limited to hotel-visit notes. The Novotel notes provide an F&B example of possible profile-access friction, but one property cannot establish PARKROYAL practice. The PARKROYAL notes support the lounge as a useful bounded case and record interest in the concept, but they do not map the current F&B workflow or the exact POC permission. This report should identify which findings are literature-based, which come from local notes, and which remain design hypotheses.
+The local workflow evidence is limited to hotel-visit notes. The Novotel notes provide an F&B example of possible profile-access friction, but one property cannot establish PARKROYAL practice. The team has permission to use PARKROYAL's lounge as the POC test setting; that gives the project a bounded case, but does not establish the current F&B workflow or approval for live guest records, images, biometric processing, or every participant/device arrangement. This report should identify which findings are literature-based, which come from local notes, and which remain design hypotheses.
 
 Biometric identification linked to a guest profile and allergy information require careful purpose, access, accuracy, retention, and participant handling. The [Singapore PDPA](https://sso.agc.gov.sg/Act/PDPA2012) and the [PDPC biometric-data guide](https://www.pdpc.gov.sg/-/media/files/pdpc/pdf-files/other-guides/guide-to-biometric_17may2022.pdf) provide official reference points, but the PDPC guide focuses on security applications and is not blanket approval for service personalization. Before any real-guest trial, confirm the project purpose, notice/consent or other reviewed basis, authorized roles, bystander treatment, retention/deletion, and correction or withdrawal route with the hotel and university reviewers. A lounge-card tap for access does not by itself demonstrate that a guest agreed to camera capture for personalization.
 
@@ -170,7 +172,7 @@ The glasses path is a separate feasibility risk. Public project documentation do
 
 | Step | Decision or work | Evidence to retain |
 |---|---|---|
-| 1. Confirm the local problem and permission | Validate the staff role, current information path, one service moment, and the General Manager's POC scope | Workflow map; interview/observation notes; approved data and participant boundary |
+| 1. Map the local workflow and test conditions | Validate the staff role, current information path, one service moment, and the conditions attached to using the lounge as the test setting | Workflow map; interview/observation notes; agreed data and participant boundary |
 | 2. Finalize requirements and concept | Confirm the fields, compare manual selection with face matching, and define no-match and allergy behavior | Requirements matrix; alternative rationale; cue and fallback sketches |
 | 3. Complete one end-to-end demo | Connect simulated tap, active set, association or selection, cue, and expiry | Demo record; synthetic data description; known failure cases |
 | 4. Check device feasibility | Test the exact glasses camera/display path only if it is needed for the chosen evaluation | Camera-frame and cue-return observations; fallback decision |

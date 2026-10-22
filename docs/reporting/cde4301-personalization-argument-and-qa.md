@@ -14,7 +14,7 @@ The original chain—“personalization matters, hotels collect data, but staff 
 
 Use a more defensible chain:
 
-> Relevant personalization can make hospitality service feel more fitting to an individual guest. Some hotels record preferences and service history, but collecting information does not guarantee that it is accurate, available to the right employee at the right moment, or used in a way the guest welcomes. Research and one local hotel visit make this a credible issue to investigate; they do not establish the same gap at PARKROYAL. We will map the lounge workflow, then prototype whether an authorized guest cue can help staff adapt one food-or-drink interaction.
+> Some hotels collect guest preferences and service history to support more personalized experiences, but having the information does not guarantee that frontline staff can use relevant, current, authorized context to adapt service at the right moment. Research makes this a credible hotel-service design question; it does not prove the same gap exists in every hotel or at PARKROYAL. We will investigate the question through a bounded test in PARKROYAL's club lounge, where the team has permission to use the lounge as a POC test setting, and prototype whether a staff-facing cue can make one preference actionable during food-or-drink service.
 
 This keeps the problem distinct from the solution. Face matching and smart glasses are possible ways to connect a guest with relevant context; the project should test whether that connection is actually needed and useful.
 
@@ -22,7 +22,7 @@ This keeps the problem distinct from the solution. Face matching and smart glass
 
 It is sensible to discuss personalization across **hospitality, hotels, restaurants, and food service**. Restaurants and lounges offer directly relevant evidence about remembered orders, dietary inclusion, names, and service encounters.
 
-Keep the empirical project focused on the **PARKROYAL club lounge**. Treat restaurants as a literature and comparison context, not as a second field site. The lounge gives the project a real partner and a bounded service setting; its food-and-drink interactions make preferences and dietary information concrete.
+Frame the design problem at the **hotel-service level**, then keep discovery, prototyping, and evaluation bounded to the **PARKROYAL club lounge**. The team has permission to use the lounge as a POC test setting. Treat restaurants as a literature and comparison context, not as a second field site. This lets the report discuss a hotel-level design opportunity without implying that one lounge test represents every hotel.
 
 Do not describe ACDC as PARKROYAL's system. The visit notes place ACDC at **Novotel Singapore on Stevens**, an Accor property. PARKROYAL's notes record interest in lounge recognition and possible name, allergy, and preference cues; they do not document its current profile system or full lounge-service workflow.
 
@@ -32,9 +32,9 @@ Do not describe ACDC as PARKROYAL's system. The visit notes place ACDC at **Novo
 2. **Explain guest value.** A fitting interaction can support perceived service value and professional rapport. Use hotel evidence and clearly label the restaurant name-use evidence as cross-context support.
 3. **Show current practice.** Hotels can capture preferences through guest requests or forms and record or route them through PMS/CRM/guest-service systems. Use the Novotel ACDC visit as one local example, not as a PARKROYAL fact.
 4. **Show the possible gap.** Data can exist without becoming accurate, authorized, timely service action. Cite the hotel data-access survey, the lower guest recall during hotel stays, and the local ACDC account, while stating that none proves the cause at PARKROYAL.
-5. **Land the project question.** PARKROYAL is interested in lounge recognition, and food-and-drink service gives a bounded interaction to examine. Map its real workflow first; then test whether a cue is useful and whether face matching adds value over manual selection.
+5. **Land the project question.** The hotel-level design question is whether staff can turn relevant guest context into a fitting service action. PARKROYAL has permitted the team to use its lounge as the bounded test setting. Map the workflow there, then test whether a cue is useful and whether face matching adds value over manual selection.
 
-**Short spoken version:** “Personalization matters when it helps the hotel respond to what this guest needs, not simply because staff know a name. Hotels already record preferences, but the guest only benefits if the right information reaches the employee and changes the service in a way that feels appropriate. The research makes that translation gap plausible, while our PARKROYAL notes do not yet prove it exists in the lounge. We will map that workflow and test one food-and-drink cue before deciding whether facial recognition is warranted.”
+**Short spoken version:** “Personalization matters when it helps hotel staff respond to what a guest needs, not simply because they know a name. Some hotels record preferences, but the guest benefits only if relevant, authorized information reaches staff and changes the service in a way that feels appropriate. Research makes that translation gap worth investigating; it does not prove that every hotel or PARKROYAL has the same problem. PARKROYAL has permitted us to use its lounge as our test setting, where we will map the workflow and test one food-and-drink cue before deciding whether facial recognition is warranted.”
 
 ## Why personalization can matter
 
@@ -85,11 +85,13 @@ Therefore, the gap to investigate is not simply “hotels need more data.” It 
 
 ## Recommended problem framing
 
-> Some hospitality providers collect guest preferences and service history to support tailored service, but the presence of data does not guarantee that it reaches frontline staff in an accurate, usable form or results in service guests experience as relevant. Existing research and project visits make this a credible issue to investigate; the current PARKROYAL lounge workflow and its specific barriers are not yet established. This project will map that workflow and prototype a staff-facing way to make one authorized guest cue actionable during food-and-drink service.
+> Some hotels collect guest preferences and service history to support personalized experiences, but having the information does not guarantee that frontline staff can use relevant, current, authorized context to adapt service at the right moment. Research makes this a credible hotel-service design question, but does not prove the same gap exists in every hotel or at PARKROYAL. We will investigate it through a bounded test in PARKROYAL's club lounge, where the team has permission to use the lounge as the POC test setting, and prototype whether a staff-facing cue can make one guest preference actionable during food-and-drink service.
 
 **How might we:**
 
-> How might we help PARKROYAL lounge staff use relevant, authorized guest context during food-and-drink service so the interaction feels more fitting to the guest?
+> How might we help hotel frontline staff use relevant, authorized guest context to adapt a service interaction in a way that feels fitting to the guest?
+
+The empirical work will explore this hotel-level design question through the permitted PARKROYAL club-lounge test setting.
 
 **Research question:**
 
