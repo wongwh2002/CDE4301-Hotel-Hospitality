@@ -11,50 +11,50 @@
 
 ## Executive summary
 
-Hotel employees balance time-sensitive operational work with guest-facing service. During busy service periods, they may have less opportunity to retrieve and use recorded guest context. Existing hotel research supports investigating workload pressure and competing demands, but it does not show that check-in universally takes priority over personalization or that the same access problem has been confirmed at PARKROYAL. A local Novotel visit provides one example of food-and-beverage staff potentially lacking time to check recorded profiles; this is a separate property and cannot establish PARKROYAL's workflow.
+Relevant personalization can make hospitality service feel more fitting to an individual guest. Some hotels record preferences and service history, but collection does not guarantee that accurate, authorized context reaches the employee who can act on it, at the right service moment, or results in an interaction the guest welcomes. Research and one local hotel visit make this a credible issue to investigate; they do not establish the same gap at PARKROYAL.
 
 This project will investigate the lounge workflow at PARKROYAL and design a low-disruption way to surface one useful guest cue during food-or-drink service. The proposed proof of concept begins with a guest tapping a lounge card at the entrance. A simulated tap adds the guest to a temporary active-lounge set. A staff-facing device could then associate a visible guest with that set, using face matching or a simpler selection method, and show one current preference plus an explicit allergy alert where relevant. An allergy cue would prompt staff to verify the current information and the food item; it would not make the decision for them.
 
-The main local prototype can simulate entry events, maintain a candidate set, match test images or a laptop-camera feed against synthetic profiles, and show diagnostic match cards. The repository also contains a separate Rokid Android/laptop face-identification demo. Its README reports 30 capture requests over Wi-Fi on 2026-10-22, with 944 ms average and 1,114 ms p95 capture-request-to-response latency; 11 samples contained a detected face. This is a latency measurement, not a recognition-accuracy result, and excludes the wait for the next capture and physical display presentation. The standalone demo is not connected to lounge entry, the active guest set, hotel profiles, or allergy/preference cues; the exact glasses SKU used still needs confirmation. A physical reader, live hotel data, and an employee service interaction are not demonstrated. The next phase should connect the relevant components, validate the workflow, compare face matching with a manual alternative, and run a small simulated evaluation using synthetic or appropriately consenting demo data. Current evidence supports a bounded design investigation, not a claim of reduced real-shift workload, improved guest satisfaction, or safer food service.
+The main local prototype can simulate entry events, maintain a candidate set, match test images or a laptop-camera feed against synthetic profiles, and show diagnostic match cards. The repository also contains a separate Rokid Android/laptop face-identification demo. Its README reports 30 capture requests over Wi-Fi on 2026-10-22, with 944 ms average and 1,114 ms p95 capture-request-to-response latency; 11 samples contained a detected face. This is a latency measurement, not a recognition-accuracy result, and excludes the wait for the next capture and physical display presentation. The standalone demo is not connected to lounge entry, the active guest set, hotel profiles, or allergy/preference cues; the exact glasses SKU used still needs confirmation. A physical reader, live hotel data, and an employee service interaction are not demonstrated. The next phase should map the workflow, compare face matching with a manual alternative, and run a small simulated evaluation using synthetic or appropriately consenting demo data. Current evidence supports a bounded design investigation, not a claim of improved guest satisfaction, safer food service, or commercial return.
 
 ## 1. Hotel-service context and why personalization matters
 
-Frontline hotel work includes both guest-facing service and operational responsibilities. In an observational, multilevel study, Vashdi, Katz–Navon, and Delegach examined 245 employees in 39 departments across 13 hotels in one luxury chain. Their results indicate that workload pressure can condition the relationship between service-priority climate, emotional-labour strategies, and manager-rated service performance. The study does not compare check-in with personalization, measure guest-profile retrieval, or show that workload caused a particular service failure. It provides a reason to investigate competing demands, not proof of the specific problem proposed here. [Vashdi et al. (2022)](https://doi.org/10.1177/19389655211029912)
+For this project, **guest-context personalization** means an employee uses relevant, permitted knowledge about an individual guest to adapt the service or interaction. Recognition, context access, service adaptation, and the guest's perception that the service fits are separate stages. A name or profile display by itself is not enough. Lei et al. found that a hotel's attempt to tailor service and a guest's perception of that effort can differ, so the report should measure whether the action seems relevant rather than assume that intent guarantees a good guest experience. [Lei et al. (2024)](https://doi.org/10.1016/j.tourman.2023.104818)
 
-Related research also connects performance pressure with discretionary extra-role service among frontline hospitality employees. “Extra-role service” is broader than personalization, so this evidence should remain background context rather than be presented as a finding about guest profiles. [Rescalvo-Martin et al. (2022)](https://doi.org/10.1016/j.tmp.2022.101030)
+Customer–employee rapport offers a useful theory for the interpersonal side of recognition. Gremler and Gwinner linked rapport dimensions with satisfaction, loyalty intention, and word of mouth in two service contexts. This supports the idea that personal connection and an enjoyable interaction can matter in service; it does not mean a hotel employee and guest are literally friends or that every guest wants familiarity. [Gremler & Gwinner (2000)](https://journals.sagepub.com/doi/10.1177/109467050031006)
 
-For this project, **guest-context personalization** means an employee uses relevant, permitted knowledge about an individual guest to adapt the service or interaction. Recognition, access to context, adaptation, and the guest’s perception that the service fits are different steps. Recognizing a name or displaying a profile does not, by itself, demonstrate personalization. Lei et al. find that a hotel's attempt to tailor service and a guest's perception of that effort can differ; their studies support measuring whether an action feels relevant, not assuming that intent guarantees a good guest experience. [Lei et al. (2024)](https://doi.org/10.1016/j.tourman.2023.104818)
+The “friend who keeps asking your name” example is a relatable presentation hook, not evidence. A 2026 restaurant study found that name use can support satisfaction through rapport, but overuse or awkward use can create discomfort. Frequent luxury-hotel guests interviewed by Buehring and O'Mahony also described being acknowledged and remembered as a valued experience, although their sample of 25 cannot represent all hotel guests. Use a name as an optional, natural recognition cue; test the guest's comfort and do not treat a name alone as personalized service. [Raja et al. (2026)](https://research.monash.edu/en/publications/call-me-by-my-name-the-effects-of-addressing-customers-by-their-n/) · [Buehring & O'Mahony (2019)](https://doi.org/10.1108/JHTI-11-2018-0077)
 
-Guest surveys suggest that continuity and responsive service are meaningful examples of personalization. Medallia surveyed 1,749 U.S. hotel guests about recent stays; commonly recalled experiences included having stay details ready, follow-up after a service issue, and being offered a choice in resolving it. These are self-reported recollections from a vendor-produced U.S. survey, not objective service rates or evidence about PARKROYAL. [Medallia (2024)](https://www.medallia.com/wp-content/uploads/pdf/resources/Medallia-Understanding-Personalization-Efforts-in-the-Hospitality-and-Retail-Industries-Report.pdf)
+Guest surveys suggest that continuity and responsive service are meaningful examples of personalization. Medallia surveyed 1,749 U.S. hotel guests about recent stays; commonly recalled experiences included having stay details ready, follow-up after a service issue, and being offered a choice in resolving it. Guests recalled fewer listed personalization elements during the stay itself than at several other journey stages. These are self-reported recollections from a vendor-produced U.S. survey, not objective service rates or evidence of the cause. [Medallia (2024)](https://www.medallia.com/press-release/medallia-research-finds-61-percent-of-consumers-are-willing-to-spend-more-for-personalized-experiences/)
 
-Oracle Hospitality and Skift reported that many surveyed consumers were conditionally open to data-assisted hotel service when they had willingly provided the data for that purpose. This is stated interest in a hypothetical scenario; it is not blanket consent to biometric identification. [Oracle/Skift (2022)](https://www.oracle.com/news/announcement/oracle-hospitality-in-2025-consumer-research-study-2022-06-01/)
+Hotels use guest-facing preference capture and internal systems to store or route service requests. In one hotel field study, preferences entered through an IT-enabled system were associated with higher service and value ratings; it was a single-property observational study, not a test of a lounge cue. The Novotel visit notes separately describe ACDC and role-based profile access. These examples show that recorded context exists in some hotel workflows; they do not establish one industry-wide system or prove that PARKROYAL uses ACDC. [Piccoli et al. (2017)](https://doi.org/10.1016/j.tourman.2016.08.015) · [Novotel visit notes](../../hotel-visit/novotel-formatted.md)
 
-Food and drink is a bounded first use case because a current preference can change what an employee offers, while allergy information can prompt a necessary verification step. A guest's name may support a natural greeting, but it is secondary to adapting service. Previous conversations, meeting schedules, and broader profile details are excluded from the first prototype unless discovery establishes a specific, authorized need.
+Food and drink is a bounded first use case because a current preference can change what an employee offers. A dietary restriction may affect inclusion or safety and needs a distinct verification path. A guest's preferred room type is more relevant to booking or room assignment, while previous conversations or meeting schedules should remain outside the first prototype unless discovery establishes a specific, authorized need.
 
 ## 2. Problem framing and local evidence
 
 ### Working problem statement
 
-> Hotel lounge employees may have limited opportunity to retrieve and apply relevant guest preferences during busy service periods. This project will investigate the PARKROYAL lounge workflow and prototype a low-disruption way to surface an authorized, task-relevant cue at the point of service.
+> Some hospitality providers collect guest preferences and service history to support tailored service, but the presence of data does not guarantee that it reaches frontline staff in an accurate, usable form or results in service guests experience as relevant. Existing research and project visits make this a credible issue to investigate; the current PARKROYAL lounge workflow and its specific barriers are not yet established. This project will map that workflow and prototype a staff-facing way to make one authorized guest cue actionable during food-and-drink service.
 
-This statement treats workload pressure and missed profile use as a hypothesis. The current evidence does not establish high cognitive load at PARKROYAL, show that staff rank check-in above personalization, or indicate that employees do not value personalization.
+This statement distinguishes an evidence-supported industry question from a locally confirmed problem. The current evidence does not establish PARKROYAL's profile system, staff access path, or the exact point where relevant guest context does or does not change service.
 
 ### What the local notes support
 
 | Evidence | What it supports | What it does not establish |
 |---|---|---|
-| Novotel Singapore on Stevens visit notes | A local lead: F&B staff may not have time to consult ACDC during service, may rely on memory or a physical VIP board, and preferences may not transfer consistently between shifts. The notes also mention a three-minute check-in brand standard and peak-period queues. | A measured time-use comparison, that check-in causes missed profile checks, or the same workflow at PARKROYAL. ACDC is an Accor system and must not be attributed to PARKROYAL. |
+| Novotel Singapore on Stevens visit notes | A local lead about ACDC, role-dependent access, pre-arrival profile review, and reported F&B reliance on memory or a physical VIP board. | A measured rate of profile use, a causal explanation for any gap, or the same workflow at PARKROYAL. ACDC is an Accor system and must not be attributed to PARKROYAL. |
 | PARKROYAL visit notes | Stakeholder interest in VIP recognition in the club lounge; possible fields include name, allergies, and preferences; room-card entry and privacy/access concerns are relevant to the concept. | The full in-lounge F&B workflow, a finding that staff lack time for personalization, or the exact scope of permission for devices, real guest data, or staff testing. |
 
 The team reports that PARKROYAL's General Manager allowed a proof of concept. The visit notes record stakeholder interest but do not specify the permission boundaries. **To confirm:** whether the permission covers synthetic-data demonstration only, staff observation or testing, device use in the lounge, or any real guest information.
 
 ## 3. Project aim, research question, and scope
 
-**Aim:** Investigate how guest context currently reaches lounge staff at PARKROYAL and test whether a concise service cue can help staff use one relevant food-or-drink preference during a simulated service interaction.
+**Aim:** Map how guest context currently reaches lounge staff at PARKROYAL and test whether a staff-facing cue can make one relevant food-or-drink preference actionable during a simulated service interaction.
 
 **Research question:**
 
-> How might a concise, timely guest-context cue help lounge staff use a relevant food or drink preference during service while remaining understandable, useful, and low-disruption?
+> How might we help PARKROYAL lounge staff use relevant, authorized guest context during food-and-drink service so the interaction feels more fitting to the guest?
 
 **Supporting questions:**
 
@@ -63,7 +63,7 @@ The team reports that PARKROYAL's General Manager allowed a proof of concept. Th
 3. How should the prototype connect the lounge-entry event to a guest cue, and is face matching preferable to a manual alternative?
 4. In a simulated task, can participants interpret the cue and take an appropriate service action without unacceptable confusion or interruption?
 
-**Initial scope:** One lounge food-or-drink scenario; synthetic profiles or explicitly consenting demo participants; one current preference; a clearly worded allergy alert where applicable; and a manual fallback. The project will not claim to solve hotel staffing, validate a live hotel deployment, or prove a commercial return. Face matching remains a concept to compare, not a fixed requirement.
+**Initial scope:** Hotel and restaurant research for context; one PARKROYAL lounge food-or-drink scenario for discovery and prototype evaluation; synthetic profiles or explicitly consenting demo participants; one current preference; a clearly worded allergy alert where applicable; and a manual fallback. The project will not claim to validate a live hotel deployment or prove a commercial return. Face matching remains a concept to compare, not a fixed requirement.
 
 ## 4. User workflow and design requirements
 
@@ -86,7 +86,7 @@ Steps 3–6 are design proposals. **To confirm with PARKROYAL:** staff roles, ar
 | Keep profile data relevant and authorized | Show only fields confirmed as current and accessible to the staff role | Confirm fields and source with the hotel; test whether any displayed detail is unnecessary |
 | Make allergy information explicit | Use warning icon plus plain text, e.g. `⚠️ PEANUT ALLERGY`; prompt verification | Participants correctly identify the alert and describe the verification step |
 | Prevent uncertain identity from revealing a profile | Suppress all guest-specific details when the match is uncertain; offer manual fallback | Include no-match and ambiguous-match scenarios |
-| Avoid overloading or interrupting staff | Use an event-timed, glanceable cue with one preference; no persistent profile stream | Observe reading time, task completion, confusion, and interruption |
+| Fit the cue to the service moment | Use an event-timed, glanceable cue with one preference; no persistent profile stream | Observe whether the participant sees it at the right moment, understands it, and can continue the interaction naturally |
 | Keep the demo safe and feasible | Use synthetic or consented demo data; avoid live hotel records until permissions are clear | Document the data source, participant notice, and limits of the demo |
 
 ### Alternatives to compare
@@ -97,7 +97,7 @@ Steps 3–6 are design proposals. **To confirm with PARKROYAL:** staff roles, ar
 | Match a visible guest against the active set | Could reduce repeated lookup actions during service | Identity error can reveal another guest's information; biometric governance and device feasibility are unresolved |
 | Use the card tap only, with no in-lounge identification | Simplest data and device path | Does not associate a guest with a staff member at the service moment |
 
-The interim prototype can compare manual selection with face matching in a controlled demonstration. Select a final concept only after the workflow, staff burden, privacy constraints, and hardware path are better understood.
+The interim prototype can compare manual selection with face matching in a controlled demonstration. Select a final concept only after the workflow, privacy constraints, and hardware path are better understood.
 
 ## 5. Concept and prototype status
 
@@ -134,8 +134,7 @@ Suggested scenarios are: (1) a guest's usual drink preference; (2) an allergy al
 | Did the system associate the right guest? | Correct associations, misses, false associations, abstentions, and cue delay |
 | Did the participant understand the cue? | Correct interpretation of the preference and allergy wording; clarification requests or errors |
 | Did the cue support service? | Whether the participant offered or confirmed an appropriate option and followed the allergy-check step |
-| Did it disrupt the task? | Task or retrieval time, interruptions, visible hesitation, and brief usefulness/distraction feedback |
-| Did perceived workload change? | Optional NASA-TLX after matched scenarios; exploratory only and not a measure of a real shift |
+| Did the cue fit the service flow? | Task or retrieval time, interruptions, visible hesitation, and brief usefulness feedback |
 
 ### Initial outcomes available for this draft
 
@@ -153,7 +152,7 @@ If no participant evaluation is completed before the interim deadline, report th
 
 ## 7. Discussion, limitations, and responsible use
 
-The strongest current rationale is that relevant guest context can support a more fitting service interaction, while workload pressure and information access are worth investigating. The evidence does not establish that PARKROYAL staff currently miss preferences, that check-in is the competing task in the lounge, or that a display reduces workload. A correct face match would establish identification performance only; personalization additionally requires a suitable staff action and, ideally, evidence that the guest experiences the action as relevant.
+The strongest current rationale is that relevant guest context can support a more fitting service interaction, while the path from recorded information to a staff action is worth investigating. The evidence does not establish PARKROYAL's profile system, lounge staff access path, or exact local barrier. A correct face match would establish identification performance only; personalization additionally requires a suitable staff action and, ideally, evidence that the guest experiences the action as relevant.
 
 The local workflow evidence is limited to hotel-visit notes. The Novotel notes provide an F&B example of possible profile-access friction, but one property cannot establish PARKROYAL practice. The PARKROYAL notes support the lounge as a useful bounded case and record interest in the concept, but they do not map the current F&B workflow or the exact POC permission. This report should identify which findings are literature-based, which come from local notes, and which remain design hypotheses.
 
@@ -178,15 +177,17 @@ The interim project will be strongest if it demonstrates one complete, honest pa
 
 ## Selected references and project records
 
-- Alfataftah, M. (2026). *Sorry to Interrupt…: How Work Interruptions Relate to Performance of Hotel Front Office Staff*. Auburn University thesis. [Repository record](https://auetd.auburn.edu/handle/10415/10452). Emerging thesis evidence; not a PARKROYAL study.
-- Hart, S. G., & Staveland, L. E. (1988). “Development of NASA-TLX.” [NASA-hosted paper](https://human-factors.arc.nasa.gov/groups/TLX/downloads/Hart_Staveland_ORIGINAL_1.pdf).
+- Gremler, D. D., & Gwinner, K. P. (2000). “Customer-Employee Rapport in Service Relationships.” *Journal of Service Research*, 3(1), 82–104. [DOI](https://doi.org/10.1177/109467050031006).
 - Lei, S. S. I., Wang, D., Fong, L. H. N., & Ye, S. (2024). “Recipe for perceived personalization in hotels.” *Tourism Management*, 100, 104818. [DOI](https://doi.org/10.1016/j.tourman.2023.104818).
 - Lewis, J. E., & Neider, M. B. (2016). “Through the Google Glass: The impact of heads-up displays on visual attention.” [DOI](https://doi.org/10.1186/s41235-016-0015-6).
 - Medallia Market Research (2024). *Understanding Personalization Efforts in the Hospitality and Retail Industries*. [Report](https://www.medallia.com/wp-content/uploads/pdf/resources/Medallia-Understanding-Personalization-Efforts-in-the-Hospitality-and-Retail-Industries-Report.pdf).
+- Piccoli, G., Lui, T.-W., & Grün, B. (2017). “The impact of IT-enabled customer service systems on service personalization, customer service perceptions, and hotel performance.” *Tourism Management*, 59, 349–362. [DOI](https://doi.org/10.1016/j.tourman.2016.08.015).
+- Raja, S. V. S., Cheng, Y., & Danaher, T. S. (2026). “Call me by my name: The effects of addressing customers by their names, the underlying mechanisms, and the boundary conditions.” *Journal of Retailing*. [DOI](https://doi.org/10.1016/j.jretai.2026.03.008).
+- Hapi and Revinate (2025). *The Future of Hotel Data*. [Survey findings and method](https://www.revinate.com/press-releases/the-future-of-hotel-data-report-reveals-nearly-50-of-hoteliers-struggle-to-access-critical-data/).
 - Oracle Hospitality & Skift (2022). *Hospitality in 2025*. [Methodology](https://www.oracle.com/news/announcement/oracle-hospitality-in-2025-consumer-research-study-2022-06-01/).
 - Personal Data Protection Commission Singapore. *Guide on Responsible Use of Biometric Data in Security Applications* (2022). [Guide](https://www.pdpc.gov.sg/-/media/files/pdpc/pdf-files/other-guides/guide-to-biometric_17may2022.pdf).
-- Rescalvo-Martin, E., Gutiérrez, L., & Llorens-Montes, F. J. (2022). “Extra-role service under pressure in the hospitality industry.” [DOI](https://doi.org/10.1016/j.tmp.2022.101030).
 - Rokid standalone face-identification demo and latency notes. [Repository README](../../rokid/README.md). The run reports timing, not recognition accuracy or hotel-workflow performance.
-- Vashdi, D. R., Katz–Navon, T., & Delegach, M. (2022). “Service Priority Climate and Service Performance Among Hospitality Employees.” *Cornell Hospitality Quarterly*, 63(4), 504–518. [DOI](https://doi.org/10.1177/19389655211029912).
+- Buehring, J. H., & O'Mahony, B. (2019). “Designing memorable guest experiences: Development of constructs and value generating factors in luxury hotels.” *Journal of Hospitality and Tourism Insights*, 2(4), 358–376. [DOI](https://doi.org/10.1108/JHTI-11-2018-0077).
 - CDE4301 project records: [PARKROYAL visit notes](../../hotel-visit/parkroyal-main-points.md), [Novotel visit notes](../../hotel-visit/novotel-formatted.md), [problem framing](../agents/hotel-smart-glasses-poc.md), and [proposed architecture](../architecture/hotel-lounge-smart-glasses-poc.md).
+- [Personalization argument and presentation Q&A](cde4301-personalization-argument-and-qa.md) — expanded reasoning and likely oral-defense questions.
 - Fuller source audit: [CDE4301 interim report research synthesis](../research/cde4301-interim-report-research-synthesis.md).
