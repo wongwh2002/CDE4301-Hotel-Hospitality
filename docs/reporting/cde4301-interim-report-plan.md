@@ -29,11 +29,13 @@ The proposed proof of concept starts when a guest taps a lounge card at the entr
 
 This keeps the core problem solution-neutral. Face matching and smart glasses are candidate ways to connect a visible guest with relevant context, not established requirements.
 
-## Provisional research question
+## Provisional HMW and research question
+
+**How might we:**
 
 > How might we help PARKROYAL lounge staff use relevant, authorized guest context during food-and-drink service so the interaction feels more fitting to the guest?
 
-Possible research question:
+**Research question:**
 
 > How can a staff-facing prototype make a current guest preference actionable during a PARKROYAL lounge interaction, and how well can participants understand and use the cue in a simulated scenario?
 

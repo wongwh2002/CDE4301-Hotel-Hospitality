@@ -52,9 +52,13 @@ The team reports that PARKROYAL's General Manager allowed a proof of concept. Th
 
 **Aim:** Map how guest context currently reaches lounge staff at PARKROYAL and test whether a staff-facing cue can make one relevant food-or-drink preference actionable during a simulated service interaction.
 
-**Research question:**
+**How might we:**
 
 > How might we help PARKROYAL lounge staff use relevant, authorized guest context during food-and-drink service so the interaction feels more fitting to the guest?
+
+**Research question:**
+
+> How can a staff-facing prototype make a current guest preference actionable during a PARKROYAL lounge interaction, and how well can participants understand and use the cue in a simulated scenario?
 
 **Supporting questions:**
 
