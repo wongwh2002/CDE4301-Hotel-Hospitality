@@ -471,6 +471,7 @@
   "allergies": ["Peanut allergy"]
 }</code></pre>
         <p>The image is not repeated in every snapshot. Clients cache crops by <code>crop_id</code> and discard them when the track leaves the set or its five-second TTL expires.</p>
+        <p>A transient <code>no_match</code> or <code>unconfirmed</code> frame does not clear a previously stable guest or extend its TTL. Full snapshots keep that guest visible until five seconds after the last stable observation; a stable refresh renews the TTL. Guest departure, stream disconnect, and TTL expiry still remove the result.</p>
         <p>Before inference, the worker rechecks capture age, rejects duplicate or out-of-order sequence numbers, and favors the newest queued frame. A returned face crop is attached only to a candidate identity supported by that detection.</p>
         <p>Enrollment reports a status to the dashboard. Temporary worker outages are retried every five seconds, and active templates are rebuilt from stored reference photos after a worker restart. SQLite holds the reference photos; active embeddings stay in memory, so pgvector is not needed for this small POC cohort.</p>
         <p>Clients can opt in with <code>debug_faces: true</code> to receive transient crops for every face returned by the model, including faces below the identity-match threshold. The debug response includes detector scores and worker timings; lounge-control also reports the frame handoff time. Docker logs show the same scores and timing metadata without image bytes.</p>

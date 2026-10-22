@@ -27,7 +27,7 @@ A short guest preference that can help with a service interaction, such as a pre
 A snapshot of the stable, identified people currently reported in one camera stream. Each entry represents a face track, so people with the same name remain separate.
 
 **Detection TTL (time-to-live)**:
-The time after a face track was last observed before lounge-control removes its cached result and crop. The POC target is five seconds.
+The time after the last stable identity observation before lounge-control removes its cached result and crop. The POC target is five seconds; transient `no_match` and `unconfirmed` observations neither extend nor immediately clear that stable result.
 
 **Suggested match**:
 A guest identity proposed by face recognition for a face track. It remains provisional until a staff member confirms it.

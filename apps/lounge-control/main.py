@@ -716,6 +716,19 @@ async def post_match(
         raise HTTPException(status_code=401, detail="Invalid internal service token")
 
     if event.status not in {"stable_match", "stable_refresh"}:
+        previous_match = device_manager.get_detected_person(
+            event.stream_id,
+            event.track_id,
+            now=time.monotonic(),
+        )
+        if previous_match is not None:
+            await publish_detection_set(event.stream_id)
+            return {
+                "status": "retained",
+                "stream_id": event.stream_id,
+                "track_id": event.track_id,
+            }
+
         clear_message = CueMessage(
             type="clear",
             stream_id=event.stream_id,
