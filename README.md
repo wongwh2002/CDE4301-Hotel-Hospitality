@@ -63,6 +63,14 @@ Shared Pydantic models are defined in [`contracts/models.py`](contracts/models.p
 
 ### Quickstart
 
+#### Prerequisites
+
+- Docker Desktop with the Docker Compose plugin (`docker compose version` must report **2.24.4 or newer**; the optional M1 native-worker setup uses Compose's `!override` feature).
+- Bash and Python 3 to run `scripts/dev-up.sh`. On Windows, run the helper from WSL or Git Bash. The direct Compose commands can also be run from PowerShell after creating `.env`.
+- OpenSSL CLI only if you use the manual token-generation commands below.
+
+The helper uses the Compose project name `hotel-poc` by default. Use that same project name in subsequent `docker compose` commands so they address the stack you started. If you set `COMPOSE_PROJECT_NAME` before running the helper, replace `hotel-poc` in those commands with your chosen name.
+
 #### 1. Setup Environment Configuration
 
 On first run, `./scripts/dev-up.sh` creates a private `.env` file with the POC device token set to `gedi-4301` and generates a separate random `INTERNAL_API_TOKEN`. The dashboard loads the configured `DEVICE_AUTH_TOKEN` automatically, so staff do not need to type it into the face test. To configure Compose manually, copy `.env.example` to `.env` and generate an `INTERNAL_API_TOKEN`. Keep `.env` private; it is excluded from Git.
@@ -84,7 +92,7 @@ Using the development helper script:
 Or using Docker Compose directly:
 
 ```bash
-docker compose up --build --wait
+docker compose -p hotel-poc up --build --wait
 ```
 
 The three core services (`lounge-control`, `face-worker`, `mock-hotel`) start and await healthcheck readiness before Compose returns. Host ports `8000` and `8003` both map to the same `lounge-control` container (container port `8000`); port `8003` is a convenient video-stream address, not another container. `lounge-control` forwards frames internally to `face-worker`.
@@ -217,7 +225,7 @@ Port `8003` is another published port for the existing `lounge-control` containe
 
 #### Image and embedding storage
 
-- Guest reference images are JPEG BLOBs in the mock-hotel SQLite database: one primary image on the `guests` row and up to two additional rows in `guest_reference_photos`. The database lives in the Compose `mock-hotel-data` volume, so reference photos survive container restarts and are removed by `docker compose down -v`.
+- Guest reference images are JPEG BLOBs in the mock-hotel SQLite database: one primary image on the `guests` row and up to two additional rows in `guest_reference_photos`. The database lives in the Compose `mock-hotel-data` volume, so reference photos survive container restarts and are removed by `docker compose -p hotel-poc down -v`.
 - Camera frames and generated face crops are transient. They pass through service memory and WebSocket messages and are not written to the database or Docker logs.
 - Face-worker derives normalized 512-value embeddings from admitted guests' reference photos. Those vectors stay in the worker's RAM while each guest is an active candidate, then are removed on departure, expiry, or restart. There is no vector database or on-disk embedding index in this POC.
 
@@ -393,7 +401,7 @@ The `sim` profile includes `tap-simulator` and `frame-replay`.
 Start the stack with continuous simulated card-reader taps:
 
 ```bash
-docker compose --profile sim up --build --wait lounge-control face-worker mock-hotel tap-simulator
+docker compose -p hotel-poc --profile sim up --build --wait lounge-control face-worker mock-hotel tap-simulator
 ```
 
 #### One-Shot Frame Replay
@@ -401,13 +409,13 @@ docker compose --profile sim up --build --wait lounge-control face-worker mock-h
 Admit Alex in the dashboard first, then run the one-shot replay. It sends three frames of the fictional synthetic face through the real device WebSocket interface and waits for the recognition cue. The image is a local test fixture, not a real guest photo:
 
 ```bash
-docker compose --profile sim run --rm frame-replay
+docker compose -p hotel-poc --profile sim run --rm frame-replay
 ```
 
 To specify custom options or a custom fixture:
 
 ```bash
-docker compose --profile sim run --rm frame-replay --fixture /path/to/consented_frame.jpg --frames 5
+docker compose -p hotel-poc --profile sim run --rm frame-replay --fixture /path/to/consented_frame.jpg --frames 5
 ```
 
 The replay client connects, transmits three frames by default, logs transmission metrics (without logging frame payloads), listens for cues, and cleanly exits. This confirms that the same synthetic reference and replay image produce a stable match in the local POC; it is not an accuracy or real-world performance evaluation.

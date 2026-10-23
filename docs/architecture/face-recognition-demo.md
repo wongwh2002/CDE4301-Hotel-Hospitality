@@ -56,9 +56,9 @@ The seeded Alex profile uses the fictional generated test portrait below. Other 
 
 ![Fictional synthetic test portrait](../../fixtures/synthetic_face.jpg)
 
-1. Start the core services: `docker compose up --build --wait`.
+1. Start the core services: `docker compose -p hotel-poc up --build --wait`. This matches the `hotel-poc` project used by `scripts/dev-up.sh`.
 2. Open `http://127.0.0.1:8000/` and admit Alex.
-3. Run `docker compose --profile sim run --rm frame-replay`.
+3. Run `docker compose -p hotel-poc --profile sim run --rm frame-replay`.
 
 The one-shot replay sends three frames through the same WebSocket route used by a phone bridge. In the local smoke run, it returned an `ALEX` cue with the seeded allergy alert. The reference and replay use the same synthetic image, so this checks pipeline wiring and stable-match behavior; it does not measure recognition accuracy across people, lighting, or camera angles.
 
@@ -69,7 +69,7 @@ The staff page is served at `/` by `lounge-control`. Its visible sections are:
 - **Active Lounge Roster:** see admitted guest names and admission times, refreshed through SSE.
 - **Face Recognition Test:** send a picture or three distinct camera frames through the device WebSocket and view stable matches plus raw model detections. Results stay in the browser until the next test; server-side detections and crops are transient.
 
-For container-side diagnostics, run `docker compose logs -f lounge-control face-worker`. In debug mode, the logs show per-frame handoff/processing times and every returned detection's bounding box, detector score, identity similarity, and transient crop ID. Image bytes are not written to logs.
+For container-side diagnostics, run `docker compose -p hotel-poc logs -f lounge-control face-worker`. In debug mode, the logs show per-frame handoff/processing times and every returned detection's bounding box, detector score, identity similarity, and transient crop ID. Image bytes are not written to logs.
 
 ### Synthetic two-person test
 
@@ -82,7 +82,7 @@ The repository contains a generated two-person lounge scene and a single-person 
 3. In **Face Recognition Test**, choose `fixtures/synthetic_multi_face.png`, enter the device token from `.env`, and select **Send picture test**.
 4. Inspect **People returned to this client**. Each stable match should appear as its own card with the cropped face, `guest_id`, `track_id`, name, preferences, and allergies. The images arrive as separate `face_crop` messages and are joined to people in `detection_set` by `crop_id` (with `track_id` linking the person to a live face track).
 
-The picture button sends the same synthetic still three times so the 2-of-3 observation gate can be exercised. This is a repeatable wiring/demo check, not an accuracy evaluation or evidence that three independent camera observations were captured. The mock-hotel registration stores these synthetic reference photos in its Docker volume; `docker compose down -v` removes the local database and cached model along with other named volumes. Because a `face_crop` and its `detection_set` reference may have an unrelated periodic snapshot between them, clients retain unreferenced crops for up to five seconds and refresh that timer when a snapshot references the crop.
+The picture button sends the same synthetic still three times so the 2-of-3 observation gate can be exercised. This is a repeatable wiring/demo check, not an accuracy evaluation or evidence that three independent camera observations were captured. The mock-hotel registration stores these synthetic reference photos in its Docker volume; `docker compose -p hotel-poc down -v` removes the local database and cached model along with other named volumes. Because a `face_crop` and its `detection_set` reference may have an unrelated periodic snapshot between them, clients retain unreferenced crops for up to five seconds and refresh that timer when a snapshot references the crop.
 
 The current `test_one_stream_returns_multiple_guest_profiles_and_face_crops` test verifies the two-person WebSocket contract using controlled face-worker callbacks: two guest entries, two crop images, and two cues. It does not run the recognition model on `synthetic_multi_face.png`. A real model-backed image test requires the face-worker dependencies and model cache to run in Docker.
 
