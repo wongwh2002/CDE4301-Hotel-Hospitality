@@ -2,5 +2,7 @@
     <string name="app_name">rokid-app</string>
     <string name="take_picture">Take Picture</string>
     <string name="processing_mode">Remote</string>
-    <string name="connecting_server">Connecting to server...</string>
+    <string name="server_connecting">Connecting to server</string>
+    <string name="server_online">Server connected</string>
+    <string name="server_offline">Server unavailable, retrying</string>
 </resources>
