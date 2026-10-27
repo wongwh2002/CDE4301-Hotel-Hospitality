@@ -80,7 +80,7 @@ class MainActivity : AppCompatActivity() {
         busy = false
         connected = false
         nextRequestAt = 0
-        showStatus("Connecting to serverÃ¢â‚¬Â¦")
+        showStatus("Connecting to server...")
         if (hasCameraPermission()) startCamera(session)
         handler.post(tick)
     }
@@ -137,7 +137,7 @@ class MainActivity : AppCompatActivity() {
                     nextRequestAt = SystemClock.elapsedRealtime() + CAPTURE_INTERVAL_MS
                 } else {
                     Log.w(TAG, "Server unavailable", result.exceptionOrNull())
-                    showStatus("Server unavailable. RetryingÃ¢â‚¬Â¦")
+                    showStatus("Server unavailable. Retrying...")
                 }
             }
         }
@@ -189,7 +189,7 @@ class MainActivity : AppCompatActivity() {
                         ))
                     }.onFailure {
                         connected = false
-                        showStatus("Server unavailable. RetryingÃ¢â‚¬Â¦")
+                        showStatus("Server unavailable. Retrying...")
                         Log.w(TAG, "Upload or detection failed", it)
                     }
                 }
@@ -206,7 +206,7 @@ class MainActivity : AppCompatActivity() {
         handler.post {
             if (isCurrent(token)) {
                 busy = false
-                showStatus("Camera capture failed. RetryingÃ¢â‚¬Â¦")
+                showStatus("Camera capture failed. Retrying...")
             }
         }
     }

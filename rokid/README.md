@@ -17,14 +17,6 @@ This folder contains a standalone demo with a Kotlin Android app running on the 
 | `server/run.py` | Starts the server, normally on port 8000, with a configurable matching threshold. |
 | `gradle.properties` | Configures the laptop server address compiled into the Android app. |
 
-## Relationship to the hotel POC
-
-This demo currently operates separately from the [main hotel smart-glasses POC](../README.md). It uses its own server, reference-photo gallery, and YuNet/SFace models. It does not yet connect to `lounge-control`, `face-worker`, or `mock-hotel`.
-
-The demo compares detected faces against the entire local gallery. Lounge entry/exit events, the active lounge cohort, hotel guest profiles, and allergy or preference cues are not integrated. The glasses show recognition names and status text. Connecting this app to the hotel backend requires adapting its HTTP request/response flow to the backend's authenticated WebSocket frame and cue protocol.
-
-Both servers default to host port 8000. When running this server alongside the main Compose stack, choose another port with `python server/run.py --port 8010` and update `faceServerUrl` accordingly before rebuilding the app.
-
 ## Pipeline
 
 1. **Load the gallery:** At server startup, images in server/faces/ are converted into SFace feature vectors and cached in memory. Each filename becomes the person's name.
