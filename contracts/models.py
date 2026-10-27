@@ -68,7 +68,7 @@ class DeviceStreamMessage(ContractModel):
 class MatchEvent(ContractModel):
     """Match update from face-worker, with transient crop bytes when required."""
     candidate_id: Optional[Identifier] = Field(
-        None, description="Opaque candidate ID; absent for a no_match cue clear"
+        None, description="Opaque candidate ID; omitted when no identity candidate is reported"
     )
     stream_id: Identifier
     track_id: Identifier

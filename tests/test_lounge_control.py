@@ -575,7 +575,7 @@ async def test_detection_set_broadcast_loop_sends_periodic_full_snapshots(
 
 
 @pytest.mark.parametrize("match_status", ["unconfirmed", "no_match"])
-def test_non_stable_match_sends_clear_without_guest_profile(
+def test_non_stable_match_without_stable_result_sends_clear_without_guest_profile(
     lounge_control_client,
     match_status,
 ):
@@ -632,6 +632,106 @@ def test_non_stable_match_sends_clear_without_guest_profile(
         assert cleared_set["type"] == "detection_set"
         assert cleared_set["stream_id"] == "stream-uncertain"
         assert cleared_set["people"] == []
+
+
+def test_transient_miss_keeps_stable_guest_until_ttl_expires(
+    lounge_control_client,
+):
+    import apps_lounge_control as main
+
+    cohort_manager = main.cohort_manager
+    cohort_manager.admit_candidate(
+        candidate_id="cand-ttl-gap",
+        guest_ref="guest-alex-ttl-gap",
+        display_name="Alex",
+        room_number="401",
+        allergies=["Peanut allergy"],
+        preferences=["Sparkling water"],
+        expires_at="2099-01-01T00:00:00Z",
+    )
+
+    def post_match(
+        status,
+        *,
+        candidate_id=None,
+        crop_id=None,
+        crop_b64=None,
+        matched_at=None,
+    ):
+        payload = {
+            "candidate_id": candidate_id,
+            "stream_id": "stream-ttl-gap",
+            "track_id": "track-alex",
+            "status": status,
+            "confidence": 0.95 if status.startswith("stable") else 0.4,
+            "crop_id": crop_id,
+            "crop_b64": crop_b64,
+            "matched_at": matched_at or fresh_match_time(),
+        }
+        return lounge_control_client.post(
+            "/internal/v1/matches",
+            json=payload,
+            headers={"X-Internal-Token": "test-internal-token"},
+        )
+
+    with lounge_control_client.websocket_connect(
+        "/v1/video/stream/phone-ttl-gap?token=test-secret-token"
+    ) as phone:
+        assert phone.receive_json()["type"] == "session_ack"
+        phone.send_json({
+            "type": "frame_meta",
+            "stream_id": "stream-ttl-gap",
+            "sequence": 1,
+            "captured_at": fresh_match_time(),
+        })
+        assert phone.receive_json()["people"] == []
+
+        stable = post_match(
+            "stable_match",
+            candidate_id="cand-ttl-gap",
+            crop_id="crop-ttl-gap",
+            crop_b64="ZmFrZS1qcGVn",
+            matched_at=(datetime.now(timezone.utc) - timedelta(seconds=3)).isoformat(),
+        )
+        assert stable.status_code == 200
+        assert phone.receive_json()["type"] == "face_crop"
+        initial_set = phone.receive_json()
+        assert initial_set["type"] == "detection_set"
+        assert initial_set["people"][0]["display_name"] == "ALEX"
+        assert initial_set["people"][0]["crop_id"] == "crop-ttl-gap"
+        assert phone.receive_json()["type"] == "cue"
+
+        # A frame with no confirmed identity must not remove or refresh the
+        # last stable guest. The current full set stays authoritative.
+        unconfirmed = post_match(
+            "unconfirmed",
+            candidate_id="cand-ttl-gap",
+        )
+        assert unconfirmed.status_code == 200
+        retained_set = phone.receive_json()
+        assert retained_set["type"] == "detection_set"
+        assert [person["track_id"] for person in retained_set["people"]] == [
+            "track-alex"
+        ]
+
+        no_match = post_match("no_match")
+        assert no_match.status_code == 200
+        still_present = phone.receive_json()
+        assert still_present["type"] == "detection_set"
+        assert [person["track_id"] for person in still_present["people"]] == [
+            "track-alex"
+        ]
+
+        # The last stable observation is already three seconds old. These
+        # misses do not renew its TTL, so it expires after the remaining time.
+        time.sleep(2.1)
+        after_expiry = post_match("no_match")
+        assert after_expiry.status_code == 200
+        clear = phone.receive_json()
+        assert clear["type"] == "clear"
+        expired_set = phone.receive_json()
+        assert expired_set["type"] == "detection_set"
+        assert expired_set["people"] == []
 
 
 def test_device_websocket_authenticated_and_frame_exchange(lounge_control_client, caplog):

@@ -63,6 +63,14 @@ Shared Pydantic models are defined in [`contracts/models.py`](contracts/models.p
 
 ### Quickstart
 
+#### Prerequisites
+
+- Docker Desktop with the Docker Compose plugin (`docker compose version` must report **2.24.4 or newer**; the optional M1 native-worker setup uses Compose's `!override` feature).
+- Bash and Python 3 to run `scripts/dev-up.sh`. On Windows, run the helper from WSL or Git Bash. The direct Compose commands can also be run from PowerShell after creating `.env`.
+- OpenSSL CLI only if you use the manual token-generation commands below.
+
+The helper uses the Compose project name `hotel-poc` by default. Use that same project name in subsequent `docker compose` commands so they address the stack you started. If you set `COMPOSE_PROJECT_NAME` before running the helper, replace `hotel-poc` in those commands with your chosen name.
+
 #### 1. Setup Environment Configuration
 
 On first run, `./scripts/dev-up.sh` creates a private `.env` file with the POC device token set to `gedi-4301` and generates a separate random `INTERNAL_API_TOKEN`. The dashboard loads the configured `DEVICE_AUTH_TOKEN` automatically, so staff do not need to type it into the face test. To configure Compose manually, copy `.env.example` to `.env` and generate an `INTERNAL_API_TOKEN`. Keep `.env` private; it is excluded from Git.
@@ -84,7 +92,7 @@ Using the development helper script:
 Or using Docker Compose directly:
 
 ```bash
-docker compose up --build --wait
+docker compose -p hotel-poc up --build --wait
 ```
 
 The three core services (`lounge-control`, `face-worker`, `mock-hotel`) start and await healthcheck readiness before Compose returns. Host ports `8000` and `8003` both map to the same `lounge-control` container (container port `8000`); port `8003` is a convenient video-stream address, not another container. `lounge-control` forwards frames internally to `face-worker`.
@@ -217,7 +225,7 @@ Port `8003` is another published port for the existing `lounge-control` containe
 
 #### Image and embedding storage
 
-- Guest reference images are JPEG BLOBs in the mock-hotel SQLite database: one primary image on the `guests` row and up to two additional rows in `guest_reference_photos`. The database lives in the Compose `mock-hotel-data` volume, so reference photos survive container restarts and are removed by `docker compose down -v`.
+- Guest reference images are JPEG BLOBs in the mock-hotel SQLite database: one primary image on the `guests` row and up to two additional rows in `guest_reference_photos`. The database lives in the Compose `mock-hotel-data` volume, so reference photos survive container restarts and are removed by `docker compose -p hotel-poc down -v`.
 - Camera frames and generated face crops are transient. They pass through service memory and WebSocket messages and are not written to the database or Docker logs.
 - Face-worker derives normalized 512-value embeddings from admitted guests' reference photos. Those vectors stay in the worker's RAM while each guest is an active candidate, then are removed on departure, expiry, or restart. There is no vector database or on-disk embedding index in this POC.
 
@@ -313,7 +321,7 @@ The phone should listen for JSON messages on this same connection. An active cue
 
 #### Detection-set response
 
-After the first `frame_meta` message for a stream, the server sends an initial empty snapshot. Lounge-control sends a full `detection_set` when the set changes and then once per second while the stream is connected. Each snapshot contains all currently stable, identified tracks; two people with the same name remain separate because each entry has its own `track_id`. Unknown and unconfirmed faces are excluded. Existing per-track `cue` and `clear` messages remain available.
+After the first `frame_meta` message for a stream, the server sends an initial empty snapshot. Lounge-control sends a full `detection_set` when the set changes and then once per second while the stream is connected. Each snapshot contains all currently stable, identified tracks; two people with the same name remain separate because each entry has its own `track_id`. Unknown and unconfirmed faces are excluded. A transient `no_match` or `unconfirmed` result does not remove a previously stable guest or send a per-track `clear`; the full set continues to include that guest until its five-second TTL expires. Explicit guest departure and stream disconnect still clear it immediately.
 
 ```json
 {
@@ -376,7 +384,7 @@ Every stable person entry includes `crop_id`. Lounge-control sends the cropped J
 
 Cache the image by `crop_id` on the phone and associate it with the matching `track_id`. Do not expect the full image to be repeated in every snapshot. If a crop delivery fails or lounge-control no longer has the referenced crop, the worker retries that crop with its next refresh. The `guest_id` is a stable opaque guest-profile ID; `track_id` identifies one temporary face track and may change if the worker loses and reacquires the face or the stream restarts. `preferences` and `allergies` are separate lists; the optional `alert` is the concise display string for the allergy cue.
 
-Lounge-control keeps each stable match for five seconds after the worker's `matched_at` observation time, not callback arrival time; callbacks older than five seconds are ignored. A worker refreshes active tracks only when a current detection supports the same candidate identity. Crops are cached only from identity-matched detections, and a track with strong evidence for another guest is not reused for the new identity. An explicit no-match, guest departure, or WebSocket disconnect clears the corresponding result sooner. A crop can arrive just before its person entry, with a periodic snapshot in between, so phone clients should keep an unreferenced crop pending for up to five seconds instead of discarding it on the first snapshot that omits it. Refresh its local expiry whenever a snapshot references it; expire it five seconds after its last reference, or after five seconds without a newer snapshot if the connection drops. The face worker's separate 2.5-second tracking timeout is unchanged. Frames and crops remain transient in memory and are never written to disk.
+Lounge-control keeps each stable match for five seconds after the worker's `matched_at` observation time, not callback arrival time; stable callbacks older than five seconds are ignored. A worker refreshes active tracks only when a current detection supports the same candidate identity. Transient `no_match` and `unconfirmed` callbacks do not refresh the TTL or remove an existing stable result, so the guest stays in full snapshots until five seconds after its last stable observation. An explicit guest departure, stream disconnect, or TTL expiry removes the corresponding result. Crops are cached only from identity-matched detections, and a track with strong evidence for another guest is not reused for the new identity. A crop can arrive just before its person entry, with a periodic snapshot in between, so phone clients should keep an unreferenced crop pending for up to five seconds instead of discarding it on the first snapshot that omits it. Refresh its local expiry whenever a snapshot references it; expire it five seconds after its last reference, or after five seconds without a newer snapshot if the connection drops. The face worker's separate 2.5-second tracking timeout is unchanged. Frames and crops remain transient in memory and are never written to disk.
 
 The snapshot schema is [`contracts/detection-set.schema.json`](contracts/detection-set.schema.json), the crop message schema is [`contracts/face-crop.schema.json`](contracts/face-crop.schema.json), the raw debug message schema is [`contracts/debug-frame.schema.json`](contracts/debug-frame.schema.json), and the internal worker callback schema is [`contracts/match-event.schema.json`](contracts/match-event.schema.json).
 
@@ -393,7 +401,7 @@ The `sim` profile includes `tap-simulator` and `frame-replay`.
 Start the stack with continuous simulated card-reader taps:
 
 ```bash
-docker compose --profile sim up --build --wait lounge-control face-worker mock-hotel tap-simulator
+docker compose -p hotel-poc --profile sim up --build --wait lounge-control face-worker mock-hotel tap-simulator
 ```
 
 #### One-Shot Frame Replay
@@ -401,13 +409,13 @@ docker compose --profile sim up --build --wait lounge-control face-worker mock-h
 Admit Alex in the dashboard first, then run the one-shot replay. It sends three frames of the fictional synthetic face through the real device WebSocket interface and waits for the recognition cue. The image is a local test fixture, not a real guest photo:
 
 ```bash
-docker compose --profile sim run --rm frame-replay
+docker compose -p hotel-poc --profile sim run --rm frame-replay
 ```
 
 To specify custom options or a custom fixture:
 
 ```bash
-docker compose --profile sim run --rm frame-replay --fixture /path/to/consented_frame.jpg --frames 5
+docker compose -p hotel-poc --profile sim run --rm frame-replay --fixture /path/to/consented_frame.jpg --frames 5
 ```
 
 The replay client connects, transmits three frames by default, logs transmission metrics (without logging frame payloads), listens for cues, and cleanly exits. This confirms that the same synthetic reference and replay image produce a stable match in the local POC; it is not an accuracy or real-world performance evaluation.
