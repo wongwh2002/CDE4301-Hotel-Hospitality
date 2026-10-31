@@ -6,17 +6,9 @@
 
 ## The short verdict
 
-The original chain—“personalization matters, hotels collect data, but staff do not use it enough”—has a promising direction, but it currently leaps over three questions:
+Use a problem-to-solution chain: **personalized service matters → guests do not always experience it as highly personalized → a possible barrier is guest knowledge not reaching staff → improve continuity at the point of service → test the first use case and whether glasses help.**
 
-1. What guest or service outcome does personalization improve?
-2. What evidence shows a data-to-service gap, and does that evidence apply to PARKROYAL?
-3. Why is the proposed identification method needed after a guest taps a lounge card?
-
-Use a more defensible chain:
-
-> Some hotels collect guest preferences and service history to support more personalized experiences, but having the information does not guarantee that frontline staff can use relevant, current, authorized context to adapt service at the right moment. Research makes this a credible hotel-service design question; it does not prove the same gap exists in every hotel or at PARKROYAL. We will investigate the question through a bounded test in PARKROYAL's club lounge, where the team has permission to use the lounge as a POC test setting, and prototype whether a staff-facing cue can make one preference actionable during food-or-drink service.
-
-This keeps the problem distinct from the solution. Face matching and smart glasses are possible ways to connect a guest with relevant context; the project should test whether that connection is actually needed and useful.
+> Personalized service can make a hotel interaction feel more relevant to the guest. Yet high personalization is not consistently reported: in one U.S. survey, 23% of hotel guests rated a recent stay 9–10 for personalization. That result does not explain why; a possible barrier is that relevant preferences and needs are not consistently captured, shared, or accessible to frontline staff in the moment. When context does not carry across employees or service moments, staff may rely on memory and guests may have to repeat themselves. This project will test whether that information gap exists in the PARKROYAL lounge and whether making guest-approved context usable during service can help. The first use case and the added value of smart glasses remain open.
 
 ## Scope: widen the context, keep the case bounded
 
@@ -26,15 +18,16 @@ Frame the design problem at the **hotel-service level**, then keep discovery, pr
 
 Do not describe ACDC as PARKROYAL's system. The visit notes place ACDC at **Novotel Singapore on Stevens**, an Accor property. PARKROYAL's notes record interest in lounge recognition and possible name, allergy, and preference cues; they do not document its current profile system or full lounge-service workflow.
 
-## Five-slide background argument
+## Six-slide problem-to-solution flow
 
-1. **Define the outcome.** Personalization means adapting service using relevant guest context; displaying a name or profile is only an input. Use one coffee example to make the service change concrete.
-2. **Explain guest value.** A fitting interaction can support perceived service value and professional rapport. Use hotel evidence and clearly label the restaurant name-use evidence as cross-context support.
-3. **Show current practice.** Hotels can capture preferences through guest requests or forms and record or route them through PMS/CRM/guest-service systems. Use the Novotel ACDC visit as one local example, not as a PARKROYAL fact.
-4. **Show the possible gap.** Data can exist without becoming accurate, authorized, timely service action. Cite the hotel data-access survey, the lower guest recall during hotel stays, and the local ACDC account, while stating that none proves the cause at PARKROYAL.
-5. **Land the project question.** The hotel-level design question is whether staff can turn relevant guest context into a fitting service action. PARKROYAL has permitted the team to use its lounge as the bounded test setting. Map the workflow there, then test whether a cue is useful and whether face matching adds value over manual selection.
+1. **Why personalized service matters.** Show how tailoring service to guest needs can improve perceived relevance and value. Use hotel evidence, while distinguishing perceived personalization from actual service behavior. ([Piccoli et al., 2017](https://doi.org/10.1016/j.tourman.2016.08.015); [Lei et al., 2024](https://doi.org/10.1016/j.tourman.2023.104818).)
+2. **Where hotel personalization falls short.** Give the guest-side signal: Medallia found 23% of surveyed U.S. hotel guests rated their recent stay 9–10 for personalization; average recall of listed personalization elements during the stay was 46%. Explain that this is perceived rating and recall, not an objective count of personalized stays or an explanation of the cause. ([Medallia report and methodology](https://www.medallia.com/press-release/medallia-research-finds-61-percent-of-consumers-are-willing-to-spend-more-for-personalized-experiences/).)
+3. **A possible barrier: guest knowledge may not reach staff.** Introduce the mechanism to investigate: information may not be recorded, handed over, easy to retrieve, or actionable during face-to-face service. Hotel studies and operator surveys describe data access or integration challenges in some settings, but do not prove this caused the Medallia result or exists at PARKROYAL. ([Sigala, 2005](https://doi.org/10.1016/j.ijhm.2004.08.008); [Hapi/Revinate, 2025](https://www.revinate.com/press-releases/the-future-of-hotel-data-report-reveals-nearly-50-of-hoteliers-struggle-to-access-critical-data/); [Novotel visit notes](../../hotel-visit/novotel-formatted.md).)
+4. **The design need: continuity from guest context to service action.** Explain who and when: new guests may share a preference that needs to carry from check-in to breakfast; returning guests may have existing information that staff still need to retrieve and apply. The possible outcome is fewer repeated explanations and more consistent, attentive service. Validate these effects locally.
+5. **How might staff use guest-approved context in the moment?** State the design question: “How might we enable hotel staff to capture and access relevant, guest-approved information across interactions, so they can provide personalized service while remaining naturally engaged with the guest?”
+6. **The first use case and value of glasses remain open.** Prioritize between remembering requirements, following up on concerns, or supporting personalized conversations. Then compare the chosen interaction with existing tools to see whether glasses improve access without disrupting engagement. The direction has broad alignment; the local problem and feature set are not yet fully validated.
 
-**Short spoken version:** “Personalization matters when it helps hotel staff respond to what a guest needs, not simply because they know a name. Some hotels record preferences, but the guest benefits only if relevant, authorized information reaches staff and changes the service in a way that feels appropriate. Research makes that translation gap worth investigating; it does not prove that every hotel or PARKROYAL has the same problem. PARKROYAL has permitted us to use its lounge as our test setting, where we will map the workflow and test one food-and-drink cue before deciding whether facial recognition is warranted.”
+**Short spoken version:** “Personalized service matters because it helps a hotel respond to what is relevant to each guest. But guests do not always experience hotel stays as highly personalized. One possible reason is that the knowledge staff need does not consistently reach them during service. A preference shared at check-in may not carry through to breakfast, and a returning guest's existing record may be difficult to use in the moment. We need to validate this information gap in the PARKROYAL lounge. Our design question is how staff can use guest-approved context while staying engaged with the guest. We still need to choose the first use case and test whether glasses work better than existing tools.”
 
 ## Why personalization can matter
 
