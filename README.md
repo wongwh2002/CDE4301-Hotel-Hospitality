@@ -65,11 +65,11 @@ Shared Pydantic models are defined in [`contracts/models.py`](contracts/models.p
 
 #### Prerequisites
 
-- Docker Desktop with the Docker Compose plugin (`docker compose version` must report **2.24.4 or newer**; the optional M1 native-worker setup uses Compose's `!override` feature).
+- Docker Compose v2.24.4 or newer. `scripts/dev-up.sh` prefers `docker compose` and falls back to `docker-compose` when the plugin command is unavailable. The optional M1 native-worker setup uses Compose's `!override` feature.
 - Bash and Python 3 to run `scripts/dev-up.sh`. On Windows, run the helper from WSL or Git Bash. The direct Compose commands can also be run from PowerShell after creating `.env`.
 - OpenSSL CLI only if you use the manual token-generation commands below.
 
-The helper uses the Compose project name `hotel-poc` by default. Use that same project name in subsequent `docker compose` commands so they address the stack you started. If you set `COMPOSE_PROJECT_NAME` before running the helper, replace `hotel-poc` in those commands with your chosen name.
+The helper uses the Compose project name `hotel-poc` by default. Use that same project name in subsequent Compose commands so they address the stack you started. If you set `COMPOSE_PROJECT_NAME` before running the helper, replace `hotel-poc` in those commands with your chosen name. The examples below use `docker compose`; if your installation exposes only `docker-compose`, use that command spelling instead.
 
 #### 1. Setup Environment Configuration
 

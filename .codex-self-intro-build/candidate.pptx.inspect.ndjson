@@ -1,0 +1,26 @@
+{"kind":"deck","id":"pr/4qvcm7","name":"Deck"}
+{"kind":"layout","id":"ly/u1sbmxkz","editable":false,"name":"Master","type":"master"}
+{"kind":"layout","id":"ly/k72tgjqd","editable":false,"name":"Title Slide","type":"title","placeholders":[{"name":"title","type":"title"},{"name":"subtitle","type":"subtitle"}]}
+{"kind":"layout","id":"ly/uhg32xkv","editable":false,"name":"Section Header","type":"sectionHeader","placeholders":[{"name":"title","type":"title"}]}
+{"kind":"layout","id":"ly/zad0vu1k","editable":false,"name":"Title and Body","type":"tx","placeholders":[{"name":"title","type":"title"},{"name":"body","type":"body"}]}
+{"kind":"layout","id":"ly/729g76h0","editable":false,"name":"Title and Two Column","type":"twoColTx","placeholders":[{"name":"title","type":"title"},{"name":"Left column","type":"body"},{"name":"Right column","type":"body"}]}
+{"kind":"layout","id":"ly/it4j2h07","editable":false,"name":"Title and One Column","type":"tx","placeholders":[{"name":"title","type":"title"},{"name":"body","type":"body"}]}
+{"kind":"layout","id":"ly/h8futw3q","editable":false,"name":"Blank","type":"blank"}
+{"kind":"slide","id":"sl/rxfds0","slideIndex":0,"layout":{"id":"ly/h8futw3q","name":"Blank"},"title":"Slide 1","textShapes":0,"backgroundColor":"rgba(0,0,0,1)"}
+{"kind":"image","id":"im/epcf6hgv","slideIndex":0,"position":{"left":32,"top":40,"width":295,"height":302},"fit":"cover","name":"","alt":"Modified home espresso machine and grinder."}
+{"kind":"image","id":"im/1s3ehcf6","slideIndex":0,"position":{"left":339,"top":40,"width":295,"height":302},"fit":"cover","name":"","alt":"A filter coffee tasting beside a cup of coffee."}
+{"kind":"image","id":"im/0rux87yl","slideIndex":0,"position":{"left":646,"top":40,"width":295,"height":302},"fit":"cover","name":"","alt":"A meal during a food outing."}
+{"kind":"image","id":"im/r21wb2x4","slideIndex":0,"position":{"left":953,"top":40,"width":295,"height":302},"fit":"cover","name":"","alt":"A home-cooked meal with steak."}
+{"kind":"image","id":"im/q1sf2xgj","slideIndex":0,"position":{"left":32,"top":378,"width":295,"height":302},"fit":"cover","name":"","alt":"A slice of tiramisu."}
+{"kind":"image","id":"im/do3edcfa","slideIndex":0,"position":{"left":339,"top":378,"width":295,"height":302},"fit":"cover","name":"","alt":"The remains of a homemade tiramisu attempt."}
+{"kind":"image","id":"im/cnux47yp","slideIndex":0,"position":{"left":646,"top":378,"width":295,"height":302},"fit":"cover","name":"","alt":"A basket of assorted drinks."}
+{"kind":"image","id":"im/by5gn6x8","slideIndex":0,"position":{"left":953,"top":378,"width":295,"height":302},"fit":"cover","name":"","alt":"A bar counter and beer tap."}
+{"kind":"notes","id":"nt/rxfds0","slideIndex":0,"text":""}
+{"kind":"slide","id":"sl/lntrzm","slideIndex":1,"layout":{"id":"ly/h8futw3q","name":"Blank"},"title":"Slide 2","textShapes":0,"backgroundColor":"rgba(0,0,0,1)"}
+{"kind":"image","id":"im/4jahobe5","slideIndex":1,"position":{"left":28,"top":36,"width":282,"height":216},"fit":"cover","name":"","alt":"Laptop open during a video call."}
+{"kind":"image","id":"im/ji10v6dk","slideIndex":1,"position":{"left":332,"top":36,"width":282,"height":216},"fit":"cover","name":"","alt":"Students working together in a project meeting."}
+{"kind":"image","id":"im/ihszm1wz","slideIndex":1,"position":{"left":636,"top":36,"width":282,"height":216},"fit":"cover","name":"","alt":"A group meeting around a table in a bright cafe."}
+{"kind":"image","id":"im/hgjytwve","slideIndex":1,"position":{"left":940,"top":36,"width":282,"height":216},"fit":"cover","name":"","alt":"A laptop ready for class or study."}
+{"kind":"image","id":"im/wfqhkret","slideIndex":1,"position":{"left":28,"top":274,"width":596,"height":410},"fit":"cover","name":"","alt":"A crowded lunch gathering."}
+{"kind":"image","id":"im/vuhgrmd8","slideIndex":1,"position":{"left":656,"top":274,"width":596,"height":410},"fit":"cover","name":"","alt":"A busy food and shopping street."}
+{"kind":"notes","id":"nt/lntrzm","slideIndex":1,"text":""}

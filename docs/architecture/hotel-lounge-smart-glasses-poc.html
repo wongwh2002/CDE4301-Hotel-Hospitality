@@ -247,6 +247,67 @@
     .output-contract code { font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace; }
     .output-contract .payload-caption { color: #53647b; font-size: .78rem; font-weight: 750; }
 
+    .capture-extension {
+      margin-top: 22px;
+      padding: 22px 24px 24px;
+      border: 1px dashed #8b9db4;
+      border-radius: 16px;
+      background: #fbfcfe;
+    }
+
+    .capture-extension h2 { margin: 0 0 7px; font-size: 1.2rem; letter-spacing: -.02em; }
+    .capture-intro { max-width: 900px; margin: 0; color: var(--muted); font-size: .9rem; }
+    .capture-flow {
+      display: grid;
+      grid-template-columns: repeat(5, minmax(0, 1fr));
+      gap: 24px;
+      margin-top: 18px;
+    }
+    .capture-step {
+      position: relative;
+      min-height: 146px;
+      padding: 15px 15px 14px;
+      border: 1px solid #d8e0eb;
+      border-radius: 12px;
+      background: #fff;
+    }
+    .capture-step:not(:last-child)::after {
+      position: absolute;
+      top: 50%;
+      right: -20px;
+      content: "→";
+      color: #71839a;
+      font-size: 1.25rem;
+      font-weight: 750;
+      transform: translateY(-50%);
+    }
+    .capture-step .step-number {
+      display: block;
+      margin-bottom: 8px;
+      color: #51647d;
+      font-size: .68rem;
+      font-weight: 800;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+    }
+    .capture-step strong { display: block; margin-bottom: 5px; color: #263950; font-size: .9rem; }
+    .capture-step p { margin: 0; color: #5a6a80; font-size: .78rem; line-height: 1.45; }
+    .capture-step.proposed { border-color: #a9b6c7; border-style: dashed; }
+    .capture-step.store { border-color: #a99add; background: #fbfaff; }
+    .capture-step.retrieve { border-color: #8bc9c5; background: #f7fcfc; }
+    .capture-guardrail {
+      display: flex;
+      gap: 10px;
+      align-items: flex-start;
+      margin: 16px 0 0;
+      padding: 12px 14px;
+      border-left: 3px solid #d3a64a;
+      background: #fff8e8;
+      color: #624b1d;
+      font-size: .8rem;
+    }
+    .capture-guardrail strong { flex: 0 0 auto; }
+
     .validation {
       display: grid;
       grid-template-columns: auto 1fr;
@@ -281,6 +342,17 @@
       .toolbar-label { flex-basis: 100%; }
       .validation { grid-template-columns: 1fr; gap: 4px; }
       .output-contract { grid-template-columns: 1fr; gap: 14px; }
+      .capture-flow { grid-template-columns: 1fr; gap: 10px; }
+      .capture-step { min-height: auto; }
+      .capture-step:not(:last-child)::after {
+        top: auto;
+        right: 50%;
+        bottom: -15px;
+        content: "↓";
+        transform: translateX(50%);
+      }
+      .capture-guardrail { display: block; }
+      .capture-guardrail strong { display: block; margin-bottom: 4px; }
     }
 
     @media (prefers-reduced-motion: reduce) {
@@ -452,6 +524,40 @@
         <span class="legend-item"><i class="swatch debug" aria-hidden="true"></i>Opt-in raw detections + timings</span>
         <span class="legend-item"><i class="swatch device" aria-hidden="true"></i>Glasses ↔ phone</span>
       </div>
+    </section>
+
+    <section class="capture-extension" aria-labelledby="capture-extension-heading">
+      <p class="eyebrow">Separate proposed extension · not yet implemented</p>
+      <h2 id="capture-extension-heading">Add a guest-approved note and make it available to the next employee</h2>
+      <p class="capture-intro">The current POC reads synthetic profile context after a lounge entry event. This additional path captures a new detail from a conversation. Keep the write path separate from face matching, and save only after staff checks the note and the guest/stay association.</p>
+      <div class="capture-flow" aria-label="Proposed guest insight capture and handover flow">
+        <article class="capture-step proposed">
+          <span class="step-number">Proposed · capture</span>
+          <strong>Guest shares a preference</strong>
+          <p>Staff asks whether it should be kept for this stay. No passive audio capture.</p>
+        </article>
+        <article class="capture-step proposed">
+          <span class="step-number">Proposed · review</span>
+          <strong>Staff enters or edits a short note</strong>
+          <p>A staff phone form can capture the wording, source, and time. Staff checks it before saving.</p>
+        </article>
+        <article class="capture-step proposed store">
+          <span class="step-number">Proposed · write</span>
+          <strong>Confirm guest and current stay</strong>
+          <p>Store a stay-scoped note with provenance and an agreed expiry in the mock-hotel record.</p>
+        </article>
+        <article class="capture-step proposed retrieve">
+          <span class="step-number">Proposed · handover</span>
+          <strong>Next employee retrieves the note</strong>
+          <p>Show it in the existing authorized staff channel; role access and the hotel source of truth need partner input.</p>
+        </article>
+        <article class="capture-step proposed retrieve">
+          <span class="step-number">Proposed · service moment</span>
+          <strong>Offer a compact cue</strong>
+          <p>Glasses are one delivery option. Staff confirms that the preference still applies before acting.</p>
+        </article>
+      </div>
+      <p class="capture-guardrail"><strong>Correction and expiry</strong><span>Let staff or the guest correct or decline the note, and expire or remove it at checkout or the hotel-approved retention point. A face match must not be the sole write-time check. Allergy information remains a safety alert that staff verifies against the authoritative source and food-safety process.</span></p>
     </section>
 
     <section class="output-contract" aria-labelledby="output-contract-heading">
