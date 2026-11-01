@@ -23,15 +23,19 @@ def main() -> int:
     parser.add_argument("--host", default="0.0.0.0", help="Interface to listen on (default: all interfaces)")
     parser.add_argument("--port", type=int, default=8000, help="HTTP port (default: 8000)")
     parser.add_argument(
-        "--threshold", type=float, default=0.363,
-        help="SFace cosine-similarity threshold (default: 0.363)",
+        "--threshold", type=float, default=0.50,
+        help="ArcFace cosine-similarity threshold (default: 0.50; provisional)",
     )
+    parser.add_argument("--margin", type=float, default=0.10,
+                        help="Required lead over the second-best identity (default: 0.10; provisional)")
     args = parser.parse_args()
 
     if not -1 <= args.threshold <= 1:
         parser.error("--threshold must be between -1 and 1")
     if not 1 <= args.port <= 65535:
         parser.error("--port must be between 1 and 65535")
+    if not 0 <= args.margin <= 2:
+        parser.error("--margin must be between 0 and 2")
 
     if not in_server_environment():
         if not PYTHON.exists():
@@ -44,6 +48,7 @@ def main() -> int:
         ).returncode
 
     os.environ["FACE_MATCH_THRESHOLD"] = str(args.threshold)
+    os.environ["FACE_MATCH_MARGIN"] = str(args.margin)
     sys.path.insert(0, str(PROJECT_DIR))
     import uvicorn
 

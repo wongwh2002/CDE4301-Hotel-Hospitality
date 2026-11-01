@@ -1,4 +1,4 @@
-﻿"""Full-frame face identification service. Incoming images are processed in memory only."""
+"""Full-frame face identification service. Incoming images are processed in memory only."""
 from __future__ import annotations
 
 import io
@@ -8,125 +8,21 @@ import os
 import threading
 import time
 import warnings
-from collections import defaultdict
 from contextlib import asynccontextmanager
-from dataclasses import dataclass
-from pathlib import Path
 
 import numpy as np
 from fastapi import FastAPI, HTTPException, Query, Request
 from PIL import Image, UnidentifiedImageError
 from starlette.concurrency import run_in_threadpool
+from server.recognition import (
+    DEFAULT_MARGIN, DEFAULT_THRESHOLD, MODEL_NAME, FaceResult, InsightFaceRecognizer,
+)
 
 LOG = logging.getLogger("uvicorn.error")
 MAX_BYTES = 8 * 1024 * 1024
 MAX_PIXELS = 16_000_000
 MAX_DISPLAY_FACES = 5
 Image.MAX_IMAGE_PIXELS = MAX_PIXELS
-
-
-@dataclass(frozen=True)
-class FaceResult:
-    name: str
-    similarity: float | None
-    box: dict[str, int]
-    detection_confidence: float
-
-
-class OpenCvFaceRecognizer:
-    """YuNet face detection plus SFace embeddings and a filename-based face gallery."""
-
-    def __init__(self, threshold: float):
-        import cv2
-
-        self.cv2 = cv2
-        self.threshold = threshold
-        server_dir = Path(__file__).parent
-        models_dir = Path(os.getenv("FACE_MODELS_DIR", str(server_dir / "models")))
-        detector_path = Path(os.getenv(
-            "FACE_DETECTION_MODEL", str(models_dir / "face_detection_yunet_2023mar.onnx")
-        ))
-        recognizer_path = Path(os.getenv(
-            "FACE_RECOGNITION_MODEL", str(models_dir / "face_recognition_sface_2021dec.onnx")
-        ))
-        for model_path in (detector_path, recognizer_path):
-            if not model_path.is_file():
-                raise FileNotFoundError(
-                    f"Missing OpenCV model {model_path}. Run: python server/setup.py"
-                )
-
-        self.detector = cv2.FaceDetectorYN.create(
-            str(detector_path), "", (320, 320),
-            float(os.getenv("FACE_DETECTION_CONFIDENCE", "0.80")), 0.3, 5000,
-        )
-        self.recognizer = cv2.FaceRecognizerSF.create(str(recognizer_path), "")
-        self.gallery_dir = Path(os.getenv("FACE_GALLERY", str(server_dir / "faces")))
-        self.gallery_dir.mkdir(parents=True, exist_ok=True)
-        self.gallery: dict[str, list[np.ndarray]] = defaultdict(list)
-        self._load_gallery()
-        # Catch broken/incompatible models before reporting /health as ready.
-        self._detect(np.zeros((320, 320, 3), dtype=np.uint8))
-
-    def _detect(self, image: np.ndarray):
-        height, width = image.shape[:2]
-        self.detector.setInputSize((width, height))
-        _, faces = self.detector.detect(image)
-        return [] if faces is None else faces
-
-    def _feature(self, image: np.ndarray, face: np.ndarray) -> np.ndarray:
-        aligned = self.recognizer.alignCrop(image, face)
-        return self.recognizer.feature(aligned)
-
-    def _load_gallery(self) -> None:
-        supported = {".jpg", ".jpeg", ".png", ".bmp", ".webp"}
-        for path in sorted(self.gallery_dir.iterdir()):
-            if not path.is_file() or path.suffix.lower() not in supported:
-                continue
-            image = self.cv2.imread(str(path), self.cv2.IMREAD_COLOR)
-            if image is None:
-                LOG.warning("Skipping unreadable gallery image: %s", path.name)
-                continue
-            faces = self._detect(image)
-            if len(faces) == 0:
-                LOG.warning("No face found in gallery image: %s", path.name)
-                continue
-            # One enrollment image can contain several faces; use its largest face.
-            face = max(faces, key=lambda item: float(item[2] * item[3]))
-            self.gallery[path.stem].append(self._feature(image, face))
-        LOG.info(
-            "Loaded %d face templates for %d names from %s",
-            sum(map(len, self.gallery.values())), len(self.gallery), self.gallery_dir,
-        )
-
-    def detect(self, image: np.ndarray) -> list[FaceResult]:
-        results = []
-        height, width = image.shape[:2]
-        for face in self._detect(image):
-            x, y, box_width, box_height = (float(value) for value in face[:4])
-            x1 = max(0, min(width, round(x)))
-            y1 = max(0, min(height, round(y)))
-            x2 = max(x1, min(width, round(x + box_width)))
-            y2 = max(y1, min(height, round(y + box_height)))
-            feature = self._feature(image, face)
-            best_name = "Unknown"
-            best_score: float | None = None
-            for name, templates in self.gallery.items():
-                score = max(
-                    float(self.recognizer.match(
-                        feature, template, self.cv2.FaceRecognizerSF_FR_COSINE
-                    ))
-                    for template in templates
-                )
-                if math.isfinite(score) and (best_score is None or score > best_score):
-                    best_name, best_score = name, score
-            if best_score is None or best_score < self.threshold:
-                best_name = "Unknown"
-            results.append(FaceResult(
-                best_name, best_score,
-                {"x": x1, "y": y1, "width": x2 - x1, "height": y2 - y1},
-                float(face[14]),
-            ))
-        return results
 
 
 def format_display(faces: list[FaceResult]) -> str:
@@ -183,6 +79,7 @@ def process_image(recognizer, data: bytes, rotation: int, request_id: str) -> di
             {
                 "name": face.name,
                 "similarity": face.similarity,
+                "runner_up_similarity": face.runner_up_similarity,
                 "box": face.box,
                 "detection_confidence": face.detection_confidence,
             }
@@ -195,18 +92,21 @@ def process_image(recognizer, data: bytes, rotation: int, request_id: str) -> di
     }
 
 
-def create_app(recognizer=None, threshold: float | None = None) -> FastAPI:
-    match_threshold = float(os.getenv("FACE_MATCH_THRESHOLD", "0.363")) if threshold is None else threshold
+def create_app(recognizer=None, threshold: float | None = None, margin: float | None = None) -> FastAPI:
+    match_threshold = float(os.getenv("FACE_MATCH_THRESHOLD", str(DEFAULT_THRESHOLD))) if threshold is None else threshold
+    match_margin = float(os.getenv("FACE_MATCH_MARGIN", str(DEFAULT_MARGIN))) if margin is None else margin
     if not math.isfinite(match_threshold) or not -1 <= match_threshold <= 1:
         raise ValueError("FACE_MATCH_THRESHOLD must be between -1 and 1")
+    if not math.isfinite(match_margin) or not 0 <= match_margin <= 2:
+        raise ValueError("FACE_MATCH_MARGIN must be between 0 and 2")
 
     @asynccontextmanager
     async def lifespan(app: FastAPI):
         app.state.recognizer = (
             recognizer if recognizer is not None
-            else await run_in_threadpool(OpenCvFaceRecognizer, match_threshold)
+            else await run_in_threadpool(InsightFaceRecognizer, match_threshold, match_margin)
         )
-        LOG.info("Face recognizer ready; cosine similarity threshold %.3f", match_threshold)
+        LOG.info("Face recognizer ready; model=%s cosine threshold=%.3f margin=%.3f", MODEL_NAME, match_threshold, match_margin)
         yield
 
     app = FastAPI(title="Rokid face identification", lifespan=lifespan)
@@ -218,6 +118,11 @@ def create_app(recognizer=None, threshold: float | None = None) -> FastAPI:
             "status": "ready",
             "protocol_version": 2,
             "match_threshold": match_threshold,
+            "match_margin": match_margin,
+            "model": MODEL_NAME,
+            "providers": getattr(app.state.recognizer, "providers", {}),
+            "gallery_names": len(getattr(app.state.recognizer, "gallery", {})),
+            "gallery_templates": sum(map(len, getattr(app.state.recognizer, "gallery", {}).values())),
         }
 
     @app.post("/detect")
@@ -257,6 +162,8 @@ def create_app(recognizer=None, threshold: float | None = None) -> FastAPI:
                 "protocol_version": 2,
                 "request_id": request_id,
                 "match_threshold": match_threshold,
+                "match_margin": match_margin,
+                "model": MODEL_NAME,
                 **result,
             }
         except HTTPException:

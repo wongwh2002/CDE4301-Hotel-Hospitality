@@ -54,6 +54,8 @@ class ServerTests(unittest.TestCase):
         self.assertEqual(result["status"], "ready")
         self.assertEqual(result["protocol_version"], 2)
         self.assertEqual(result["match_threshold"], 0.363)
+        self.assertEqual(result["model"], "buffalo_l")
+        self.assertEqual(result["match_margin"], 0.1)
 
     def test_names_scores_boxes_and_request_correlation(self):
         self.recognizer.results = [face(), face(x=55)]
@@ -115,6 +117,12 @@ class ServerTests(unittest.TestCase):
     def test_invalid_match_threshold(self):
         with self.assertRaises(ValueError):
             create_app(self.recognizer, threshold=1.1)
+
+    def test_invalid_match_margin(self):
+        for margin in (-0.1, 2.1, float("nan")):
+            with self.subTest(margin=margin):
+                with self.assertRaises(ValueError):
+                    create_app(self.recognizer, margin=margin)
 
 
 if __name__ == "__main__":
