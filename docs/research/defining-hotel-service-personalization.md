@@ -1,9 +1,9 @@
 # Defining personalization in hotel service
 
-**Research date:** 2026-10-09
+**Research date:** 2026-10-29
 **Purpose:** Establish a useful, source-grounded meaning of personalization for the hotel guest-context project and distinguish it from customization, recognition, and generally good service.
 
-## Short assessmen
+## Short assessment
 
 Researchers use related terms in different ways, so there is no single clean boundary across all service and marketing research. A hotel-specific scale treats personalization as a customer–employee construct with four dimensions: responsiveness, intimacy, empathy, and attention to personal interests. Other service research describes its social content, while marketing research distinguishes firm-led tailoring from customer-led customization. These definitions overlap: empathy and responsiveness can also be elements of good service, and greeting someone by name can be one personalized gesture.
 
@@ -13,7 +13,23 @@ For this project, the most useful operational definition is:
 
 This is a project definition synthesized from the sources, not a claim that the literature has one canonical definition. It separates the data or recognition step from the service action and the guest’s perception of fit.
 
-## Distinctions that matter for the projec
+### What “highly personalized” means in the Medallia survey
+
+Medallia did not define a behavior-based standard for a highly personalized hotel stay. In its November 2023 survey, guests rated how personalized a recent stay felt from 0 to 10 and were told to “use your best judgment” about what personalized means. Medallia classified 9–10 as high, 7–8 as moderate, and 0–6 as low. **Twenty-three percent of hotel guests** gave a 9–10 rating; the press-release headline’s roughly 25% combines hotel (23%) and retail (26%) respondents. This measures perceived personalization, not the share of stays that passed an objective service checklist. [Medallia report, pp. 2–3](https://www.medallia.com/wp-content/uploads/pdf/resources/Medallia-Understanding-Personalization-Efforts-in-the-Hospitality-and-Retail-Industries-Report.pdf) · [Medallia release and methodology](https://www.medallia.com/press-release/medallia-research-finds-61-percent-of-consumers-are-willing-to-spend-more-for-personalized-experiences/)
+
+For this project, use **high personalization** as a guest-perceived outcome, then record the service evidence that may explain it: whether the context was specific and relevant to the guest, whether staff adapted the service or interaction because of it, and whether the guest found that adaptation relevant. These are proposed observation dimensions, not a validated threshold from Medallia or a universal academic scale. A remembered name or stored preference by itself should not count as proof that highly personalized service was delivered.
+
+### What broader hotel and service research adds
+
+Across hotel studies, personalization commonly means adapting service to an individual guest's needs or preferences. A hotel field study by Piccoli et al. describes it as using the guest's own information to tailor both the service and the service environment. Its examples range from essential requests, such as an extra bed or food allergy, to preferred minibar drinks, towels, or room temperature. The study examines how hotels elicit and use preferences; it does not set a threshold for “high” personalization. [Piccoli et al. (2017)](https://doi.org/10.1016/j.tourman.2016.08.015) · [Author manuscript](https://dds.cct.lsu.edu/ddslab/pdf/piccoliLuiGruen.pdf)
+
+Service-encounter research adds a human and relational dimension. Mittal and Lassar describe personalization as the social content of employee–customer interaction. Choo's hotel-specific scale found four dimensions—**responsiveness, intimacy, empathy, and personal interest**—using scale-development interviews and exploratory and confirmatory factor analyses. Its item pool includes listening carefully, understanding a guest's requirements, giving advice that fits those requirements, treating the guest warmly, and taking interest in personal circumstances. The validation survey used 375 frequent hotel users, recruited mainly through VIP and private-banking customer groups in Busan, so the scale is useful evidence rather than a universal standard. [Mittal & Lassar (1996)](https://doi.org/10.1016/S0022-4359(96)90007-X) · [Choo (2012), full article](https://journal.kci.go.kr/JTS/archive/articlePdf?artiId=ART001697043)
+
+Lei et al. distinguish **actual personalization** (what a hotel attempts) from **perceived personalization** (whether the guest feels the service fits their special needs and preferences). Their three-study design used hotel-manager interviews, an online experiment with 919 respondents, and a survey of 214 China-based respondents. In the final study, a three-item guest scale rated whether service seemed designed for the respondent, treated them as a unique individual, and fit their situation; it measured degree, with no universal high/low cutoff. The research found that effort and surprise can raise perceived personalization. In practical terms, this suggests surprise can help but is not necessary: an accurate, well-executed response to a stated preference may also feel personal. [Lei et al. (2024)](https://doi.org/10.1016/j.tourman.2023.104818) · [Institutional study record and methods](https://research.polyu.edu.hk/en/publications/recipe-for-perceived-personalization-in-hotels/)
+
+Taken together, the literature supports a working definition of **highly personalized hotel service** as service that (1) draws on context specific to the guest and relevant to the current stay or interaction, (2) adapts what staff offer or do using that context, and (3) is delivered with attentive understanding and perceived by the guest as a good fit. This is a synthesis for the project, not an established universal scale. Measure the service action and the guest's perceived fit separately; neither data access nor a friendly gesture alone establishes high personalization.
+
+## Distinctions that matter for the project
 
 ### Personalization and customization
 
@@ -64,3 +80,5 @@ Observe or ask about recent cases, recording recognition, context access, staff 
 4. Mittal, B., & Lassar, W. M. (1996). “The Role of Personalization in Service Encounters.” *Journal of Retailing*, 72(1), 95–109. [DOI](https://doi.org/10.1016/S0022-4359(96)90007-X).
 5. Surprenant, C. F., & Solomon, M. R. (1987). “Predictability and Personalization in the Service Encounter.” *Journal of Marketing*, 51(2), 86–96. [DOI](https://doi.org/10.1177/002224298705100207).
 6. Hiezl, K., & Gyurácz-Németh, P. (2025). “Is High-Touch Enough? Personalization-Supporting Technology in Hotel Service: A Data-Driven Approach.” *Strategic Change*, 34(4), 609–630. [DOI](https://doi.org/10.1002/jsc.2663).
+7. Medallia Market Research (2024). *Understanding Personalization Efforts in the Hospitality and Retail Industries*. November 2023 survey of hotel guests and retail consumers. [Report](https://www.medallia.com/wp-content/uploads/pdf/resources/Medallia-Understanding-Personalization-Efforts-in-the-Hospitality-and-Retail-Industries-Report.pdf) · [Release and methodology](https://www.medallia.com/press-release/medallia-research-finds-61-percent-of-consumers-are-willing-to-spend-more-for-personalized-experiences/).
+8. Piccoli, G., Lui, T.-W., & Grün, B. (2017). “The impact of IT-enabled customer service systems on service personalization, customer service perceptions, and hotel performance.” *Tourism Management*, 59, 349–362. [DOI](https://doi.org/10.1016/j.tourman.2016.08.015) · [Author manuscript](https://dds.cct.lsu.edu/ddslab/pdf/piccoliLuiGruen.pdf).

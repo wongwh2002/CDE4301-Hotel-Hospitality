@@ -9,6 +9,40 @@ ROOT_DIR="$(cd "${SCRIPT_DIR}/.." && pwd)"
 
 cd "${ROOT_DIR}"
 
+# 0. Select an installed Compose v2 CLI. Docker Desktop commonly provides
+# `docker compose`; some installations expose the standalone `docker-compose`.
+compose_version_supported() {
+    local version_output major minor patch
+    version_output="$("$@" version 2>&1)" || return 1
+
+    if [[ ! "${version_output}" =~ [vV]?([0-9]+)\.([0-9]+)\.([0-9]+) ]]; then
+        return 1
+    fi
+
+    major="${BASH_REMATCH[1]}"
+    minor="${BASH_REMATCH[2]}"
+    patch="${BASH_REMATCH[3]}"
+    COMPOSE_VERSION="${BASH_REMATCH[0]}"
+
+    if (( major > 2 || (major == 2 && minor > 24) || (major == 2 && minor == 24 && patch >= 4) )); then
+        return 0
+    fi
+    return 1
+}
+
+if compose_version_supported docker compose; then
+    COMPOSE_CMD=(docker compose)
+elif command -v docker-compose >/dev/null 2>&1 && compose_version_supported docker-compose; then
+    COMPOSE_CMD=(docker-compose)
+else
+    echo "ERROR: Docker Compose v2.24.4 or newer was not found." >&2
+    echo "Install or update Docker Desktop, or install the Docker Compose v2 plugin." >&2
+    echo "Checked both 'docker compose version' and 'docker-compose version'." >&2
+    exit 1
+fi
+
+echo "==> Using ${COMPOSE_CMD[*]} (${COMPOSE_VERSION})"
+
 # 1. Initialize .env from .env.example if missing
 if [[ ! -f ".env" ]]; then
     echo "==> Creating .env from .env.example..."
@@ -58,9 +92,9 @@ echo "===================================================================="
 
 # 3. Launch Docker Compose with passed arguments or default up --build --wait
 if [[ $# -eq 0 ]]; then
-    docker compose -p "${PROJECT_NAME}" up --build --wait
+    "${COMPOSE_CMD[@]}" -p "${PROJECT_NAME}" up --build --wait
 else
-    docker compose -p "${PROJECT_NAME}" "$@"
+    "${COMPOSE_CMD[@]}" -p "${PROJECT_NAME}" "$@"
 fi
 
 echo ""
@@ -78,11 +112,11 @@ echo "   - mock-hotel:     http://<HOST_BIND_ADDRESS>:8002/health"
 echo ""
 echo " Useful commands:"
 echo "   - Start with tap simulator:"
-echo "       docker compose -p ${PROJECT_NAME} --profile sim up --build --wait lounge-control face-worker mock-hotel tap-simulator"
+echo "       ${COMPOSE_CMD[*]} -p ${PROJECT_NAME} --profile sim up --build --wait lounge-control face-worker mock-hotel tap-simulator"
 echo "   - Run one-shot frame replay fixture:"
-echo "       docker compose -p ${PROJECT_NAME} --profile sim run --rm frame-replay"
+echo "       ${COMPOSE_CMD[*]} -p ${PROJECT_NAME} --profile sim run --rm frame-replay"
 echo "   - View logs:"
-echo "       docker compose -p ${PROJECT_NAME} logs -f"
+echo "       ${COMPOSE_CMD[*]} -p ${PROJECT_NAME} logs -f"
 echo "   - Stop stack:"
-echo "       docker compose -p ${PROJECT_NAME} down"
+echo "       ${COMPOSE_CMD[*]} -p ${PROJECT_NAME} down"
 echo "===================================================================="
