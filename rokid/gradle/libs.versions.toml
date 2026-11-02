@@ -7,8 +7,10 @@ espressoCore = "3.7.0"
 appcompat = "1.8.0"
 material = "1.14.0"
 camerax = "1.4.1"
+mlkitFace = "16.1.7"
 
 [libraries]
+mlkit-face-detection = { group = "com.google.mlkit", name = "face-detection", version.ref = "mlkitFace" }
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
 junit = { group = "junit", name = "junit", version.ref = "junit" }
 androidx-junit = { group = "androidx.test.ext", name = "junit", version.ref = "junitVersion" }

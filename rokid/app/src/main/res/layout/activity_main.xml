@@ -3,14 +3,26 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@android:color/black">
+    <com.example.rokid_app.FaceOverlayView
+        android:id="@+id/faceOverlay"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent" />
     <TextView
         android:id="@+id/statusText"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom"
         android:gravity="center"
-        android:padding="24dp"
-        android:text="@string/connecting_server"
+        android:padding="8dp"
         android:textColor="#00FF00"
-        android:textSize="28sp"
-        android:maxLines="8" />
+        android:textSize="16sp"
+        android:maxLines="2" />
+    <com.example.rokid_app.ServerStatusView
+        android:id="@+id/serverStatus"
+        android:layout_width="28dp"
+        android:layout_height="28dp"
+        android:layout_gravity="top|end"
+        android:layout_marginTop="32dp"
+        android:layout_marginEnd="12dp"
+        android:visibility="gone" />
 </FrameLayout>
