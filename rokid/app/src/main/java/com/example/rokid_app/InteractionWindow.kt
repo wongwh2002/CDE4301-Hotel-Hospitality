@@ -4,18 +4,23 @@ package com.example.rokid_app
 data class InteractionWindow(
     val scanId: Long = 0,
     val detectionUntil: Long = 0,
-    val statusUntil: Long = 0
+    val statusUntil: Long = 0,
+    val detectionStartedAt: Long = 0
 ) {
-    fun tap(now: Long) = copy(scanId = scanId + 1, detectionUntil = now + DETECTION_MS)
+    fun tap(now: Long) = copy(scanId = scanId + 1, detectionUntil = now + SILENCE_TIMEOUT_MS, detectionStartedAt = now)
+    /** Speech extends this session, but can never activate idle detection or revive an expired scan. */
+    fun speech(id: Long, observedAt: Long): InteractionWindow =
+        if (acceptsResult(id, observedAt) && observedAt >= detectionStartedAt)
+            copy(detectionUntil = maxOf(detectionUntil, observedAt + SILENCE_TIMEOUT_MS)) else this
     fun swipeForward(now: Long) = copy(statusUntil = now + STATUS_MS)
-    fun stopDetection() = copy(scanId = scanId + 1, detectionUntil = 0)
+    fun stopDetection() = copy(scanId = scanId + 1, detectionUntil = 0, detectionStartedAt = 0)
     fun detecting(now: Long) = now < detectionUntil
     fun showingStatus(now: Long) = now < statusUntil
     fun acceptsResult(id: Long, now: Long) = id == scanId && detecting(now)
     fun canStartRecognition(now: Long) = detecting(now) && detectionUntil - now >= 350
 
     companion object {
-        const val DETECTION_MS = 10_000L
+        const val SILENCE_TIMEOUT_MS = 15_000L
         const val STATUS_MS = 5_000L
     }
 }

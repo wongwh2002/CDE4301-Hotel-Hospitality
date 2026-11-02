@@ -33,6 +33,7 @@ android {
 }
 
 dependencies {
+    implementation(libs.webrtc.vad)
     implementation(libs.mlkit.face.detection)
     implementation(libs.androidx.appcompat)
     implementation(libs.androidx.core.ktx)

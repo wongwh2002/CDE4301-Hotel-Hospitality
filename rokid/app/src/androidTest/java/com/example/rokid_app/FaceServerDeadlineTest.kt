@@ -25,6 +25,25 @@ class FaceServerDeadlineTest {
         verifyCancellation(explicitStop = true)
     }
 
+    @Test fun speechExtendsARequestPastItsOriginalDeadline() {
+        DelayedServer(responseDelayMs = 1_200).use { server ->
+            val client = FaceServerClient("http://127.0.0.1:${server.port}")
+            val executor = Executors.newSingleThreadExecutor()
+            try {
+                val started = SystemClock.elapsedRealtime()
+                client.setDetectionScan(1, started + 600)
+                val result = executor.submit<FaceServerResult> {
+                    client.detect(byteArrayOf(1, 2, 3), 0, "deadline-test", 1, started + 600)
+                }
+                assertTrue(server.detectReceived.await(500, TimeUnit.MILLISECONDS))
+                client.extendDetectionDeadline(1, started + 3_000)
+                assertEquals(0, result.get(3, TimeUnit.SECONDS).faceCount)
+                assertTrue("Response did not cross the original deadline", SystemClock.elapsedRealtime() - started > 600)
+                client.checkHealth()
+            } finally { client.close(); executor.shutdownNow() }
+        }
+    }
+
     private fun verifyCancellation(explicitStop: Boolean) {
         DelayedServer().use { server ->
             val client = FaceServerClient("http://127.0.0.1:${server.port}")
@@ -54,7 +73,7 @@ class FaceServerDeadlineTest {
         }
     }
 
-    private class DelayedServer : AutoCloseable {
+    private class DelayedServer(private val responseDelayMs: Long? = null) : AutoCloseable {
         private val server = ServerSocket(0)
         val port get() = server.localPort
         val detectReceived = CountDownLatch(1)
@@ -84,7 +103,13 @@ class FaceServerDeadlineTest {
                                 repeat(length) { check(reader.read() != -1) }
                                 if (line.startsWith("POST /detect")) {
                                     detectReceived.countDown()
-                                    holdDetection.await()
+                                    if (responseDelayMs == null) holdDetection.await()
+                                    else {
+                                        Thread.sleep(responseDelayMs)
+                                        val body = """{"protocol_version":2,"request_id":"deadline-test","image_width":1,"image_height":1,"faces":[],"display":"Unknown","inference_ms":0}"""
+                                        it.getOutputStream().write(("HTTP/1.1 200 OK\r\nContent-Type: application/json\r\n" +
+                                            "Content-Length: ${body.length}\r\nConnection: close\r\n\r\n" + body).toByteArray())
+                                    }
                                 } else {
                                     healthReceived.countDown()
                                     val body = "{\"status\":\"ready\",\"protocol_version\":2}"

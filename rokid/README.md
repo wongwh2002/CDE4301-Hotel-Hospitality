@@ -21,11 +21,74 @@ This folder contains a standalone demo with a Kotlin Android app running on the 
 ## Pipeline
 
 1. **Load the gallery:** At server startup, images in server/faces/ are converted into normalized 512-value ArcFace feature vectors and cached in memory. Each filename becomes the person's name. Reference images with zero or multiple detected faces are skipped.
-2. **Track and send:** A single temple tap starts a ten-second detection window. During that window, the glasses analyze the latest camera frame at most every 80 ms, targeting 960 × 720 (the actual resolution may differ). Frames arriving while detection is busy are dropped. Only a guest whose face center lies within the central 30% of both axes of the calibrated display is eligible; if several qualify, the closest to the center is selected. About every two seconds, the selected face and padding (1.6 times its detected width/height, clipped at image edges) are encoded as a JPEG crop for recognition. No recognition request is sent while idle or without a centered guest. Only one server request runs at a time.
+2. **Track and send:** A single temple tap starts detection and a 15-second silence timer. Locally detected speech resets the timer; after 15 seconds without detected speech, camera capture and microphone monitoring stop and the display returns to black. During that window, the glasses analyze the latest camera frame at most every 80 ms, targeting 960 × 720 (the actual resolution may differ). Frames arriving while detection is busy are dropped. Only a guest whose face center lies within the central 30% of both axes of the calibrated display is eligible; if several qualify, the closest to the center is selected. About every two seconds, the selected face and padding (1.6 times its detected width/height, clipped at image edges) are encoded as a JPEG crop for recognition. No recognition request is sent while idle or without a centered guest. Only one server request runs at a time.
 3. **Recognize:** The server rotates the image upright and uses InsightFace buffalo_l with SCRFD detection/landmarks and ArcFace embeddings. Each vector is compared against the gallery using cosine similarity. A match must pass both the score threshold and the required lead over the second-best identity; otherwise it returns Unknown.
 4. **Display:** Server face boxes are mapped from the JPEG crop back into the original upright frame and matched against the selected local track. Unambiguous matches label the current track beside its face, with text size bounded by readable limits. Matches below the recognition threshold show **Unknown**. Leaving the center clears the box/name and invalidates pending identities. Lost tracks, ambiguous associations, responses older than two seconds, and identities older than four seconds are discarded. Labels disappear within 500 ms if tracking stalls. Debug boxes have 12% visual padding, independent of optical calibration. There is no visible camera preview. This uses head direction as a proxy for attention; it does not measure eye contact. The padded crop can include parts of other people if they overlap the selected guest.
 
 Gallery vectors are rebuilt on every server restart. Incoming camera images are processed in memory and are not saved.
+
+## Temple touch and audio silence timeout
+
+The camera and microphone stay closed while idle; server health checks continue.
+A temple tap starts a new session with a 15-second deadline. AudioRecord uses the
+standard MIC source: on this RV101, VOICE_RECOGNITION initializes without error
+but supplies only zero-valued samples. The firmware also reports silenced=true
+for MIC even when real samples arrive, so tests validate the signal rather than
+trusting that flag alone. This agrees with a separate [first-hand RV101 microphone
+investigation](https://zenn.dev/maruhana/articles/rokid-conversation-support-03?locale=en).
+WebRTC VAD 2.0.10
+runs locally on 16 kHz mono, signed 16-bit PCM in 20 ms frames, using its
+VERY_AGGRESSIVE mode and a short speech-duration filter. It detects speech-like
+activity rather than resetting on every loud sound. Audio is overwritten in
+memory, never saved, transcribed, or sent to the server. Only the existing JPEG
+recognition requests use the network.
+
+Each speech observation resets the deadline to 15 seconds after that observation
+without changing the scan ID, so valid pending identities remain associated with
+the same session. Speech cannot activate idle detection or revive an expired
+session. Another temple tap starts a new session. A status swipe neither starts
+nor extends recognition. Expiry closes the camera and microphone, clears labels,
+and cancels pending uploads while leaving health checks enabled. Backgrounding
+the app also stops capture. Microphone permission denial or initialization/read
+failure leaves/stops detection with a retry message instead of pretending the
+audio timeout is working.
+
+An in-flight HTTP request follows the extended scan deadline while retaining
+independent 3-second connect, 10-second read, and 12-second overall limits.
+Stopping/expiring a scan still cancels it. Speech/VAD is not speaker recognition:
+nearby conversations, television speech and false positives can keep a session
+active, while quiet/occluded speech can be missed. Validate it in the intended
+restaurant noise; these settings do not establish speech-detection accuracy.
+
+Implementation references: [Android AudioRecord](https://developer.android.com/reference/android/media/AudioRecord)
+and [the pinned Android WebRTC VAD implementation](https://github.com/gkonovalov/android-vad/tree/2.0.10).
+The JitPack repository is restricted to that dependency group.
+
+To inspect timing without recording audio:
+
+~~~text
+adb logcat -v threadtime -s FaceAudio:I FaceInteraction:I FaceConnection:I "*:S"
+~~~
+
+`FaceAudio` reports microphone start/stop and throttled speech-activity events,
+not PCM or recognized words. Unit tests cover the 15-second boundary, continuous
+speech, stale callbacks, retaps and status swipes. Device tests cover native VAD
+on silence/synthetic speech, actual microphone stop/reopen, and HTTP requests
+surviving deadline extension as well as expiry and cancellation.
+
+Validation on **2026-11-02**: all 30 JVM tests and eight device tests (including the opt-in production-input probe) passed;
+debug build and lint passed with no errors. On the cleaned MIC-source build, a speech event at 14.782 seconds extended a
+fresh capture session to 30.195 seconds. Capture stopped 15.413 seconds after
+that last logged speech event, the microphone was released, and server health
+checks continued online over the debug USB transport. A separate quiet-room
+capture had zero speech detections and stopped after approximately 15.4 seconds.
+This does not establish speech/noise accuracy in a restaurant. The test APK's
+speech fixture is offline-generated speech, not a recording of a person.
+An opt-in `AudioInputProbeTest` opens the exact production recorder in a foreground
+Activity and checks actual nonzero samples; it caught the VOICE_RECOGNITION input
+regression that start/stop-only tests missed. Run it with `-e audio_probe true`;
+`-e expect_speech true -e frames 1000` additionally checks 20 seconds of live speech
+when a wearer is available. Only aggregate levels and VAD counts are logged.
 
 ## Data handling
 
@@ -76,7 +139,7 @@ The provisional defaults are **0.50** cosine similarity and a **0.10** lead over
 
 ### Why ML Kit remains on the glasses
 
-ML Kit supplies fast local face positions and temporary tracking IDs during each ten-second activation window. It selects a centered guest and keeps their name near their face between server uploads. It does not identify the person. InsightFace runs on the laptop and supplies identity matching. Removing ML Kit would require another local tracker or more frequent full-frame server processing, with label updates dependent on network and server latency. Both local detection and server recognition are idle outside the tap-activated window; lightweight health checks continue.
+ML Kit supplies fast local face positions and temporary tracking IDs during each tap-activated session. It selects a centered guest and keeps their name near their face between server uploads. It does not identify the person. InsightFace runs on the laptop and supplies identity matching. Removing ML Kit would require another local tracker or more frequent full-frame server processing, with label updates dependent on network and server latency. Both local detection and server recognition are idle outside the tap-activated window; lightweight health checks continue.
 
 The buffalo_l pretrained weights are provided by InsightFace for non-commercial research; commercial deployment needs an appropriately licensed model. See the [main project's model notes](../apps/face-worker/MODELS.md) and [InsightFace's model documentation](https://github.com/deepinsight/insightface/tree/master/python-package).
 
@@ -90,7 +153,7 @@ Connect the laptop and glasses to the same reachable Wi-Fi network. Set the lapt
 faceServerUrl=http://YOUR_LAPTOP_IP:8000
 ~~~
 
-In Android Studio, select the glasses and click **Run** to build, install, and launch the app. Grant camera permission. The app stays black while checking the server in the background. Tap the temple once for a ten-second detection window; swipe forward to show the connection icon for five seconds. Rebuild/reinstall if the server address changes.
+In Android Studio, select the glasses and click **Run** to build, install, and launch the app. On the first temple tap, grant camera and microphone permissions. The app stays black while checking the server in the background. Tap once to activate detection; speech resets a 15-second silence timer, and 15 seconds without detected speech returns the app to idle. Swipe forward to show the connection icon for five seconds. Rebuild/reinstall if the server address changes.
 
 ## Previous SFace recognition latency check
 

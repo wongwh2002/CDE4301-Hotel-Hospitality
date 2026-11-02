@@ -21,6 +21,7 @@ class FaceServerClient(baseUrl: String) {
     private val timeoutExecutor = Executors.newSingleThreadScheduledExecutor()
     @Volatile private var connection: HttpURLConnection? = null
     private var activeScanId: Long? = null
+    private var activeScanDeadlineAt: Long? = null
     private var connectionScanId: Long? = null
 
     fun checkHealth() {
@@ -56,17 +57,26 @@ class FaceServerClient(baseUrl: String) {
     private fun request(path: String, jpeg: ByteArray? = null, scanId: Long? = null, deadlineAt: Long? = null): JSONObject {
         val conn = synchronized(lock) {
             check(enabled) { "Client stopped" }
-            if (scanId != null && (scanId != activeScanId || SystemClock.elapsedRealtime() >= deadlineAt!!))
-                throw CancellationException("Detection window ended")
+            if (scanId != null) {
+                if (scanId != activeScanId) throw CancellationException("Detection window ended")
+                activeScanDeadlineAt = maxOf(activeScanDeadlineAt ?: deadlineAt!!, deadlineAt!!)
+                if (SystemClock.elapsedRealtime() >= activeScanDeadlineAt!!) throw CancellationException("Detection window ended")
+            }
             (URL(base + path).openConnection() as HttpURLConnection).also { connection = it; connectionScanId = scanId }
         }
-        val remainingMs = if (deadlineAt == null) 12_000L else
-            (deadlineAt - SystemClock.elapsedRealtime()).coerceIn(1, 12_000)
-        val deadline = timeoutExecutor.schedule({ conn.disconnect() }, remainingMs, TimeUnit.MILLISECONDS)
+        val requestLimit = SystemClock.elapsedRealtime() + 12_000L
+        fun scanExpired() = scanId != null && synchronized(lock) {
+            activeScanId != scanId || SystemClock.elapsedRealtime() >= (activeScanDeadlineAt ?: deadlineAt!!)
+        }
+        // Re-read the shared deadline: speech may extend it while this request is blocked in I/O.
+        // Fixed network timeouts remain independent; expiry/explicit stop still disconnects promptly.
+        val deadline = timeoutExecutor.scheduleWithFixedDelay({
+            if (SystemClock.elapsedRealtime() >= requestLimit || scanExpired()) conn.disconnect()
+        }, 0, 50, TimeUnit.MILLISECONDS)
         var completed = false
         try {
-            conn.connectTimeout = minOf(3_000, remainingMs.toInt())
-            conn.readTimeout = minOf(10_000, remainingMs.toInt())
+            conn.connectTimeout = 3_000
+            conn.readTimeout = 10_000
             conn.instanceFollowRedirects = false
             conn.setRequestProperty("Accept", "application/json")
             if (jpeg != null) {
@@ -83,7 +93,7 @@ class FaceServerClient(baseUrl: String) {
             }
             return JSONObject(body).also { completed = true }
         } catch (error: Exception) {
-            if (scanId != null && (synchronized(lock) { activeScanId != scanId } || SystemClock.elapsedRealtime() >= deadlineAt!!))
+            if (scanExpired())
                 throw CancellationException("Detection window ended").apply { initCause(error) }
             throw error
         } finally {
@@ -96,12 +106,21 @@ class FaceServerClient(baseUrl: String) {
     }
 
     /** Stop only the old scan's upload; the health-check client remains enabled. */
-    fun setDetectionScan(scanId: Long?) {
+    fun setDetectionScan(scanId: Long?, deadlineAt: Long? = null) {
         val oldRequest = synchronized(lock) {
             activeScanId = scanId
+            activeScanDeadlineAt = deadlineAt
             if (connectionScanId != null && connectionScanId != scanId) connection else null
         }
         oldRequest?.disconnect()
+    }
+
+    /** Extend only the current, still-live scan; stale audio must not revive an expired request. */
+    fun extendDetectionDeadline(scanId: Long, deadlineAt: Long) {
+        synchronized(lock) {
+            if (activeScanId == scanId && (activeScanDeadlineAt?.let { SystemClock.elapsedRealtime() < it } != false))
+                activeScanDeadlineAt = maxOf(activeScanDeadlineAt ?: deadlineAt, deadlineAt)
+        }
     }
 
     private fun java.io.InputStream.readBytesLimited(limit: Int): ByteArray {

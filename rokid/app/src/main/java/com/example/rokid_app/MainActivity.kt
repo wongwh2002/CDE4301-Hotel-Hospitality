@@ -46,6 +46,7 @@ class MainActivity : AppCompatActivity() {
     private val handler = Handler(Looper.getMainLooper())
     private val analysisExecutor = Executors.newSingleThreadExecutor()
     private val ioExecutor = Executors.newSingleThreadExecutor()
+    private val speechMonitor = SpeechActivityMonitor()
     private val detector = FaceDetection.getClient(FaceDetectorOptions.Builder()
         .setPerformanceMode(FaceDetectorOptions.PERFORMANCE_MODE_FAST).enableTracking().build())
     private val tracking = FaceTracking()
@@ -58,6 +59,8 @@ class MainActivity : AppCompatActivity() {
     @Volatile private var interaction = InteractionWindow()
     private var lastForwardAt = -1_000L
     private var firstDetectionAt = 0L
+    private var pendingPermissionTap = false
+    private var lastSpeechLogAt = 0L
     private var lastAnalysisAt = 0L
     private var lastTrackingLogAt = 0L
     @Volatile private var nextRequestAt = 0L
@@ -68,10 +71,13 @@ class MainActivity : AppCompatActivity() {
     private var pendingFrames = 0
     private var closing = false
 
-    private val permissionRequest = registerForActivityResult(ActivityResultContracts.RequestPermission()) { granted ->
-        if (granted && active && interaction.detecting(SystemClock.elapsedRealtime())) startCamera(session)
-        else if (!granted && active && interaction.detecting(SystemClock.elapsedRealtime()))
-            showStatus("Camera permission is required.")
+    private val permissionRequest = registerForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) {
+        val requested = pendingPermissionTap
+        pendingPermissionTap = false
+        if (requested && active) {
+            if (hasCapturePermissions()) beginDetection()
+            else showStatus("Camera and microphone permission are required. Tap to retry.")
+        }
     }
     private val heartbeat = object : Runnable {
         override fun run() {
@@ -81,7 +87,10 @@ class MainActivity : AppCompatActivity() {
             handler.postDelayed(this, 2_000)
         }
     }
-    private val detectionTimeout = Runnable { endDetection() }
+    private val detectionTimeout = Runnable {
+        if (interaction.detecting(SystemClock.elapsedRealtime())) scheduleDetectionTimeout()
+        else endDetection()
+    }
     private val statusTimeout = Runnable { serverStatus.visibility = View.GONE }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -105,7 +114,6 @@ class MainActivity : AppCompatActivity() {
             systemBarsBehavior = WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
             hide(WindowInsetsCompat.Type.systemBars())
         }
-        if (!hasCameraPermission()) permissionRequest.launch(Manifest.permission.CAMERA)
         applyControls(intent)
         warmDetector()
     }
@@ -127,27 +135,63 @@ class MainActivity : AppCompatActivity() {
         handler.post(heartbeat)
     }
 
-    private fun hasCameraPermission() = ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED
+    private fun hasCapturePermissions() = listOf(Manifest.permission.CAMERA, Manifest.permission.RECORD_AUDIO)
+        .all { ContextCompat.checkSelfPermission(this, it) == PackageManager.PERMISSION_GRANTED }
     private fun isCurrent(token: Int) = active && token == session
     private fun isScanning(token: Int, scanId: Long) = isCurrent(token) &&
         interaction.acceptsResult(scanId, SystemClock.elapsedRealtime())
 
     private fun beginDetection() {
         if (!active) return
+        if (!hasCapturePermissions()) {
+            if (!pendingPermissionTap) {
+                pendingPermissionTap = true
+                permissionRequest.launch(arrayOf(Manifest.permission.CAMERA, Manifest.permission.RECORD_AUDIO))
+            }
+            return
+        }
         val now = SystemClock.elapsedRealtime()
         interaction = interaction.tap(now)
-        client.setDetectionScan(interaction.scanId)
+        val scanId = interaction.scanId
+        val token = session
+        client.setDetectionScan(scanId, interaction.detectionUntil)
         firstDetectionAt = 0
         nextRequestAt = 0
         tracking.clear(); overlay.clear(); showStatus("")
+        scheduleDetectionTimeout()
+        Log.i("FaceInteraction", "detection_started scan_id=$scanId silence_timeout_ms=${InteractionWindow.SILENCE_TIMEOUT_MS}")
+        speechMonitor.start(onSpeech = { observedAt ->
+            handler.post {
+                val receivedAt = SystemClock.elapsedRealtime()
+                if (!isScanning(token, scanId) || observedAt > receivedAt) return@post
+                val extended = interaction.speech(scanId, observedAt)
+                if (extended.detectionUntil == interaction.detectionUntil) return@post
+                interaction = extended
+                client.extendDetectionDeadline(scanId, extended.detectionUntil)
+                scheduleDetectionTimeout()
+                if (receivedAt - lastSpeechLogAt >= 1_000) {
+                    lastSpeechLogAt = receivedAt
+                    Log.i("FaceAudio", "speech_activity scan_id=$scanId silence_remaining_ms=${extended.detectionUntil - receivedAt}")
+                }
+            }
+        }, onFailure = { error ->
+            handler.post {
+                if (!isScanning(token, scanId)) return@post
+                Log.w("FaceAudio", "Microphone unavailable", error)
+                endDetection()
+                showStatus("Microphone unavailable. Tap to retry.")
+            }
+        })
+        startCamera(token)
+    }
+
+    private fun scheduleDetectionTimeout() {
         handler.removeCallbacks(detectionTimeout)
-        handler.postDelayed(detectionTimeout, InteractionWindow.DETECTION_MS)
-        Log.i("FaceInteraction", "detection_started scan_id=${interaction.scanId} duration_ms=${InteractionWindow.DETECTION_MS}")
-        if (hasCameraPermission()) startCamera(session)
-        else permissionRequest.launch(Manifest.permission.CAMERA)
+        handler.postDelayed(detectionTimeout, (interaction.detectionUntil - SystemClock.elapsedRealtime()).coerceAtLeast(1))
     }
 
     private fun endDetection() {
+        speechMonitor.stop()
         interaction = interaction.stopDetection()
         client.setDetectionScan(null)
         handler.removeCallbacks(detectionTimeout)
@@ -206,7 +250,10 @@ class MainActivity : AppCompatActivity() {
                 analysis = stream
             } catch (error: Exception) {
                 Log.e(TAG, "Camera startup failed", error)
-                showStatus("Unable to start outward camera.")
+                if (isScanning(token, scanId)) {
+                    endDetection()
+                    showStatus("Unable to start outward camera. Tap to retry.")
+                }
             }
         }, ContextCompat.getMainExecutor(this))
     }
@@ -251,7 +298,7 @@ class MainActivity : AppCompatActivity() {
                             val now = SystemClock.elapsedRealtime()
                             if (firstDetectionAt == 0L) {
                                 firstDetectionAt = now
-                                Log.i("FaceInteraction", "first_analysis_ms=${now - (interaction.detectionUntil - InteractionWindow.DETECTION_MS)} scan_id=$scanId")
+                                Log.i("FaceInteraction", "first_analysis_ms=${now - interaction.detectionStartedAt} scan_id=$scanId")
                             }
                             val frameGeometry = "$width:$height:$rotation"
                             if (geometry != frameGeometry || now - lastFrameAt > 500) tracking.clear()
@@ -409,6 +456,8 @@ class MainActivity : AppCompatActivity() {
 
     override fun onStop() {
         active = false; session++
+        pendingPermissionTap = false
+        speechMonitor.stop()
         interaction = InteractionWindow()
         client.setDetectionScan(null)
         handler.removeCallbacks(heartbeat)
@@ -423,6 +472,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     override fun onDestroy() {
+        speechMonitor.close()
         client.close()
         analysisExecutor.execute { closing = true; closeDetectorIfIdle() }
         ioExecutor.shutdown()
