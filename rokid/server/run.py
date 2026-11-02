@@ -23,8 +23,8 @@ def main() -> int:
     parser.add_argument("--host", default="0.0.0.0", help="Interface to listen on (default: all interfaces)")
     parser.add_argument("--port", type=int, default=8000, help="HTTP port (default: 8000)")
     parser.add_argument(
-        "--threshold", type=float, default=0.50,
-        help="ArcFace cosine-similarity threshold (default: 0.50; provisional)",
+        "--threshold", type=float, default=0.45,
+        help="ArcFace cosine-similarity threshold (default: 0.45; provisional)",
     )
     parser.add_argument("--margin", type=float, default=0.10,
                         help="Required lead over the second-best identity (default: 0.10; provisional)")

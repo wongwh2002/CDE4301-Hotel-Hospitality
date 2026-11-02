@@ -29,7 +29,7 @@ Gallery vectors are rebuilt on every server restart. Incoming camera images are 
 
 ## Temple touch and audio silence timeout
 
-The camera and microphone stay closed while idle; server health checks continue.
+The camera and microphone stay closed while idle; no automatic health checks run.
 A temple tap starts a new session with a 15-second deadline. AudioRecord uses the
 standard MIC source: on this RV101, VOICE_RECOGNITION initializes without error
 but supplies only zero-valued samples. The firmware also reports silenced=true
@@ -48,7 +48,7 @@ without changing the scan ID, so valid pending identities remain associated with
 the same session. Speech cannot activate idle detection or revive an expired
 session. Another temple tap starts a new session. A status swipe neither starts
 nor extends recognition. Expiry closes the camera and microphone, clears labels,
-and cancels pending uploads while leaving health checks enabled. Backgrounding
+and cancels pending uploads. A forward swipe requests a server health check. Backgrounding
 the app also stops capture. Microphone permission denial or initialization/read
 failure leaves/stops detection with a retry message instead of pretending the
 audio timeout is working.
@@ -132,14 +132,16 @@ python server/run.py
 Keep the terminal open. The server uses CPU inference and listens on port **8000**. To change the matching threshold:
 
 ~~~text
-python server/run.py --threshold 0.50 --margin 0.10
+python server/run.py --threshold 0.45 --margin 0.10
 ~~~
 
-The provisional defaults are **0.50** cosine similarity and a **0.10** lead over the second-best identity. The score threshold was lowered from the main project's initial 0.65 after frequent Unknown results during glasses testing. This makes matching more permissive and may increase wrong-name matches; both settings still need representative validation. These use a different embedding model from the old SFace threshold of 0.363. Cosine similarity is not a percentage confidence. This standalone endpoint applies score and margin checks per image; it does not implement the main worker's two-of-three temporal voting or active-cohort service.
+The provisional defaults are **0.45** cosine similarity and a **0.10** lead over the second-best identity. The score threshold was lowered from 0.50 at the user's request after frequent Unknown results during glasses testing. This makes matching more permissive and may increase wrong-name matches; both settings still need representative validation. These use a different embedding model from the old SFace threshold of 0.363. Cosine similarity is not a percentage confidence. This standalone endpoint applies score and margin checks per image; it does not implement the main worker's two-of-three temporal voting or active-cohort service.
+
+Health checks run only on a forward temple swipe. The icon shows checking, then the result; there is no periodic polling or automatic health retry. If recognition is in flight, the requested check waits for the shared request slot. Temple touch attempts recognition directly without requiring an earlier health check or cached online status. Recognition failures can be retried by later eligible camera frames during the active session. A successful server response may still be discarded by the glasses if its scan, track, or freshness checks have expired.
 
 ### Why ML Kit remains on the glasses
 
-ML Kit supplies fast local face positions and temporary tracking IDs during each tap-activated session. It selects a centered guest and keeps their name near their face between server uploads. It does not identify the person. InsightFace runs on the laptop and supplies identity matching. Removing ML Kit would require another local tracker or more frequent full-frame server processing, with label updates dependent on network and server latency. Both local detection and server recognition are idle outside the tap-activated window; lightweight health checks continue.
+ML Kit supplies fast local face positions and temporary tracking IDs during each tap-activated session. It selects a centered guest and keeps their name near their face between server uploads. It does not identify the person. InsightFace runs on the laptop and supplies identity matching. Removing ML Kit would require another local tracker or more frequent full-frame server processing, with label updates dependent on network and server latency. Both local detection and server recognition are idle outside the tap-activated window; health checks require a forward swipe.
 
 The buffalo_l pretrained weights are provided by InsightFace for non-commercial research; commercial deployment needs an appropriately licensed model. See the [main project's model notes](../apps/face-worker/MODELS.md) and [InsightFace's model documentation](https://github.com/deepinsight/insightface/tree/master/python-package).
 
@@ -159,7 +161,7 @@ In Android Studio, select the glasses and click **Run** to build, install, and l
 
 Measured using the previous SFace backend on the connected glasses over Wi-Fi on **2026-10-27**, after replacing full-frame per-pixel YUV copying with bulk copying of the selected crop. Across 14 uploads, analysis callback to parsed server response averaged **200 ms**, with a **79–321 ms** range. Thirteen responses contained a detected face; this small diagnostic sample does not establish recognition accuracy or buffalo_l performance. The timing excludes sensor delivery, waiting for a centered face/the next upload, and display presentation. Before this fix, recognition frames spent approximately **2.2–2.4 seconds** in local preparation, exceeding the two-second response freshness limit and causing otherwise successful results to be discarded.
 
-Two Android device tests use a deliberately stalled local HTTP endpoint to verify that deadline expiry and explicit scan cancellation interrupt recognition while preserving subsequent health checks. Server work already received before cancellation may still complete; continuing `GET /health` after scan expiry is expected.
+Two Android device tests use a deliberately stalled local HTTP endpoint to verify that deadline expiry and explicit scan cancellation interrupt recognition while preserving subsequent explicitly requested health checks. Server work already received before cancellation may still complete. Idle no longer generates periodic `GET /health` requests.
 
 ## Previous still-capture latency (before local tracking)
 

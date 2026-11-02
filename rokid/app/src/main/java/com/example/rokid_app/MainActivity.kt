@@ -63,6 +63,7 @@ class MainActivity : AppCompatActivity() {
     private var lastSpeechLogAt = 0L
     private var lastAnalysisAt = 0L
     private var lastTrackingLogAt = 0L
+    private var healthCheckRequested = false
     @Volatile private var nextRequestAt = 0L
     private var geometry = ""
     private var lastFrameAt = 0L
@@ -82,8 +83,10 @@ class MainActivity : AppCompatActivity() {
     private val heartbeat = object : Runnable {
         override fun run() {
             if (!active) return
-            if (SystemClock.elapsedRealtime() - lastFrameAt > 500) { tracking.clear(); overlay.clear() }
-            if (requestBusy.compareAndSet(false, true)) checkConnection(session)
+            val now = SystemClock.elapsedRealtime()
+            if (now - lastFrameAt > 500) { tracking.clear(); overlay.clear() }
+            // Only a swipe requests health. Wait for any current recognition to finish.
+            runRequestedHealthCheck()
             handler.postDelayed(this, 2_000)
         }
     }
@@ -198,7 +201,7 @@ class MainActivity : AppCompatActivity() {
         analysis?.clearAnalyzer(); provider?.unbindAll(); analysis = null
         tracking.clear(); overlay.clear(); showStatus("")
         Log.i("FaceInteraction", "detection_stopped")
-        // Keep health checks alive, but cancel recognition uploads from the expired scan.
+        // Cancel recognition uploads from the expired scan; idle sends no network requests.
     }
 
     private fun revealServerStatus() {
@@ -208,6 +211,9 @@ class MainActivity : AppCompatActivity() {
         lastForwardAt = now
         interaction = interaction.swipeForward(now)
         serverStatus.visibility = View.VISIBLE
+        serverStatus.state = ServerStatusView.State.CONNECTING
+        healthCheckRequested = true
+        runRequestedHealthCheck()
         handler.removeCallbacks(statusTimeout)
         handler.postDelayed(statusTimeout, InteractionWindow.STATUS_MS)
         Log.i("FaceInteraction", "status_shown state=${serverStatus.state}")
@@ -284,7 +290,7 @@ class MainActivity : AppCompatActivity() {
                         val detectedAt = SystemClock.elapsedRealtime()
                         val focused = focusedFace(faces, overlay.calibration)
                         var jpeg: RecognitionFrame? = null
-                        if (focused != null && connected && interaction.canStartRecognition(detectedAt) && started >= nextRequestAt && requestBusy.compareAndSet(false, true)) {
+                        if (focused != null && interaction.canStartRecognition(detectedAt) && started >= nextRequestAt && requestBusy.compareAndSet(false, true)) {
                             try { jpeg = cameraJpeg(image, focused.second); nextRequestAt = started + 2_000 }
                             catch (error: Exception) { requestBusy.set(false); throw error }
                         }
@@ -359,6 +365,13 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+    private fun runRequestedHealthCheck() {
+        if (active && healthCheckRequested && requestBusy.compareAndSet(false, true)) {
+            healthCheckRequested = false
+            checkConnection(session)
+        }
+    }
+
     private fun checkConnection(token: Int) {
         ioExecutor.execute {
             val result = runCatching { check(isCurrent(token)); client.checkHealth() }
@@ -368,6 +381,10 @@ class MainActivity : AppCompatActivity() {
                 connected = result.isSuccess
                 Log.i("FaceConnection", "health=${if (connected) "online" else "offline"} scanning=${interaction.detecting(SystemClock.elapsedRealtime())}")
                 serverStatus.state = if (connected) ServerStatusView.State.ONLINE else ServerStatusView.State.OFFLINE
+                if (serverStatus.visibility == View.VISIBLE) {
+                    handler.removeCallbacks(statusTimeout)
+                    handler.postDelayed(statusTimeout, InteractionWindow.STATUS_MS)
+                }
                 if (!connected) { tracking.clearNames(); overlay.clear() }
                 if (!connected) Log.w(TAG, "Server health check failed", result.exceptionOrNull())
             }
@@ -456,6 +473,7 @@ class MainActivity : AppCompatActivity() {
 
     override fun onStop() {
         active = false; session++
+        healthCheckRequested = false
         pendingPermissionTap = false
         speechMonitor.stop()
         interaction = InteractionWindow()

@@ -13,7 +13,7 @@ from PIL import Image, ImageOps
 
 LOG = logging.getLogger("uvicorn.error")
 MODEL_NAME = "buffalo_l"
-DEFAULT_THRESHOLD = 0.50
+DEFAULT_THRESHOLD = 0.45
 DEFAULT_MARGIN = 0.10
 
 
