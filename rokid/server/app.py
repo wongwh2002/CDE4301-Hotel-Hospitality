@@ -17,6 +17,7 @@ from starlette.concurrency import run_in_threadpool
 from server.recognition import (
     DEFAULT_MARGIN, DEFAULT_THRESHOLD, MODEL_NAME, FaceResult, InsightFaceRecognizer,
 )
+from server.guest_preferences import DEFAULT_DATABASE, GuestPreferenceStore
 
 LOG = logging.getLogger("uvicorn.error")
 MAX_BYTES = 8 * 1024 * 1024
@@ -92,7 +93,7 @@ def process_image(recognizer, data: bytes, rotation: int, request_id: str) -> di
     }
 
 
-def create_app(recognizer=None, threshold: float | None = None, margin: float | None = None) -> FastAPI:
+def create_app(recognizer=None, threshold: float | None = None, margin: float | None = None, preference_store=None) -> FastAPI:
     match_threshold = float(os.getenv("FACE_MATCH_THRESHOLD", str(DEFAULT_THRESHOLD))) if threshold is None else threshold
     match_margin = float(os.getenv("FACE_MATCH_MARGIN", str(DEFAULT_MARGIN))) if margin is None else margin
     if not math.isfinite(match_threshold) or not -1 <= match_threshold <= 1:
@@ -106,6 +107,10 @@ def create_app(recognizer=None, threshold: float | None = None, margin: float | 
             recognizer if recognizer is not None
             else await run_in_threadpool(InsightFaceRecognizer, match_threshold, match_margin)
         )
+        store = (await run_in_threadpool(GuestPreferenceStore, os.getenv('GUEST_PREFERENCES_DB', str(DEFAULT_DATABASE)))
+                 if preference_store is None else preference_store)
+        profiles = await run_in_threadpool(store.profiles) if store else []
+        app.state.cue_profiles = {profile['name'].casefold(): profile for profile in profiles}
         LOG.info("Face recognizer ready; model=%s cosine threshold=%.3f margin=%.3f", MODEL_NAME, match_threshold, match_margin)
         yield
 
@@ -123,6 +128,7 @@ def create_app(recognizer=None, threshold: float | None = None, margin: float | 
             "providers": getattr(app.state.recognizer, "providers", {}),
             "gallery_names": len(getattr(app.state.recognizer, "gallery", {})),
             "gallery_templates": sum(map(len, getattr(app.state.recognizer, "gallery", {}).values())),
+            "cue_profile_count": len(app.state.cue_profiles),
         }
 
     @app.post("/detect")
@@ -158,6 +164,13 @@ def create_app(recognizer=None, threshold: float | None = None, margin: float | 
             result = await run_in_threadpool(
                 process_image, app.state.recognizer, bytes(data), rotation, request_id
             )
+            for face in result['faces']:
+                name_key = face['name'].strip().casefold()
+                profile = app.state.cue_profiles.get(name_key) if name_key != 'unknown' else None
+                cues = profile['cues'] if profile else []
+                # The display has room for two cues. Keep warnings first if a manually
+                # edited profile has more; never attach a profile to Unknown.
+                face['cues'] = sorted(cues, key=lambda c: c['sentiment'] != 'allergy')[:2]
             return {
                 "protocol_version": 2,
                 "request_id": request_id,

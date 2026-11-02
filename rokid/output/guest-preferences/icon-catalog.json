@@ -1,0 +1,95 @@
+{
+  "schema_version": 2,
+  "items": [
+    {
+      "code": "king_room",
+      "category": "room_type",
+      "label": "King room",
+      "icon_file": "king-bed.svg"
+    },
+    {
+      "code": "twin_room",
+      "category": "room_type",
+      "label": "Twin room",
+      "icon_file": "twin-beds.svg"
+    },
+    {
+      "code": "suite",
+      "category": "room_type",
+      "label": "Suite",
+      "icon_file": "suite.svg"
+    },
+    {
+      "code": "black_coffee",
+      "category": "food_beverage",
+      "label": "Black coffee",
+      "icon_file": "black-coffee.svg"
+    },
+    {
+      "code": "green_tea",
+      "category": "food_beverage",
+      "label": "Green tea",
+      "icon_file": "green-tea.svg"
+    },
+    {
+      "code": "still_water",
+      "category": "food_beverage",
+      "label": "Still water",
+      "icon_file": "still-water.svg"
+    },
+    {
+      "code": "vegetarian",
+      "category": "food_beverage",
+      "label": "Vegetarian food",
+      "icon_file": "vegetarian.svg"
+    },
+    {
+      "code": "smoking_room",
+      "category": "room_type",
+      "label": "Smoking-allowed room",
+      "icon_file": "smoking-room.svg"
+    },
+    {
+      "code": "shellfish",
+      "category": "food_beverage",
+      "label": "Shellfish",
+      "icon_file": "shellfish.svg"
+    },
+    {
+      "code": "peanut",
+      "category": "food_beverage",
+      "label": "Peanuts",
+      "icon_file": "peanut.svg"
+    },
+    {
+      "code": "milk",
+      "category": "food_beverage",
+      "label": "Milk",
+      "icon_file": "milk.svg"
+    },
+    {
+      "code": "egg",
+      "category": "food_beverage",
+      "label": "Eggs",
+      "icon_file": "egg.svg"
+    }
+  ],
+  "markers": {
+    "prefer": {
+      "label": "Prefers",
+      "icon_file": "markers/heart.svg"
+    },
+    "dislike": {
+      "label": "Dislikes",
+      "icon_file": "markers/dislike.svg"
+    },
+    "allergy": {
+      "label": "Demo allergy",
+      "icon_file": "markers/warning.svg"
+    }
+  },
+  "overlay": {
+    "anchor": "bottom_right",
+    "size_ratio": 0.36
+  }
+}

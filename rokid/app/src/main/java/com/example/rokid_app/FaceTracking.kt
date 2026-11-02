@@ -34,14 +34,15 @@ data class FaceBox(val left: Float, val top: Float, val right: Float, val bottom
 }
 
 data class TrackedFace(val id: Int, val generation: Long, val box: FaceBox)
-data class NamedFace(val name: String, val box: FaceBox)
-data class FaceLabel(val text: String, val box: FaceBox)
+data class GuestCue(val code: String, val sentiment: String)
+data class NamedFace(val name: String, val box: FaceBox, val cues: List<GuestCue> = emptyList())
+data class FaceLabel(val text: String, val box: FaceBox, val cues: List<GuestCue> = emptyList())
 
 /** Main-thread state. Never transfer a name to a newly acquired/reused tracking ID. */
 class FaceTracking {
     private var generation = 0L
     private var tracks = emptyList<TrackedFace>()
-    private data class Identity(val name: String, val expiresAt: Long)
+    private data class Identity(val name: String, val expiresAt: Long, val cues: List<GuestCue>)
     private val identities = mutableMapOf<Long, Identity>()
 
     fun update(detections: List<Pair<Int, FaceBox>>, allowedIds: Set<Int>? = null): List<TrackedFace> {
@@ -66,7 +67,8 @@ class FaceTracking {
             val matches = faces.indices.filter { track in candidates[it] }
             if (matches.size == 1 && candidates[matches.single()].size == 1) {
                 val face = faces[matches.single()]
-                identities[track.generation] = Identity(face.name, submittedAt + 4_000)
+                val cues = if (face.name.trim().equals("Unknown", true)) emptyList() else face.cues.take(2)
+                identities[track.generation] = Identity(face.name, submittedAt + 4_000, cues)
             }
         }
     }
@@ -74,7 +76,7 @@ class FaceTracking {
     fun labels(now: Long, debug: Boolean): List<FaceLabel> = tracks.mapNotNull { track ->
         val identity = identities[track.generation]?.takeIf { now < it.expiresAt }
         val name = identity?.name ?: if (debug) "Face" else return@mapNotNull null
-        FaceLabel(name, track.box)
+        FaceLabel(name, track.box, identity?.cues ?: emptyList())
     }
 
     fun clear() { tracks = emptyList(); identities.clear() }

@@ -19,4 +19,5 @@ server/.venv/
 server/models/
 *.pt
 .pytest_cache/
+server/data/guest-preferences.sqlite3*
 

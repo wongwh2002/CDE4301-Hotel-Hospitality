@@ -44,8 +44,16 @@ class FaceServerClient(baseUrl: String) {
             val x = box.getInt("x"); val y = box.getInt("y")
             val w = box.getInt("width"); val h = box.getInt("height")
             check(x >= 0 && y >= 0 && w > 0 && h > 0 && x.toLong() + w <= width && y.toLong() + h <= height)
-            NamedFace(face.getString("name").take(80).ifBlank { "Unknown" },
-                FaceBox(x / width, y / height, (x + w) / width, (y + h) / height))
+            val name = face.getString("name").take(80).ifBlank { "Unknown" }
+            val cues = if (name.trim().equals("Unknown", true)) emptyList() else {
+                val items = face.optJSONArray("cues")
+                (0 until minOf(items?.length() ?: 0, 2)).mapNotNull { cueIndex ->
+                    val cue = items?.optJSONObject(cueIndex) ?: return@mapNotNull null
+                    GuestCue(cue.optString("code"), cue.optString("sentiment"))
+                        .takeIf { GuestCueIcons.icon(it.code) != null && GuestCueIcons.marker(it.sentiment) != null }
+                }
+            }
+            NamedFace(name, FaceBox(x / width, y / height, (x + w) / width, (y + h) / height), cues)
         }
         return FaceServerResult(
             response.getString("display").take(500).ifBlank { "Unknown" },

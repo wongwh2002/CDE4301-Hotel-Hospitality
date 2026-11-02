@@ -6,6 +6,15 @@ This folder contains a standalone demo with a Kotlin Android app running on the 
 
 ## Components
 
+Demo room and F&B preferences are stored in `server/data/guest-preferences.sqlite3`.
+Open `output/guest-preferences/index.html` to see the profiles and green icon key.
+Main symbols and bottom-right markers are separate SVG assets: heart for likes,
+crossed-out heart for dislikes, and a warning triangle for fictional demo allergies.
+Current demo profiles have 1-2 total cues per guest. The server includes them
+with recognized faces, and the glasses draw their icons beneath the name.
+Unknown faces show no icons. Restart the server after changing the database.
+See [the database guide](server/GUEST_PREFERENCES.md) for seeding and editing.
+
 | Location | Purpose |
 | --- | --- |
 | `app/` | Android app for camera capture, server communication, and text display on the glasses. |

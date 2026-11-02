@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="128" height="128" viewBox="0 0 128 128" role="img" aria-label="Smoking-allowed room">
+<g fill="none" stroke="#39ff64" stroke-width="4" stroke-linecap="round" stroke-linejoin="round">
+<rect x="6" y="6" width="116" height="116" rx="23" stroke-width="2"/>
+<path d="M25 102V77a5 5 0 0 1 5-5h65a5 5 0 0 1 5 5v25M25 93h75M25 83h75M25 102v5M100 102v5" stroke-width="3"/>
+<rect x="33" y="77" width="21" height="6" rx="2" stroke-width="2"/>
+<path d="M36 49h57v11H36zM79 49v11M94 27c10 7-10 9 0 17M81 24c10 7-10 9 0 17" stroke-width="3"/>
+</g></svg>

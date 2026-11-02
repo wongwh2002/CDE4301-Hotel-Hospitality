@@ -1,0 +1,322 @@
+[
+  {
+    "guest_id": 6,
+    "name": "Eng Tat",
+    "is_demo": true,
+    "cues": [
+      {
+        "category": "food_beverage",
+        "code": "shellfish",
+        "label": "Shellfish",
+        "icon_file": "shellfish.svg",
+        "sentiment": "allergy",
+        "source": "demo_random_v2",
+        "updated_at": "2026-11-02T16:26:06.709993+00:00",
+        "marker_file": "markers/warning.svg"
+      },
+      {
+        "category": "room_type",
+        "code": "suite",
+        "label": "Suite",
+        "icon_file": "suite.svg",
+        "sentiment": "prefer",
+        "source": "demo_random_v2",
+        "updated_at": "2026-11-02T16:26:06.709993+00:00",
+        "marker_file": "markers/heart.svg"
+      }
+    ],
+    "preferences": [
+      {
+        "category": "room_type",
+        "code": "suite",
+        "label": "Suite",
+        "icon_file": "suite.svg",
+        "sentiment": "prefer",
+        "source": "demo_random_v2",
+        "updated_at": "2026-11-02T16:26:06.709993+00:00",
+        "marker_file": "markers/heart.svg"
+      }
+    ],
+    "dislikes": [],
+    "allergies": [
+      {
+        "category": "food_beverage",
+        "code": "shellfish",
+        "label": "Shellfish",
+        "icon_file": "shellfish.svg",
+        "sentiment": "allergy",
+        "source": "demo_random_v2",
+        "updated_at": "2026-11-02T16:26:06.709993+00:00",
+        "marker_file": "markers/warning.svg"
+      }
+    ]
+  },
+  {
+    "guest_id": 1,
+    "name": "Neha",
+    "is_demo": true,
+    "cues": [
+      {
+        "category": "room_type",
+        "code": "king_room",
+        "label": "King room",
+        "icon_file": "king-bed.svg",
+        "sentiment": "prefer",
+        "source": "demo_random_v2",
+        "updated_at": "2026-11-02T16:26:06.709993+00:00",
+        "marker_file": "markers/heart.svg"
+      }
+    ],
+    "preferences": [
+      {
+        "category": "room_type",
+        "code": "king_room",
+        "label": "King room",
+        "icon_file": "king-bed.svg",
+        "sentiment": "prefer",
+        "source": "demo_random_v2",
+        "updated_at": "2026-11-02T16:26:06.709993+00:00",
+        "marker_file": "markers/heart.svg"
+      }
+    ],
+    "dislikes": [],
+    "allergies": []
+  },
+  {
+    "guest_id": 2,
+    "name": "Nigel",
+    "is_demo": true,
+    "cues": [
+      {
+        "category": "food_beverage",
+        "code": "egg",
+        "label": "Eggs",
+        "icon_file": "egg.svg",
+        "sentiment": "allergy",
+        "source": "demo_random_v2",
+        "updated_at": "2026-11-02T16:26:06.709993+00:00",
+        "marker_file": "markers/warning.svg"
+      },
+      {
+        "category": "food_beverage",
+        "code": "shellfish",
+        "label": "Shellfish",
+        "icon_file": "shellfish.svg",
+        "sentiment": "allergy",
+        "source": "demo_random_v2",
+        "updated_at": "2026-11-02T16:26:06.709993+00:00",
+        "marker_file": "markers/warning.svg"
+      }
+    ],
+    "preferences": [],
+    "dislikes": [],
+    "allergies": [
+      {
+        "category": "food_beverage",
+        "code": "egg",
+        "label": "Eggs",
+        "icon_file": "egg.svg",
+        "sentiment": "allergy",
+        "source": "demo_random_v2",
+        "updated_at": "2026-11-02T16:26:06.709993+00:00",
+        "marker_file": "markers/warning.svg"
+      },
+      {
+        "category": "food_beverage",
+        "code": "shellfish",
+        "label": "Shellfish",
+        "icon_file": "shellfish.svg",
+        "sentiment": "allergy",
+        "source": "demo_random_v2",
+        "updated_at": "2026-11-02T16:26:06.709993+00:00",
+        "marker_file": "markers/warning.svg"
+      }
+    ]
+  },
+  {
+    "guest_id": 3,
+    "name": "Ping Hui",
+    "is_demo": true,
+    "cues": [
+      {
+        "category": "room_type",
+        "code": "smoking_room",
+        "label": "Smoking-allowed room",
+        "icon_file": "smoking-room.svg",
+        "sentiment": "dislike",
+        "source": "demo_random_v2",
+        "updated_at": "2026-11-02T16:26:06.709993+00:00",
+        "marker_file": "markers/dislike.svg"
+      }
+    ],
+    "preferences": [],
+    "dislikes": [
+      {
+        "category": "room_type",
+        "code": "smoking_room",
+        "label": "Smoking-allowed room",
+        "icon_file": "smoking-room.svg",
+        "sentiment": "dislike",
+        "source": "demo_random_v2",
+        "updated_at": "2026-11-02T16:26:06.709993+00:00",
+        "marker_file": "markers/dislike.svg"
+      }
+    ],
+    "allergies": []
+  },
+  {
+    "guest_id": 7,
+    "name": "Royston",
+    "is_demo": true,
+    "cues": [
+      {
+        "category": "room_type",
+        "code": "twin_room",
+        "label": "Twin room",
+        "icon_file": "twin-beds.svg",
+        "sentiment": "prefer",
+        "source": "demo_random_v2",
+        "updated_at": "2026-11-02T16:26:06.709993+00:00",
+        "marker_file": "markers/heart.svg"
+      },
+      {
+        "category": "food_beverage",
+        "code": "green_tea",
+        "label": "Green tea",
+        "icon_file": "green-tea.svg",
+        "sentiment": "prefer",
+        "source": "demo_random_v2",
+        "updated_at": "2026-11-02T16:26:06.709993+00:00",
+        "marker_file": "markers/heart.svg"
+      }
+    ],
+    "preferences": [
+      {
+        "category": "room_type",
+        "code": "twin_room",
+        "label": "Twin room",
+        "icon_file": "twin-beds.svg",
+        "sentiment": "prefer",
+        "source": "demo_random_v2",
+        "updated_at": "2026-11-02T16:26:06.709993+00:00",
+        "marker_file": "markers/heart.svg"
+      },
+      {
+        "category": "food_beverage",
+        "code": "green_tea",
+        "label": "Green tea",
+        "icon_file": "green-tea.svg",
+        "sentiment": "prefer",
+        "source": "demo_random_v2",
+        "updated_at": "2026-11-02T16:26:06.709993+00:00",
+        "marker_file": "markers/heart.svg"
+      }
+    ],
+    "dislikes": [],
+    "allergies": []
+  },
+  {
+    "guest_id": 8,
+    "name": "Tong Leong",
+    "is_demo": true,
+    "cues": [
+      {
+        "category": "food_beverage",
+        "code": "milk",
+        "label": "Milk",
+        "icon_file": "milk.svg",
+        "sentiment": "allergy",
+        "source": "demo_random_v2",
+        "updated_at": "2026-11-02T16:26:06.709993+00:00",
+        "marker_file": "markers/warning.svg"
+      },
+      {
+        "category": "room_type",
+        "code": "smoking_room",
+        "label": "Smoking-allowed room",
+        "icon_file": "smoking-room.svg",
+        "sentiment": "dislike",
+        "source": "demo_random_v2",
+        "updated_at": "2026-11-02T16:26:06.709993+00:00",
+        "marker_file": "markers/dislike.svg"
+      }
+    ],
+    "preferences": [],
+    "dislikes": [
+      {
+        "category": "room_type",
+        "code": "smoking_room",
+        "label": "Smoking-allowed room",
+        "icon_file": "smoking-room.svg",
+        "sentiment": "dislike",
+        "source": "demo_random_v2",
+        "updated_at": "2026-11-02T16:26:06.709993+00:00",
+        "marker_file": "markers/dislike.svg"
+      }
+    ],
+    "allergies": [
+      {
+        "category": "food_beverage",
+        "code": "milk",
+        "label": "Milk",
+        "icon_file": "milk.svg",
+        "sentiment": "allergy",
+        "source": "demo_random_v2",
+        "updated_at": "2026-11-02T16:26:06.709993+00:00",
+        "marker_file": "markers/warning.svg"
+      }
+    ]
+  },
+  {
+    "guest_id": 4,
+    "name": "Weng",
+    "is_demo": true,
+    "cues": [
+      {
+        "category": "food_beverage",
+        "code": "peanut",
+        "label": "Peanuts",
+        "icon_file": "peanut.svg",
+        "sentiment": "allergy",
+        "source": "demo_random_v2",
+        "updated_at": "2026-11-02T16:26:06.709993+00:00",
+        "marker_file": "markers/warning.svg"
+      },
+      {
+        "category": "room_type",
+        "code": "twin_room",
+        "label": "Twin room",
+        "icon_file": "twin-beds.svg",
+        "sentiment": "prefer",
+        "source": "demo_random_v2",
+        "updated_at": "2026-11-02T16:26:06.709993+00:00",
+        "marker_file": "markers/heart.svg"
+      }
+    ],
+    "preferences": [
+      {
+        "category": "room_type",
+        "code": "twin_room",
+        "label": "Twin room",
+        "icon_file": "twin-beds.svg",
+        "sentiment": "prefer",
+        "source": "demo_random_v2",
+        "updated_at": "2026-11-02T16:26:06.709993+00:00",
+        "marker_file": "markers/heart.svg"
+      }
+    ],
+    "dislikes": [],
+    "allergies": [
+      {
+        "category": "food_beverage",
+        "code": "peanut",
+        "label": "Peanuts",
+        "icon_file": "peanut.svg",
+        "sentiment": "allergy",
+        "source": "demo_random_v2",
+        "updated_at": "2026-11-02T16:26:06.709993+00:00",
+        "marker_file": "markers/warning.svg"
+      }
+    ]
+  }
+]

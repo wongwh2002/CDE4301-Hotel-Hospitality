@@ -35,7 +35,7 @@ def face(name="Ping Hui", score=0.61, x=10):
 class ServerTests(unittest.TestCase):
     def setUp(self):
         self.recognizer = FakeRecognizer()
-        self.app = create_app(self.recognizer, threshold=0.363)
+        self.app = create_app(self.recognizer, threshold=0.363, preference_store=False)
         self.client = TestClient(self.app)
         self.client.__enter__()
 

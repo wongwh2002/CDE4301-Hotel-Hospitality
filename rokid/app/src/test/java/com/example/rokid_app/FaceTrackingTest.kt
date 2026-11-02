@@ -82,4 +82,18 @@ class FaceTrackingTest {
         assertEquals(0.25f, result.top, 0.0001f)
         assertEquals(0.55f, result.bottom, 0.0001f)
     }
+
+    @Test fun cuesExpireWithNamesAndAreClearedForUnknownAndReusedTracks() {
+        val tracking = FaceTracking()
+        val snapshot = tracking.update(listOf(1 to left))
+        val cue = GuestCue("twin_room", "prefer")
+        tracking.recognize(snapshot, listOf(NamedFace("Demo Guest", left, listOf(cue))), 100, 400)
+        assertEquals(listOf(cue), tracking.labels(500, false).single().cues)
+        assertTrue(tracking.labels(4100, false).isEmpty())
+        tracking.recognize(snapshot, listOf(NamedFace("Unknown", left, listOf(cue))), 5000, 5200)
+        assertTrue(tracking.labels(5300, false).single().cues.isEmpty())
+        tracking.update(emptyList())
+        tracking.update(listOf(1 to left))
+        assertTrue(tracking.labels(5400, true).single().cues.isEmpty())
+    }
 }
