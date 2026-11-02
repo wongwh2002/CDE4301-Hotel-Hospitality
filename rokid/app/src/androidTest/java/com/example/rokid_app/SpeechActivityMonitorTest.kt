@@ -57,4 +57,18 @@ class SpeechActivityMonitorTest {
             }
         }
     }
+
+    @Test fun captureCallbackReceivesCompletePcmFrames() {
+        val instrumentation=InstrumentationRegistry.getInstrumentation()
+        instrumentation.uiAutomation.grantRuntimePermission(instrumentation.targetContext.packageName,Manifest.permission.RECORD_AUDIO)
+        val received=CountDownLatch(1)
+        val failure=AtomicReference<Exception?>()
+        SpeechActivityMonitor().use { monitor ->
+            monitor.start(onSpeech={},onFailure={ failure.set(it); received.countDown() },onAudioFrame={ frame,_,at ->
+                if(frame.size==320 && at>0) received.countDown()
+            })
+            assertTrue("No complete audio frame received",received.await(3,TimeUnit.SECONDS))
+            assertNull(failure.get())
+        }
+    }
 }

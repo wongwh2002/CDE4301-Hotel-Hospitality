@@ -9,7 +9,7 @@ import java.util.concurrent.Executors
 import java.util.concurrent.TimeUnit
 import java.util.concurrent.CancellationException
 
-data class FaceServerResult(val display: String, val inferenceMs: Double, val faces: List<NamedFace>) {
+data class FaceServerResult(val display: String, val inferenceMs: Double, val faces: List<NamedFace>, val preferenceGuest: PreferenceGuest? = null) {
     val faceCount get() = faces.size
 }
 
@@ -47,10 +47,15 @@ class FaceServerClient(baseUrl: String) {
             NamedFace(face.getString("name").take(80).ifBlank { "Unknown" },
                 FaceBox(x / width, y / height, (x + w) / width, (y + h) / height))
         }
+        val binding = response.optJSONObject("preference_guest")?.let {
+            val name = it.optString("name"); val token = it.optString("token")
+            if (faces.size == 1 && faces.single().name == name && name.isNotBlank() &&
+                !name.equals("Unknown", true) && token.length in 1..128) PreferenceGuest(name, token) else null
+        }
         return FaceServerResult(
             response.getString("display").take(500).ifBlank { "Unknown" },
             response.optDouble("inference_ms", Double.NaN),
-            faces
+            faces, binding
         )
     }
 

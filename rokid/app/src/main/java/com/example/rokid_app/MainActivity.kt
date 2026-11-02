@@ -43,6 +43,8 @@ class MainActivity : AppCompatActivity() {
     private lateinit var serverStatus: ServerStatusView
     private lateinit var overlay: FaceOverlayView
     private lateinit var client: FaceServerClient
+    private lateinit var preferenceClient: PreferenceClient
+    private var conversationCapture: ConversationAudioBuffer? = null
     private val handler = Handler(Looper.getMainLooper())
     private val analysisExecutor = Executors.newSingleThreadExecutor()
     private val ioExecutor = Executors.newSingleThreadExecutor()
@@ -82,14 +84,17 @@ class MainActivity : AppCompatActivity() {
     private val heartbeat = object : Runnable {
         override fun run() {
             if (!active) return
-            if (SystemClock.elapsedRealtime() - lastFrameAt > 500) { tracking.clear(); overlay.clear() }
+            if (SystemClock.elapsedRealtime() - lastFrameAt > 500) {
+                tracking.clear(); overlay.clear()
+                conversationCapture?.updateVisibility(null, SystemClock.elapsedRealtime())
+            }
             if (requestBusy.compareAndSet(false, true)) checkConnection(session)
             handler.postDelayed(this, 2_000)
         }
     }
     private val detectionTimeout = Runnable {
         if (interaction.detecting(SystemClock.elapsedRealtime())) scheduleDetectionTimeout()
-        else endDetection()
+        else endDetection(savePreferences = true)
     }
     private val statusTimeout = Runnable { serverStatus.visibility = View.GONE }
 
@@ -105,6 +110,7 @@ class MainActivity : AppCompatActivity() {
         val serverUrl = if (BuildConfig.DEBUG && intent.getBooleanExtra("usb_server", false))
             "http://127.0.0.1:8000" else BuildConfig.FACE_SERVER_URL
         client = FaceServerClient(serverUrl)
+        preferenceClient = PreferenceClient(serverUrl)
         val prefs = getSharedPreferences("label_calibration", MODE_PRIVATE)
         overlay.calibration = LabelCalibration(prefs.getFloat("sx", 1f), prefs.getFloat("sy", 1f),
             prefs.getFloat("ox", 0f), prefs.getFloat("oy", 0f))
@@ -151,6 +157,9 @@ class MainActivity : AppCompatActivity() {
             return
         }
         val now = SystemClock.elapsedRealtime()
+        conversationCapture?.discard()
+        val capture = ConversationAudioBuffer(UUID.randomUUID().toString())
+        conversationCapture = capture
         interaction = interaction.tap(now)
         val scanId = interaction.scanId
         val token = session
@@ -181,7 +190,7 @@ class MainActivity : AppCompatActivity() {
                 endDetection()
                 showStatus("Microphone unavailable. Tap to retry.")
             }
-        })
+        }, onAudioFrame = { frame, speech, observedAt -> capture.append(frame, speech, observedAt) })
         startCamera(token)
     }
 
@@ -190,14 +199,21 @@ class MainActivity : AppCompatActivity() {
         handler.postDelayed(detectionTimeout, (interaction.detectionUntil - SystemClock.elapsedRealtime()).coerceAtLeast(1))
     }
 
-    private fun endDetection() {
+    private fun endDetection(savePreferences: Boolean = false) {
         speechMonitor.stop()
+        val capture = conversationCapture
+        conversationCapture = null
+        val audio = if (savePreferences) capture?.finish() else { capture?.discard(); null }
         interaction = interaction.stopDetection()
         client.setDetectionScan(null)
         handler.removeCallbacks(detectionTimeout)
         analysis?.clearAnalyzer(); provider?.unbindAll(); analysis = null
         tracking.clear(); overlay.clear(); showStatus("")
         Log.i("FaceInteraction", "detection_stopped")
+        if (audio != null) {
+            val queued = preferenceClient.submit(audio)
+            Log.i("PreferenceCapture", "capture_id=${audio.captureId} queued=$queued wav_bytes=${audio.wav.size}")
+        }
         // Keep health checks alive, but cancel recognition uploads from the expired scan.
     }
 
@@ -304,6 +320,7 @@ class MainActivity : AppCompatActivity() {
                             if (geometry != frameGeometry || now - lastFrameAt > 500) tracking.clear()
                             geometry = frameGeometry; lastFrameAt = now
                             val snapshot = tracking.update(faces, setOfNotNull(focused?.first))
+                            conversationCapture?.updateVisibility(tracking.currentGuest(now), now)
                             overlay.show(tracking.labels(now, overlay.debug), snapshot.map { it.box })
                             if (now - lastTrackingLogAt >= 2_000) {
                                 lastTrackingLogAt = now
@@ -344,6 +361,12 @@ class MainActivity : AppCompatActivity() {
                     val now = SystemClock.elapsedRealtime()
                     val faces = response.faces.map { it.copy(box = it.box.within(frame.uprightRegion)) }
                     tracking.recognize(snapshot, faces, started, now)
+                    val guest = tracking.currentGuest(now)
+                    response.preferenceGuest?.let { binding ->
+                        if (guest != null && guest.name == binding.name)
+                            conversationCapture?.observeIdentity(binding, guest.generation, now)
+                    }
+                    conversationCapture?.updateVisibility(guest, now)
                     Log.i("FaceLatency", "request_id=$requestId scan_id=$scanId frame_to_response_ms=${now - started} http_ms=${responseAt - httpStarted} inference_ms=${response.inferenceMs} face_count=${response.faceCount}")
                 }.onFailure { error ->
                     if (error is CancellationException || !isScanning(token, scanId)) {
@@ -458,6 +481,7 @@ class MainActivity : AppCompatActivity() {
         active = false; session++
         pendingPermissionTap = false
         speechMonitor.stop()
+        conversationCapture?.discard(); conversationCapture = null
         interaction = InteractionWindow()
         client.setDetectionScan(null)
         handler.removeCallbacks(heartbeat)
@@ -472,6 +496,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     override fun onDestroy() {
+        preferenceClient.close()
         speechMonitor.close()
         client.close()
         analysisExecutor.execute { closing = true; closeDetectorIfIdle() }

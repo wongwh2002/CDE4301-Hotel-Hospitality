@@ -11,3 +11,6 @@ requests>=2.32,<3
 scikit-image>=0.24,<1
 scipy>=1.14,<2
 tqdm>=4.66,<5
+faster-whisper==1.2.1
+google-genai==2.34.0
+python-dotenv>=1.0,<2

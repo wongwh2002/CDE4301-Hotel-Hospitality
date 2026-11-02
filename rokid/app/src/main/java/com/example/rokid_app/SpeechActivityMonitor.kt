@@ -13,7 +13,7 @@ import com.konovalov.vad.webrtc.config.SampleRate
 import java.io.IOException
 import java.util.concurrent.Executors
 
-/** Tap-scoped microphone/VAD worker. PCM is overwritten in memory, never saved or transmitted. */
+/** Tap-scoped microphone/VAD worker. PCM is transient; the authorized capture callback may buffer it for upload. */
 class SpeechActivityMonitor : AutoCloseable {
     private class Session {
         @Volatile var stopped = false
@@ -24,17 +24,19 @@ class SpeechActivityMonitor : AutoCloseable {
     private var current: Session? = null
     private var closed = false
 
-    fun start(onSpeech: (Long) -> Unit, onFailure: (Exception) -> Unit, onReady: () -> Unit = {}) {
+    fun start(onSpeech: (Long) -> Unit, onFailure: (Exception) -> Unit, onReady: () -> Unit = {},
+              onAudioFrame: (ShortArray, Boolean, Long) -> Unit = { _, _, _ -> }) {
         stop()
         val session = synchronized(lock) {
             check(!closed) { "Speech monitor closed" }
             Session().also { current = it }
         }
-        worker.execute { capture(session, onSpeech, onFailure, onReady) }
+        worker.execute { capture(session, onSpeech, onFailure, onReady, onAudioFrame) }
     }
 
     @SuppressLint("MissingPermission") // Activity requires RECORD_AUDIO before starting this worker.
-    private fun capture(session: Session, onSpeech: (Long) -> Unit, onFailure: (Exception) -> Unit, onReady: () -> Unit) {
+    private fun capture(session: Session, onSpeech: (Long) -> Unit, onFailure: (Exception) -> Unit, onReady: () -> Unit,
+                        onAudioFrame: (ShortArray, Boolean, Long) -> Unit) {
         if (session.stopped) return
         val frame = ShortArray(320) // 20 ms of mono PCM at 16 kHz.
         try {
@@ -61,6 +63,7 @@ class SpeechActivityMonitor : AutoCloseable {
                         if (offset == frame.size) {
                             val at = SystemClock.elapsedRealtime()
                             val detectedSpeech = vad.isSpeech(frame)
+                            onAudioFrame(frame, detectedSpeech, at) // Callback must consume/copy synchronously.
                             if (detectedSpeech && at - lastSpeechCallback >= 200) {
                                 lastSpeechCallback = at
                                 onSpeech(at)

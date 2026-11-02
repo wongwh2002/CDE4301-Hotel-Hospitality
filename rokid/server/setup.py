@@ -27,6 +27,11 @@ def download_models() -> None:
         "allowed_modules=['detection', 'recognition'], providers=['CPUExecutionProvider']); "
         "print('buffalo_l cached at', root)"
     ))
+    run(str(PYTHON), "-c", (
+        "from dotenv import load_dotenv; load_dotenv('server/.env'); "
+        "from server.audio_models import WhisperTranscriber; "
+        "model = WhisperTranscriber(); model.load(); print('Whisper cached:', model.model_name)"
+    ))
 
 
 def main() -> int:

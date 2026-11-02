@@ -36,6 +36,7 @@ data class FaceBox(val left: Float, val top: Float, val right: Float, val bottom
 data class TrackedFace(val id: Int, val generation: Long, val box: FaceBox)
 data class NamedFace(val name: String, val box: FaceBox)
 data class FaceLabel(val text: String, val box: FaceBox)
+data class RecognizedGuest(val name: String, val generation: Long)
 
 /** Main-thread state. Never transfer a name to a newly acquired/reused tracking ID. */
 class FaceTracking {
@@ -79,6 +80,13 @@ class FaceTracking {
 
     fun clear() { tracks = emptyList(); identities.clear() }
     fun clearNames() { identities.clear() }
+
+    fun currentGuest(now: Long): RecognizedGuest? {
+        val track = tracks.singleOrNull() ?: return null
+        val identity = identities[track.generation]?.takeIf { now < it.expiresAt } ?: return null
+        if (identity.name.isBlank() || identity.name.equals("Unknown", true)) return null
+        return RecognizedGuest(identity.name, track.generation)
+    }
 }
 
 /** Head direction proxy, not eye tracking. Choose one guest in the central 30% of the mapped view. */

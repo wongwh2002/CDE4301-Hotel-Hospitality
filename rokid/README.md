@@ -39,16 +39,18 @@ investigation](https://zenn.dev/maruhana/articles/rokid-conversation-support-03?
 WebRTC VAD 2.0.10
 runs locally on 16 kHz mono, signed 16-bit PCM in 20 ms frames, using its
 VERY_AGGRESSIVE mode and a short speech-duration filter. It detects speech-like
-activity rather than resetting on every loud sound. Audio is overwritten in
-memory, never saved, transcribed, or sent to the server. Only the existing JPEG
-recognition requests use the network.
+activity rather than resetting on every loud sound. During an activation, audio
+associated with a stable recognized guest is buffered in memory. On the natural
+silence timeout it is uploaded for local Whisper transcription and Gemini
+preference extraction, as described below. Idle audio is never captured.
 
 Each speech observation resets the deadline to 15 seconds after that observation
 without changing the scan ID, so valid pending identities remain associated with
 the same session. Speech cannot activate idle detection or revive an expired
 session. Another temple tap starts a new session. A status swipe neither starts
 nor extends recognition. Expiry closes the camera and microphone, clears labels,
-and cancels pending uploads while leaving health checks enabled. Backgrounding
+and cancels pending face uploads while leaving health checks enabled. A completed
+preference upload runs separately after capture stops. Backgrounding
 the app also stops capture. Microphone permission denial or initialization/read
 failure leaves/stops detection with a retry message instead of pretending the
 audio timeout is working.
@@ -90,11 +92,86 @@ regression that start/stop-only tests missed. Run it with `-e audio_probe true`;
 `-e expect_speech true -e frames 1000` additionally checks 20 seconds of live speech
 when a wearer is available. Only aggregate levels and VAD counts are logged.
 
+## Conversation preferences
+
+A temple tap starts the existing face/speech session. Keep one enrolled guest
+centered and wait for their name to settle (two matching recognition responses)
+before saying a preference. After 15 seconds without detected speech, the glasses
+stop capture and send the buffered WAV to `POST /audio/preferences`. Local
+faster-whisper **base**, CPU int8, transcribes it; **Gemini 3.8 Flash** extracts
+structured preferences; SQLite saves them against the recognized gallery name.
+This model replaces 2.5 Flash following the project's live API availability check.
+
+Copy `server/.env.example` to `server/.env`, set `GEMINI_API_KEY`, then run
+`server/setup.py` to install/cache models and restart `server/run.py`.
+The ignored environment file also configures `GEMINI_MODEL`, `WHISPER_MODEL` and
+`WHISPER_LANGUAGE` (default `en`; empty enables language detection).
+`PREFERENCES_DB` optionally overrides `server/data/preferences.sqlite3`.
+`GET /health` reports configuration, not a successful Google availability probe.
+Inspect saved profiles at `http://localhost:8000/guests`, or fetch one profile
+at `/guests/{guest_id}/preferences`.
+
+Supported fields are coffee, tea, water, diet, food, room view/floor/type, seating
+and service. A later statement updates the same guest/field. Each value includes
+an exact supporting quote and timestamp. Capture IDs prevent duplicate writes.
+Failed transcription/extraction leaves the database unchanged. Google transient
+errors receive one bounded retry; failures are logged without conversation text.
+
+The glasses accept audio only while the same stable identity is visible and
+recently confirmed. A different recognized person discards the whole recording.
+Retapping, backgrounding, or input failures also discard unfinished recordings.
+Audio is limited to 90 seconds per activation; overflow discards the recording.
+There is no durable upload queue, so a failed upload must be captured again.
+Preference processing uses a separate worker from recognition and health checks.
+
+This POC assumes one guest per conversation. Face recognition and VAD do not
+identify individual speakers. The extraction prompt rejects ambiguous attribution,
+staff personal preferences, unanswered questions, instructions embedded in the
+transcript, and medical/allergy information; this is not a guarantee of perfect
+speaker attribution or factual accuracy. Gallery names must uniquely identify
+demo guests. Review extracted facts before using them operationally.
+
+Staged checks (synthetic speech, separate test databases):
+
+```powershell
+server/.venv/Scripts/python.exe -m unittest server.test_audio_preferences server.test_preference_api server.test_app server.test_recognition
+server/.venv/Scripts/python.exe server/check_audio_pipeline.py --stage whisper --audio .artifacts/audio-preferences/preference-test.wav
+server/.venv/Scripts/python.exe server/check_audio_pipeline.py --stage gemini
+server/.venv/Scripts/python.exe server/check_audio_pipeline.py --stage full --audio .artifacts/audio-preferences/preference-test.wav
+```
+
+The WAV is a locally generated test fixture, not supplied by setup. The model
+checks need the configured key and internet access. Unit/API tests substitute
+models; they establish contracts and persistence, not live Gemini availability.
+The opt-in Android `PreferencePipelineDeviceTest` exercises real recognition,
+native VAD, WAV buffering/upload, cloud extraction and database idempotency.
+Run it only against an isolated staging database, with `-e preference_e2e true`
+and `-e server http://127.0.0.1:8004` after setting up USB port forwarding and
+the device-private `files/preference-fixture.jpg` enrollment fixture.
+
+Validation on **2026-11-02**:
+
+| Stage | Result |
+| --- | --- |
+| SQLite, WAV validation, guest binding, extraction filtering and HTTP regressions | 34 server tests passed; models substituted in contract tests |
+| Capture policy and existing interaction/recognition logic | 37 JVM tests passed |
+| Android build and lint | Passed; no lint errors |
+| Native VAD, microphone frames, transport and existing device regressions | 10 device tests passed; opt-in cloud test separately executed |
+| Actual local Whisper base | Transcribed the 7.16-second synthetic preference clip in 1.16 seconds after model load |
+| Actual Gemini 3.8 Flash | Blocked by provider HTTP 503/504; minimal Interactions request also timed out |
+| Full device replay | Real face matching and audio upload reached the server, then failed at Gemini with HTTP 503; staging database remained empty and health stayed responsive |
+
+Cloud extraction and the complete live-model save path have **not passed**.
+Repeat the live-model checks when the provider recovers before calling this
+feature end-to-end validated. Controlled replay does not establish real-room
+transcription, recognition, or preference-extraction accuracy.
+
 ## Data handling
 
 - Reference photos remain on disk in `server/faces/`; model files are downloaded into `server/models/` by setup.
 - Derived gallery feature vectors are cached in server memory and rebuilt at startup. Restart the server after changing gallery photos.
 - Incoming camera JPEGs are processed in memory without being saved to disk.
+- Activated, identity-bound audio is transient in memory on glasses/server. Whisper runs locally; the transcript and guest name are sent to Google's Gemini service for extraction. Full audio/transcripts are not written to disk by this feature. SQLite persists extracted values and supporting transcript excerpts; its directory and `.env` are ignored by Git. This demo API is intended for a trusted test network.
 - The server returns detected face names, similarity scores, bounding boxes, and display text. Multiple detected faces can be included in one response.
 - Server logs include recognition names and scores. Android Logcat includes capture, request, and processing timings.
 - Matching uses a similarity threshold per image; it does not apply the main hotel worker's multi-observation stability checks. The reported latency measurements below do not establish recognition accuracy.

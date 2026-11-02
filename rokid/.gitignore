@@ -20,3 +20,7 @@ server/models/
 *.pt
 .pytest_cache/
 
+# Local service credentials and POC guest-preference database.
+server/.env
+server/data/
+
