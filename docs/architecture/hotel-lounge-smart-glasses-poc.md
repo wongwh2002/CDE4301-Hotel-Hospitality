@@ -1,7 +1,7 @@
 # Hotel Lounge Smart-Glasses POC Architecture
 
 **Status:** Proposed architecture for the proof of concept; the RV101 phone-bridge path is the current working hypothesis. Camera streaming and card-reader integration still need validation.
-**Last researched:** 2026-10-07
+**Last researched:** 2026-11-02
 
 ## Goal
 
@@ -14,6 +14,7 @@ The design separates access events, guest context, image processing, and display
 - Run a local Docker Compose stack on a laptop connected to a private lounge Wi-Fi network.
 - Use **FastAPI + Python** for the `lounge-control` module and the first computer-vision implementation.
 - Run `lounge-control` and `face-worker` as separate containers, with small versioned HTTP interfaces between them. Keep inference inside a bounded worker loop in `face-worker`; do not run it in an async request handler.
+- For the proposed audio-note feature, add an optional `note-worker` beside `face-worker`: run Whisper locally, then call the hosted Gemini 2.5 Flash API for language-model drafting. Keep staff review and all approved guest-record writes in `lounge-control`.
 - For the RV101 working path, pair the glasses to an Android phone running the Rokid app/CXR-L integration. The phone sends camera data over the lounge network to the laptop and receives cues for display on the glasses. Keep this bridge behind a vendor-specific interface.
 - Keep the camera transport as a validation gate: the public CXR-L sample currently demonstrates still-photo capture, not a continuous frame stream. Do not claim the end-to-end CV flow is viable until continuous or sufficiently frequent image delivery is proven on the RV101. ([CXR-L sample mirror](https://github.com/e7naq3y/CXR-L-SDK), [photo sample source](https://github.com/e7naq3y/CXR-L-SDK/blob/main/cxrlsample101/app/src/main/java/com/rokid/cxrlsample/activities/photo/PhotoUsageViewModel.kt))
 - If the paired phone receives a live preview, it may run a lightweight face-presence detector there as an upload trigger. Send a short burst of distinct JPEG frames by default, or JPEG XL frames from a client with an encoder, when a face appears; keep identity matching and guest-profile lookup on the laptop. The current worker confirms a guest after the same candidate passes in at least two of the latest three observations, so one still image is not enough for its normal cue path. If the RV101 exposes only still-photo capture, a detector can filter photos after capture but cannot trigger the shutter from a preview; keep that limitation visible until the camera path is validated. Do not assume custom model execution on the glasses. Meta's Device Access Toolkit extends an iOS/Android app to compatible glasses, and the RV101 CXR-L sample cited above does not establish continuous frames or custom on-glasses inference. ([Meta Wearables Device Access Toolkit](https://developers.meta.com/wearables/device-access-toolkit/))
@@ -30,25 +31,35 @@ flowchart LR
     Reader[Card reader / access controller]
     Adapter[Tap-event adapter]
     Control[FastAPI lounge-control]
-    GuestData[mock-hotel API<br/>SQLite-backed synthetic profiles]
+    GuestData[mock-hotel API<br/>SQLite synthetic profiles + approved notes]
     Cohort[Active lounge cohort<br/>in-memory, expiring]
     Vision[Python face-worker<br/>detect, track, match]
+    Notes[Proposed Python note-worker<br/>local Whisper + Gemini API client]
+    Gemini[External Google Gemini API<br/>gemini-2.5-flash]
     Queue[Bounded latest-frame queue<br/>inside face-worker]
-    Bridge[Companion phone app<br>vendor SDK + optional face trigger]
-    Glasses[Smart glasses<br/>camera + display]
+    Bridge[Companion phone app<br>vendor SDK + staff-triggered audio]
+    Glasses[Smart glasses<br/>camera + microphone + display]
 
     Reader -->|Entry event| Adapter
     Adapter -->|POST tap event| Control
-    Control <--> GuestData
+    Control -->|Profile lookup| GuestData
+    GuestData -->|Permitted profile| Control
     Control --> Cohort
     Control -->|Candidate enrollment / expiry| Vision
     Glasses -->|Preview frames or photos via SDK| Bridge
-    Bridge -->|Positive-detection JPEG/JXL burst / WebSocket| Control
+    Bridge -->|JPEG/JXL frames / video WebSocket| Control
+    Bridge -->|Staff-triggered audio / proposed note API| Control
     Control -->|Internal HTTP frame handoff| Vision
+    Control -->|Transient audio job| Notes
+    Notes -->|Structured draft only| Control
+    Notes -->|Transcript only · external request| Gemini
+    Gemini -->|Structured draft| Notes
+    Control -->|Draft for staff review| Bridge
+    Bridge -->|Corrected draft + confirmed guest/stay + approval| Control
+    Control -->|Approved stay-scoped note only| GuestData
     Queue --> Vision
     Cohort --> Vision
     Vision -->|Match callback| Control
-    Control -->|detection_set + face_crop + cue via WebSocket| Bridge
     Bridge -->|Emoji, color, text| Glasses
 ```
 
@@ -68,6 +79,22 @@ If there is no stable, unique match, the system must not attach personal fields 
 
 If the face-worker is unavailable or enrollment is interrupted, lounge-control still records the guest's lounge presence and returns `recognition_status: enrollment_pending`. It retries pending enrollment and re-enrolls active candidates from the mock-hotel's stored reference photos after a face-worker restart. Statuses such as `no_reference_photos` and `no_single_face` are not retried automatically; staff should correct the saved photos and re-admit that guest.
 
+## Proposed note-worker extension
+
+The note capability belongs inside the same lounge system, as a sibling service to `face-worker`. It uses the existing phone bridge and `lounge-control`, then persists approved notes through `mock-hotel`. It is not a separate guest-facing workflow. The extension is proposed and is not part of the current running POC.
+
+### Proposed note-processing rules
+
+- `note-worker` runs Whisper speech-to-text locally and calls the hosted Gemini 2.5 Flash API for structured drafting. This keeps transcription and model-call failures out of `lounge-control` and face-recognition code.
+- Capture only after staff starts recording and the guest agrees. Validate that the selected glasses SDK can provide microphone audio before treating this as feasible; do not use background or continuous recording.
+- The worker may suggest a type (`preference`, `request`, or `complaint`), concise wording, and a next action. It returns a draft only and has no guest-profile lookup or persistence access. Send the transcript, not the audio, to Gemini; do not include `guest_ref` or profile fields.
+- `lounge-control` returns the draft to the phone for staff correction and explicit confirmation of the guest and current stay. A face match cannot authorize a note write. If the guest or stay is uncertain, do not attach or save the draft.
+- After approval, `lounge-control` writes a stay-scoped note to `mock-hotel` with its source, approver, creation time, and expiry. A hotel-approved OPERA adapter is a later integration decision, not an assumed capability.
+- Keep audio, transcript, and model draft transient in the local system. The transcript leaves the local stack for Google's Gemini API, so require hotel approval, confirm data-use terms and logging/retention settings, and use an approved paid/enterprise project. Do not use unpaid Gemini API quota for guest transcripts: Google states that unpaid prompts and responses may be used to improve products and reviewed by people. If the Interactions API is used, set `store=false` and confirm any other logging settings; Google documents that interaction storage is on by default for that API.
+- Do not infer or originate allergies or other safety-critical facts from audio. If a guest states one, show it as an unverified draft for staff review and require verification against the authoritative hotel record and food-safety process before service.
+- Whisper runs on the local laptop, subject to hardware evaluation. Gemini 2.5 Flash runs through Google's hosted API. Google currently lists the stable `gemini-2.5-flash` endpoint but limits access to users who have previously used a 2.5 model; verify availability in the project before implementation. ([Gemini 2.5 Flash model page](https://ai.google.dev/gemini-api/docs/models/gemini-2.5-flash))
+- Relevant API data-handling references: [Gemini API terms](https://ai.google.dev/gemini-api/terms), [Interactions API storage controls](https://ai.google.dev/gemini-api/docs/interactions-overview), and [Gemini API pricing/data-use tiers](https://ai.google.dev/gemini-api/docs/pricing).
+
 ## First deployment on one laptop
 
 ```text
@@ -83,17 +110,23 @@ Docker Compose
 │   ├── frame intake and validation
 │   ├── bounded per-stream queue: keep latest, discard stale
 │   └── CV loop: detect, track, compare, post match callback
+├── note-worker (proposed; optional)
+│   ├── Whisper ASR (local): short clip → transient transcript
+│   └── Gemini API client: transcript → structured draft
 └── mock-hotel
     ├── FastAPI profile API
     └── SQLite file on a named Docker volume
-        └── synthetic guest profiles and up to 3 reference photos per guest
+        └── synthetic guest profiles, reference photos, and approved notes
 
 Outside Docker
 ├── Card-reader/access-controller adapter (if vendor integration requires it)
 └── Companion app on the paired phone, using the RV101 CXR-L integration
+
+External service
+└── Google Gemini 2.5 Flash API (`gemini-2.5-flash`): receives transcript only
 ```
 
-The first deployment uses separate containers so the team can own and develop the control and vision modules independently. It does not need Kafka, Redis, PySpark, or a separate database server. `mock-hotel` exposes a small FastAPI API backed by a seeded SQLite file on a named Docker volume. The local POC database can retain up to three guest reference photos for later re-enrollment; use synthetic or consented demo images and remove the Docker volume when finished. Production profile data remains behind the profile adapter. If an external hotel API is available, replace the mock adapter without changing the device or vision interfaces.
+The first deployment uses separate containers so the team can own and develop the control and vision modules independently. `note-worker` is an optional proposed service and is not required by the current POC. The stack does not need Kafka, Redis, PySpark, or a separate database server. `mock-hotel` exposes a small FastAPI API backed by a seeded SQLite file on a named Docker volume. The local POC database can retain up to three guest reference photos and, if the note extension is adopted, approved stay-scoped notes; use synthetic or consented demo images and remove the Docker volume when finished. Production profile data remains behind the profile adapter. If an external hotel API is available, replace the mock adapter without changing the device or vision interfaces.
 
 ### Frame freshness and enrollment recovery
 
@@ -111,10 +144,12 @@ Use a small number of deep modules with narrow interfaces. A teammate can change
 
 | Module | Owns | Stable interface | Data it receives |
 |---|---|---|---|
-| `lounge-control` | Tap handling, profile lookup, active guest state, device sessions, cue composition | `POST /v1/lounge/taps`; one device WebSocket per paired phone; internal match callback | Guest reference, permitted profile fields, device and stream IDs, recognition results |
+| `lounge-control` | Tap handling, profile lookup, active guest state, device sessions, cue composition, staff note review and approved note writes | `POST /v1/lounge/taps`; one device WebSocket per paired phone; internal worker callbacks | Guest reference, permitted profile fields, device and stream IDs, recognition results, staff-triggered audio and reviewed note drafts |
 | `face-worker` | Face detection/tracking, template enrollment, matching, temporal stability, frame backpressure | `PUT /internal/v1/candidates/{id}`; `DELETE /internal/v1/candidates/{id}`; `POST /internal/v1/frames`; `POST /internal/v1/matches` callback | Up to three reference photos at enrollment, opaque candidate IDs, lounge/stream IDs, transient frames; no names, preferences, or allergies |
-| `mock-hotel` | Development profiles and reference photos; SQLite persistence and profile API | `GET /v1/guests/{guest_ref}/lounge-profile` | Synthetic or consented demo records only |
-| `glasses-bridge` | Vendor SDK integration, camera access, display rendering, reconnect behavior | Device WebSocket: JPEG default or optional JPEG XL input; `detection_set`, `face_crop`, and cue output | Frames from camera; per-person guest fields and transient cropped-face images |
+| `note-worker` (proposed) | Local Whisper transcription and Gemini API client; no guest lookup or writes | Internal audio-job request; structured-draft response to `lounge-control`; HTTPS request to Gemini API | Staff-triggered short audio clip; transcript sent to Gemini without `guest_ref` or profile fields |
+| Google Gemini 2.5 Flash API (external) | Hosted language-model inference | `gemini-2.5-flash` API request / structured response | Transcript and extraction instructions; no guest reference or profile fields |
+| `mock-hotel` | Development profiles and reference photos; SQLite persistence and profile API; approved notes if extension is adopted | `GET /v1/guests/{guest_ref}/lounge-profile`; approved stay-note write through `lounge-control` | Synthetic or consented demo records; approved note, source, approver, and expiry |
+| `glasses-bridge` | Vendor SDK integration, camera/audio access, display rendering, reconnect behavior | Device WebSocket: JPEG default or optional JPEG XL input; audio job, `detection_set`, `face_crop`, cue, and note-draft messages | Camera frames; staff-triggered audio; per-person guest fields and transient cropped-face images |
 | `tap-simulator` | Simulated entry/exit events | Same tap-event interface as the reader adapter | Synthetic guest references |
 | `frame-replay` | One-shot deterministic CV integration input | Sends a prepared frame fixture once through the same device-frame interface as the bridge | Consented/synthetic test images; never real guest data in source control |
 
@@ -124,6 +159,7 @@ Suggested source layout:
 apps/
   lounge-control/
   face-worker/
+  note-worker/   # proposed, optional service
   mock-hotel/
   tap-simulator/
   frame-replay/
@@ -145,11 +181,15 @@ Keep each module's implementation in its own directory. Put only shared message 
 |---|---|---|
 | Reader adapter → `lounge-control` | `POST /v1/lounge/taps` | Idempotent on `event_id`; accepts entry/exit events and returns promptly |
 | `lounge-control` → `mock-hotel` or hotel adapter | `GET /v1/guests/{guest_ref}/lounge-profile` and indexed photo URLs | Returns a minimal permitted profile and up to three reference photos; mock uses synthetic or consented demo images |
+| `lounge-control` → `mock-hotel` | Proposed approved stay-note write | Persists only after staff confirms the wording, guest, and current stay; includes source, approver, creation time, and expiry |
 | `lounge-control` → `face-worker` | `PUT /internal/v1/candidates/{candidate_id}` | Accepts up to three JPEG references plus expiry; keeps embeddings in RAM, discards submitted photo bytes, and remains safe to retry |
 | `lounge-control` → `face-worker` | `DELETE /internal/v1/candidates/{candidate_id}` | Removes candidate template and any pending match state |
 | `lounge-control` → `face-worker` | `POST /internal/v1/frames` | Binary JPEG or JPEG XL body, MIME type, and `device_id`, `stream_id`, `sequence`, `captured_at`; queues latest frame and returns `202` |
 | `face-worker` → `lounge-control` | `POST /internal/v1/matches` | Sends opaque candidate ID, device/stream/track IDs, capture time, and quality state after temporal stability |
-| Phone bridge ↔ `lounge-control` | Authenticated device WebSocket | Receives frame messages and returns full person snapshots, separate cropped-face messages, and cue/clear/session events |
+| `lounge-control` → `note-worker` (proposed) | `POST /internal/v1/note-drafts` | Receives a staff-triggered short audio clip without `guest_ref` or profile fields; returns a structured draft only and persists no audio, transcript, or draft |
+| `note-worker` → Google Gemini 2.5 Flash API (external) | HTTPS API request to `gemini-2.5-flash` | Sends transcript and note-extraction instructions; returns a structured draft. Must use hotel-approved data terms and configured storage/logging controls. |
+| Phone bridge ↔ `lounge-control` | Authenticated device WebSocket | Carries JPEG/JPEG XL frames and returns person snapshots, crops, cues, and session events |
+| Phone bridge ↔ `lounge-control` (proposed) | `POST /v1/guest-notes/draft` and approval action | Sends staff-triggered audio; receives a draft for correction and returns confirmed guest/stay plus approve/decline state |
 
 The HTTP route names are proposed contracts. Store their request/response schemas in `contracts/` and test both callers and receivers against those files. If the face worker restarts, the control module re-enrolls still-active candidates from the profile adapter before resuming cues. If the control module restarts and cannot reconstruct active entries, it starts unavailable and waits for fresh/replayed tap events rather than showing stale matches.
 
@@ -159,6 +199,8 @@ The HTTP route names are proposed contracts. Store their request/response schema
 2. The phone bridge opens a device WebSocket to `lounge-control`. The control module forwards sampled binary frames to `face-worker` using an internal HTTP call; it does not retain the frame.
 3. `face-worker` processes the frame on its bounded queue. For a stable match it posts only the opaque candidate ID, stream ID, track ID, capture time, and quality status to the match callback.
 4. `lounge-control` checks that the candidate and device session are still active, looks up the allowed display fields, and sends the full `detection_set` snapshot plus the separate `face_crop` image over that device's WebSocket. Per-track cue and clear events remain available for clients that use the compact cue path.
+
+For the proposed note capability, the phone sends a staff-triggered audio clip to the proposed `lounge-control` note API, which forwards it to `note-worker` without `guest_ref` or profile fields. Whisper transcribes locally; after minimizing identifying details, `note-worker` sends the transcript to the external Gemini 2.5 Flash API and receives a structured draft. The draft goes to the phone for staff correction and guest/stay confirmation. Only an explicit approval causes `lounge-control` to write a stay-scoped note to `mock-hotel`; local audio, transcript, and draft are discarded after review.
 
 This keeps the most privacy-sensitive recognition logic and the worker-facing guest data in separate modules. It also lets the control module run against a fake recognizer, and the vision module run against a fake control callback.
 
