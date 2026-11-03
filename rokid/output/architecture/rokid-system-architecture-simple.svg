@@ -1,0 +1,55 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1800" height="1080" viewBox="0 0 1800 1080">
+<defs>
+ <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path d="M0 0 10 5 0 10Z" fill="#2563eb"/></marker>
+ <style>
+ text{font-family:Arial,sans-serif;fill:#15324f;text-anchor:middle;font-size:25px}
+ .title{font-size:42px;font-weight:700;fill:#0b3977}.heading{font-size:29px;font-weight:700;fill:#0b3977}
+ .small{font-size:21px;fill:#52647a}.box{fill:#eff6ff;stroke:#92b7e5;stroke-width:2}
+ .model{fill:#edf9f2;stroke:#87bca3;stroke-width:2}.data{fill:#f5f0ff;stroke:#b49edc;stroke-width:2}
+ .audio{fill:#fff7ed;stroke:#dfb887;stroke-width:2}.line{fill:none;stroke:#2563eb;stroke-width:3;marker-end:url(#arrow)}
+ </style>
+</defs>
+<rect width="1800" height="1080" fill="#f6f9fd"/>
+<text x="900" y="72" class="title">Rokid smart-glasses system architecture</text>
+<rect x="50" y="115" width="740" height="815" rx="24" fill="white" stroke="#bdcee3" stroke-width="2"/>
+<rect x="1020" y="115" width="730" height="815" rx="24" fill="white" stroke="#bdcee3" stroke-width="2"/>
+<text x="420" y="168" class="heading">ROKID GLASSES</text>
+<text x="1385" y="168" class="heading">LAPTOP SERVER</text>
+<!-- Session control and the two input branches. -->
+<rect x="100" y="205" width="640" height="85" rx="14" class="audio"/>
+<text x="420" y="240">Temple-touch activation</text><text x="420" y="269" class="small">Stops after 15 seconds of silence</text>
+<path d="M260 290V335" class="line"/><path d="M580 290V335" class="line"/>
+<rect x="100" y="335" width="290" height="80" rx="14" class="box"/><text x="245" y="383">Camera</text>
+<rect x="450" y="335" width="290" height="80" rx="14" class="audio"/><text x="595" y="383">Microphone</text>
+<path d="M245 415V460" class="line"/><path d="M595 415V460" class="line"/>
+<rect x="100" y="460" width="290" height="110" rx="14" class="model"/>
+<text x="245" y="495">ML Kit</text><text x="245" y="529" class="small">Face detection + tracking</text>
+<rect x="450" y="460" width="290" height="110" rx="14" class="audio"/>
+<text x="595" y="495">Voice activity detection</text><text x="595" y="529" class="small">Resets silence timer</text>
+<path d="M740 515H765V247H740" class="line" stroke-dasharray="7 6"/>
+<!-- One outgoing image request and one returning result. -->
+<path d="M245 570V605H1000V515H1070" class="line"/>
+<text x="900" y="443">Wi-Fi / HTTP</text><text x="900" y="481" class="small">Face image</text>
+<rect x="1070" y="460" width="630" height="110" rx="14" class="model"/>
+<text x="1385" y="501">Face detection + recognition</text><text x="1385" y="537" class="small">InsightFace buffalo_l (SCRFD + ArcFace)</text>
+<rect x="1070" y="225" width="290" height="120" rx="14" class="data"/>
+<text x="1215" y="272">Reference photos</text><text x="1215" y="309" class="small">server/faces</text>
+<path d="M1215 345V460" class="line"/>
+<rect x="1410" y="225" width="290" height="120" rx="14" class="data"/>
+<text x="1555" y="272">Guest database</text><text x="1555" y="309" class="small">Preferences + allergies</text>
+<path d="M1385 570V660" class="line"/>
+<path d="M1555 345V390H1720V620H1555V660" class="line"/>
+<rect x="1070" y="660" width="630" height="100" rx="14" class="box"/>
+<text x="1385" y="701">Retrieve guest preferences</text><text x="1385" y="736" class="small">Using the recognised name</text>
+<path d="M1070 710H740" class="line"/>
+<text x="905" y="650" class="small">JSON response</text><text x="905" y="683" class="small">Name + box + cues</text>
+<rect x="100" y="660" width="640" height="100" rx="14" class="box"/>
+<text x="420" y="701">Position name + select icons</text><text x="420" y="736" class="small">Icons stored on the glasses</text>
+<path d="M420 760V800" class="line"/>
+<rect x="100" y="800" width="640" height="90" rx="14" class="model"/>
+<text x="420" y="837">Glasses display</text><text x="420" y="871" class="small">Name beside face · Preference icons below</text>
+<text x="1385" y="841" class="small">Temple swipe → server status check</text>
+<text x="1385" y="878" class="small">Unknown guest → no preference icons</text>
+<text x="900" y="986" class="small">Current implementation · Audio is used locally for the silence timer</text>
+<text x="900" y="1023" class="small">Audio transcription and preference extraction are a planned extension</text>
+</svg>
