@@ -148,7 +148,7 @@
     .architecture {
       display: block;
       width: 100%;
-      min-width: 1000px;
+      min-width: 1140px;
       height: auto;
     }
 
@@ -166,6 +166,8 @@
     .node-violet .node-bg { fill: var(--violet-soft); stroke: #b5a1ed; }
     .node-teal .node-bg { fill: var(--teal-soft); stroke: #83c6c5; }
     .node-neutral .node-bg { fill: #fff; stroke: #b9c6d5; }
+    .node-external .node-bg { fill: #fff8e8; stroke: #d3a64a; stroke-dasharray: 6 5; }
+    .node-external .node-title { fill: #63450f !important; }
     .node-title { font-size: 17px; font-weight: 800; }
     .node-subtitle { font-size: 12px; font-weight: 650; fill: #52637a !important; }
     .node-copy { font-size: 12.2px; fill: #40516a !important; }
@@ -187,6 +189,8 @@
     .flow-internal { stroke: var(--violet); }
     .flow-debug { stroke: var(--violet); stroke-dasharray: 4 4; }
     .flow-device { stroke: #687a91; stroke-dasharray: 5 5; }
+    .flow-audio { stroke: #8b6bd6; }
+    .flow-external { stroke: #b87518; stroke-dasharray: 5 4; }
     .flow-label-bg { fill: #fbfcfe; stroke: #dce4ee; stroke-width: 1; }
     .flow-label { font-size: 10.5px; font-weight: 750; fill: #34465e !important; }
     .flow-label-small { font-size: 9.8px; font-weight: 700; fill: #34465e !important; }
@@ -196,10 +200,21 @@
     .flow-arrow-teal { fill: var(--teal); }
     .flow-arrow-violet { fill: var(--violet); }
     .flow-arrow-grey { fill: #687a91; }
+    .flow-arrow-audio { fill: #8b6bd6; }
+    .flow-arrow-external { fill: #b87518; }
     .architecture[data-focus="tap"] .node-recognition,
     .architecture[data-focus="recognition"] .flow-tap-only { opacity: .13; }
     .architecture[data-focus="recognition"] .node-tap-only { opacity: .2; }
+    .architecture[data-focus="tap"] .audio-proposed,
+    .architecture[data-focus="recognition"] .audio-proposed { opacity: .13; }
+    .architecture[data-focus="audio"] .node-recognition:not(.node-audio-source):not(.audio-link),
+    .architecture[data-focus="audio"] .node-tap-only:not(.node-note-store),
+    .architecture[data-focus="audio"] .flow-tap-only:not(.audio-link) { opacity: .13; }
+    .architecture[data-focus="audio"] .node-audio-source,
+    .architecture[data-focus="audio"] .audio-link,
+    .architecture[data-focus="audio"] .audio-proposed { opacity: 1; }
     .node-recognition, .node-tap-only, .flow-tap-only { transition: opacity .18s ease; }
+    .audio-proposed { transition: opacity .18s ease; }
 
     .legend {
       gap: 12px 20px;
@@ -216,6 +231,8 @@
     .swatch.internal { background: var(--violet); }
     .swatch.debug { height: 0; border-top: 2px dashed var(--violet); }
     .swatch.device { height: 0; border-top: 2px dashed #687a91; }
+    .swatch.audio { background: #8b6bd6; }
+    .swatch.external { background: #b87518; }
 
     .output-contract {
       display: grid;
@@ -263,6 +280,8 @@
       gap: 24px;
       margin-top: 18px;
     }
+    .capture-flow.note-components { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; }
+    .note-components .capture-step { min-height: 160px; }
     .capture-step {
       position: relative;
       min-height: 146px;
@@ -281,6 +300,7 @@
       font-weight: 750;
       transform: translateY(-50%);
     }
+    .note-components .capture-step:not(:last-child)::after { content: none; }
     .capture-step .step-number {
       display: block;
       margin-bottom: 8px;
@@ -343,6 +363,7 @@
       .validation { grid-template-columns: 1fr; gap: 4px; }
       .output-contract { grid-template-columns: 1fr; gap: 14px; }
       .capture-flow { grid-template-columns: 1fr; gap: 10px; }
+      .capture-flow.note-components { grid-template-columns: 1fr; gap: 10px; }
       .capture-step { min-height: auto; }
       .capture-step:not(:last-child)::after {
         top: auto;
@@ -364,11 +385,12 @@
   <main class="page">
     <p class="eyebrow">Hotel lounge · Smart-glasses proof of concept</p>
     <h1>From lounge entry to a useful guest cue</h1>
-    <p class="intro">A local laptop handles profile lookup and face matching. The phone bridges the Rokid RV101 to the Docker stack and receives a live set of identified people, their cropped faces, and compact service cues.</p>
+    <p class="intro">The Android phone bridges the Rokid RV101 to the lounge system. A proposed note-worker uses Whisper and Gemini 2.5 Flash beside face-worker, with lounge-control managing staff review and approved note storage.</p>
     <div class="badges" aria-label="Architecture status">
       <span class="badge proposal">Proposed architecture</span>
       <span class="badge">RV101 → Android phone → local laptop</span>
       <span class="badge">Synthetic profiles for development</span>
+      <span class="badge">Gemini 2.5 Flash API · transcript leaves local stack</span>
     </div>
 
     <section aria-labelledby="diagram-heading">
@@ -377,19 +399,22 @@
         <button type="button" data-mode="all" aria-pressed="true">All flows</button>
         <button type="button" data-mode="tap" aria-pressed="false">Tap &amp; profile</button>
         <button type="button" data-mode="recognition" aria-pressed="false">Frames &amp; cue</button>
+        <button type="button" data-mode="audio" aria-pressed="false">Audio notes</button>
       </div>
-      <p class="mode-caption" id="mode-caption" aria-live="polite">Entry creates an expiring candidate; the recognition loop matches only against current lounge candidates.</p>
+      <p class="mode-caption" id="mode-caption" aria-live="polite">Entry and recognition use temporary lounge context. The proposed note-worker drafts from staff-triggered audio; lounge-control saves only a staff-approved note.</p>
 
       <div class="diagram-shell">
-        <svg class="architecture" id="architecture" viewBox="0 0 1380 820" role="img" aria-labelledby="svg-title svg-desc" data-focus="all" xmlns="http://www.w3.org/2000/svg">
+        <svg class="architecture" id="architecture" viewBox="0 0 1560 820" role="img" aria-labelledby="svg-title svg-desc" data-focus="all" xmlns="http://www.w3.org/2000/svg">
           <title id="svg-title">Hotel lounge smart-glasses proposed architecture</title>
-          <desc id="svg-desc">The default architecture runs lounge-control, mock-hotel, and a CPU face-worker in Docker. On Apple Silicon, an optional Compose overlay keeps lounge-control and mock-hotel in Docker and routes frame requests to a native macOS face-worker using ONNX Runtime Core ML with CPU fallback. One or more Android companion phones connect over the private lounge network, each using its own authenticated WebSocket to send camera frames and receive full detection-set snapshots plus separate cropped-face messages joined by crop ID. The worker rejects captures older than two seconds, drops queue waits over one second, and can return all raw face detections and timings in opt-in debug mode.</desc>
+          <desc id="svg-desc">The lounge system includes lounge-control, mock-hotel, face-worker for recognition, and a proposed note-worker for staff-triggered audio transcription and drafting. Whisper runs locally in note-worker; the transcript is sent to the external Google Gemini 2.5 Flash API for a structured draft. Lounge-control returns that draft for staff review and stores only an approved note. The note-worker does not identify guests or write profiles.</desc>
           <defs>
             <marker id="arrow-teal" viewBox="0 0 10 10" refX="8.4" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" class="flow-arrow-teal"/></marker>
             <marker id="arrow-blue" viewBox="0 0 10 10" refX="8.4" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" class="flow-arrow-blue"/></marker>
             <marker id="arrow-green" viewBox="0 0 10 10" refX="8.4" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" class="flow-arrow-green"/></marker>
             <marker id="arrow-violet" viewBox="0 0 10 10" refX="8.4" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" class="flow-arrow-violet"/></marker>
             <marker id="arrow-grey" viewBox="0 0 10 10" refX="8.4" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" class="flow-arrow-grey"/></marker>
+            <marker id="arrow-audio" viewBox="0 0 10 10" refX="8.4" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" class="flow-arrow-audio"/></marker>
+            <marker id="arrow-external" viewBox="0 0 10 10" refX="8.4" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" class="flow-arrow-external"/></marker>
           </defs>
 
           <text x="35" y="78" class="zone-title">PRIVATE LOUNGE LAN · OUTSIDE DOCKER</text>
@@ -422,7 +447,7 @@
           <text x="533" y="193" class="flow-label">POST tap event</text>
 
           <!-- Docker services -->
-          <g class="node node-blue" aria-label="FastAPI lounge-control service">
+          <g class="node node-blue" aria-label="FastAPI lounge-control service for guest context and approved note writes">
             <rect x="625" y="130" width="330" height="265" rx="17" class="node-bg"/>
             <text x="649" y="166" class="node-title">lounge-control</text>
             <text x="649" y="189" class="node-subtitle">FastAPI · control plane</text>
@@ -430,29 +455,30 @@
             <text x="649" y="227" class="node-code">POST /v1/lounge/taps</text>
             <text x="649" y="249" class="node-copy">Profile adapter + active guest context</text>
             <text x="649" y="270" class="node-copy">In-memory cohort with expiry (TTL)</text>
-            <text x="649" y="291" class="node-copy">Device WebSocket + detection-set publisher</text>
-            <rect x="649" y="312" width="282" height="55" rx="10" fill="#fff" stroke="#c6d7f5"/>
-            <text x="663" y="335" class="node-code">/v1/video/stream/{device_id} · :8003</text>
-            <text x="663" y="354" class="node-small">Frames in · people, crops, cues out</text>
-            <text x="649" y="384" class="node-small">5s match TTL · enrollment retry + restore</text>
+            <text x="649" y="291" class="node-copy">Detection sets + staff note review</text>
+            <rect x="649" y="307" width="282" height="72" rx="10" fill="#fff" stroke="#c6d7f5"/>
+            <text x="663" y="326" class="node-code">/v1/video/stream/{device_id}</text>
+            <text x="663" y="345" class="node-code">POST /v1/guest-notes/draft</text>
+            <text x="663" y="364" class="node-small">Frames/audio in · cues/drafts out</text>
+            <text x="649" y="393" class="node-small">5s match TTL · retry + restore</text>
           </g>
 
-          <g class="node node-violet node-tap-only" aria-label="Mock hotel profile API backed by SQLite">
+          <g class="node node-violet node-tap-only node-note-store" aria-label="Mock hotel profile and approved note API backed by SQLite">
             <rect x="1055" y="130" width="270" height="245" rx="17" class="node-bg"/>
             <text x="1078" y="166" class="node-title">mock-hotel</text>
-            <text x="1078" y="189" class="node-subtitle">FastAPI profile API</text>
+            <text x="1078" y="189" class="node-subtitle">FastAPI profile + note API</text>
             <text x="1078" y="218" class="node-code node-code-long">GET /v1/guests/{ref}/lounge-profile</text>
             <text x="1078" y="240" class="node-copy">Synthetic lounge profile</text>
             <text x="1078" y="260" class="node-copy">Preferences + reference photo</text>
             <rect x="1078" y="280" width="224" height="72" rx="10" class="sqlite-box"/>
             <text x="1092" y="304" class="sqlite-title">SQLite file · named volume</text>
-            <text x="1092" y="324" class="sqlite-copy">JPEG BLOBs · up to 3 photos</text>
-            <text x="1092" y="341" class="sqlite-copy">No separate DB server</text>
+            <text x="1092" y="324" class="sqlite-copy">JPEGs + approved stay notes</text>
+            <text x="1092" y="341" class="sqlite-copy">Provenance + expiry · no DB</text>
           </g>
 
-          <path d="M955 230 H1055" class="flow flow-tap flow-tap-only" marker-start="url(#arrow-teal)" marker-end="url(#arrow-teal)"/>
-          <rect x="962" y="191" width="88" height="24" rx="7" class="flow-label-bg"/>
-          <text x="971" y="207" class="flow-label-small">profile lookup</text>
+          <path d="M955 230 H1055" class="flow flow-tap flow-tap-only audio-link" marker-start="url(#arrow-teal)" marker-end="url(#arrow-teal)"/>
+          <rect x="963" y="191" width="86" height="24" rx="7" class="flow-label-bg audio-link"/>
+          <text x="970" y="207" class="flow-label-small audio-link">profile + note</text>
 
           <g class="node node-violet node-recognition" aria-label="Python face worker">
             <rect x="625" y="505" width="330" height="250" rx="17" class="node-bg"/>
@@ -468,6 +494,36 @@
             <text x="649" y="730" class="node-small">Drops captures &gt;2s old / queue waits &gt;1s</text>
           </g>
 
+          <g class="node node-blue audio-proposed" aria-label="Proposed note worker with local Whisper and Gemini 2.5 Flash API drafting">
+            <rect x="1000" y="505" width="325" height="250" rx="17" class="node-bg"/>
+            <text x="1023" y="541" class="node-title">note-worker</text>
+            <text x="1023" y="564" class="node-subtitle">Python · independent container · proposed</text>
+            <line x1="1023" y1="578" x2="1302" y2="578" stroke="#c6d7f5"/>
+            <text x="1023" y="601" class="node-copy">Whisper · local speech-to-text</text>
+            <text x="1023" y="622" class="node-copy">Transcript → Gemini 2.5 Flash API</text>
+            <text x="1023" y="643" class="node-copy">Preference / request / complaint</text>
+            <text x="1023" y="667" class="node-small">Returns draft only; no profile access or writes</text>
+            <text x="1023" y="687" class="node-small">Transcript leaves local stack · minimize IDs</text>
+            <text x="1023" y="718" class="node-small">No identity or allergy inference</text>
+          </g>
+
+          <path d="M955 345 H980 V560 H1000" class="flow flow-audio audio-proposed" marker-end="url(#arrow-audio)" aria-label="Lounge-control sends the audio job to note-worker"/>
+          <path d="M1000 675 H990 V370 H955" class="flow flow-audio audio-proposed" marker-end="url(#arrow-audio)" aria-label="Note-worker returns a draft to lounge-control"/>
+
+          <g class="node node-external audio-proposed" aria-label="External Google Gemini 2.5 Flash API receives transcript and returns a structured draft">
+            <rect x="1375" y="505" width="165" height="250" rx="17" class="node-bg"/>
+            <text x="1390" y="541" class="node-title" style="font-size:15px">Gemini 2.5 Flash</text>
+            <text x="1390" y="564" class="node-subtitle">Google-hosted API</text>
+            <line x1="1390" y1="578" x2="1525" y2="578" stroke="#ead7ac"/>
+            <text x="1390" y="605" class="node-copy">Transcript in</text>
+            <text x="1390" y="626" class="node-copy">Structured draft out</text>
+            <text x="1390" y="660" class="node-small">Outside local Docker</text>
+            <text x="1390" y="685" class="node-small">Hotel approval +</text>
+            <text x="1390" y="702" class="node-small">retention controls</text>
+          </g>
+          <path d="M1325 604 H1375" class="flow flow-external audio-proposed" marker-end="url(#arrow-external)" aria-label="Transcript leaves the local stack for Gemini 2.5 Flash"/>
+          <path d="M1375 665 H1325" class="flow flow-external audio-proposed" marker-end="url(#arrow-external)" aria-label="Structured draft returns to note-worker"/>
+
           <path d="M715 395 V505" class="flow flow-internal node-recognition" marker-end="url(#arrow-violet)"/>
           <path d="M765 505 V395" class="flow flow-cue node-recognition" marker-end="url(#arrow-green)"/>
           <path d="M825 505 V395" class="flow flow-debug node-recognition" marker-end="url(#arrow-violet)"/>
@@ -480,7 +536,7 @@
 
           <!-- Glasses and companion phone -->
           <text x="35" y="545" class="zone-title">WORKER DEVICE</text>
-          <g class="node node-neutral node-recognition" aria-label="Rokid RV101 smart glasses">
+          <g class="node node-neutral node-recognition node-audio-source" aria-label="Rokid RV101 smart glasses">
             <rect x="35" y="565" width="205" height="185" rx="16" class="node-bg"/>
             <text x="55" y="598" class="node-title">Rokid RV101</text>
             <text x="55" y="620" class="node-subtitle">Smart glasses</text>
@@ -491,28 +547,29 @@
             <text x="68" y="721" class="screen-text" style="font-size:9px;fill:#ced8e8!important">Example cue · text + icon + color</text>
           </g>
 
-          <g class="node node-neutral node-recognition" aria-label="Android phone companion bridge">
+          <g class="node node-neutral node-recognition node-audio-source" aria-label="Android phone companion bridge with proposed staff-triggered audio capture">
             <rect x="300" y="565" width="220" height="185" rx="16" class="node-bg"/>
             <text x="321" y="598" class="node-title">Android phone(s)</text>
             <text x="321" y="620" class="node-subtitle">Rokid app / CXR-L bridge</text>
-            <text x="321" y="650" class="node-copy">Receives camera data</text>
-            <text x="321" y="671" class="node-copy">Sends sampled JPEG/JXL frames</text>
-            <text x="321" y="692" class="node-copy">Renders people list + cropped faces</text>
+            <text x="321" y="650" class="node-copy">Camera + staff-started mic audio</text>
+            <text x="321" y="671" class="node-copy">Guest agrees; no passive capture</text>
+            <text x="321" y="692" class="node-copy">Staff reviews draft + confirms stay</text>
             <rect x="321" y="708" width="172" height="25" rx="8" class="pill"/>
             <text x="331" y="725" class="pill-text">Vendor-specific boundary</text>
           </g>
 
-          <path d="M240 664 H300" class="flow flow-device node-recognition" marker-start="url(#arrow-grey)" marker-end="url(#arrow-grey)"/>
-          <rect x="232" y="625" width="76" height="24" rx="7" class="flow-label-bg node-recognition"/>
-          <text x="239" y="641" class="flow-label-small node-recognition">camera ↔ cue</text>
+          <path d="M240 664 H300" class="flow flow-device node-recognition audio-link" marker-start="url(#arrow-grey)" marker-end="url(#arrow-grey)"/>
+          <rect x="232" y="625" width="76" height="24" rx="7" class="flow-label-bg node-recognition audio-link"/>
+          <text x="239" y="641" class="flow-label-small node-recognition audio-link">camera/mic ↔ cue</text>
 
-          <path d="M520 615 H565 V375 H625" class="flow flow-frame node-recognition" marker-end="url(#arrow-blue)"/>
-          <path d="M625 385 H580 V681 H520" class="flow flow-cue node-recognition" marker-end="url(#arrow-green)"/>
-          <rect x="528" y="454" width="196" height="43" rx="8" class="flow-label-bg node-recognition"/>
-          <text x="539" y="472" class="flow-label-small node-recognition">One WS per phone</text>
-          <text x="539" y="488" class="flow-label-small node-recognition">JPEG/JXL in · people + crops</text>
+          <path d="M520 615 H565 V375 H625" class="flow flow-frame node-recognition audio-link" marker-end="url(#arrow-blue)" aria-label="Phone sends camera frames over WebSocket and staff-triggered audio through the note API"/>
+          <path d="M625 385 H580 V681 H520" class="flow flow-cue node-recognition audio-link" marker-end="url(#arrow-green)" aria-label="Lounge-control returns cues and note drafts to the phone"/>
+          <rect x="528" y="454" width="196" height="43" rx="8" class="flow-label-bg node-recognition audio-link"/>
+          <text x="539" y="472" class="flow-label-small node-recognition audio-link">Video WS: frames + cues</text>
+          <text x="539" y="488" class="flow-label-small node-recognition audio-link">Note API: audio + review</text>
 
           <text x="622" y="766" class="flow-note">Private LAN ports · one WebSocket per phone · no broker in the live path</text>
+
         </svg>
       </div>
 
@@ -523,41 +580,30 @@
         <span class="legend-item"><i class="swatch internal" aria-hidden="true"></i>Candidate enrollment / internal handoff</span>
         <span class="legend-item"><i class="swatch debug" aria-hidden="true"></i>Opt-in raw detections + timings</span>
         <span class="legend-item"><i class="swatch device" aria-hidden="true"></i>Glasses ↔ phone</span>
+        <span class="legend-item"><i class="swatch audio" aria-hidden="true"></i>Proposed note-worker request / draft</span>
+        <span class="legend-item"><i class="swatch external" aria-hidden="true"></i>Gemini API · transcript leaves local stack</span>
       </div>
     </section>
 
     <section class="capture-extension" aria-labelledby="capture-extension-heading">
-      <p class="eyebrow">Separate proposed extension · not yet implemented</p>
-      <h2 id="capture-extension-heading">Add a guest-approved note and make it available to the next employee</h2>
-      <p class="capture-intro">The current POC reads synthetic profile context after a lounge entry event. This additional path captures a new detail from a conversation. Keep the write path separate from face matching, and save only after staff checks the note and the guest/stay association.</p>
-      <div class="capture-flow" aria-label="Proposed guest insight capture and handover flow">
+      <p class="eyebrow">Proposed service extension · not yet implemented</p>
+      <h2 id="capture-extension-heading">Add note capture to the lounge system</h2>
+      <p class="capture-intro">The note-worker is a sibling service to face-worker. Lounge-control coordinates phone input, staff review, and approved writes; the note-worker only transcribes and drafts. This keeps the feature inside the existing lounge architecture without mixing language processing into face matching.</p>
+      <div class="capture-flow note-components" aria-label="Responsibilities of the proposed note-worker, lounge-control, and mock-hotel integration">
         <article class="capture-step proposed">
-          <span class="step-number">Proposed · capture</span>
-          <strong>Guest shares a preference</strong>
-          <p>Staff asks whether it should be kept for this stay. No passive audio capture.</p>
+          <strong>lounge-control · orchestration</strong>
+          <p>Accept the staff-triggered audio clip, request a draft, return it to the phone for correction, confirm the guest and current stay, then save only after staff approval.</p>
         </article>
         <article class="capture-step proposed">
-          <span class="step-number">Proposed · review</span>
-          <strong>Staff enters or edits a short note</strong>
-          <p>A staff phone form can capture the wording, source, and time. Staff checks it before saving.</p>
+          <strong>note-worker · Whisper + Gemini 2.5 Flash</strong>
+          <p>Run Whisper locally, then send the transcript to Gemini 2.5 Flash for a structured preference, request, or complaint draft. The worker has no profile lookup or database writes.</p>
         </article>
-        <article class="capture-step proposed store">
-          <span class="step-number">Proposed · write</span>
-          <strong>Confirm guest and current stay</strong>
-          <p>Store a stay-scoped note with provenance and an agreed expiry in the mock-hotel record.</p>
-        </article>
-        <article class="capture-step proposed retrieve">
-          <span class="step-number">Proposed · handover</span>
-          <strong>Next employee retrieves the note</strong>
-          <p>Show it in the existing authorized staff channel; role access and the hotel source of truth need partner input.</p>
-        </article>
-        <article class="capture-step proposed retrieve">
-          <span class="step-number">Proposed · service moment</span>
-          <strong>Offer a compact cue</strong>
-          <p>Glasses are one delivery option. Staff confirms that the preference still applies before acting.</p>
+        <article class="capture-step proposed">
+          <strong>mock-hotel · approved note storage</strong>
+          <p>Keep a stay-scoped approved note with source, approver, and expiry. A hotel-approved OPERA adapter is a later integration decision.</p>
         </article>
       </div>
-      <p class="capture-guardrail"><strong>Correction and expiry</strong><span>Let staff or the guest correct or decline the note, and expire or remove it at checkout or the hotel-approved retention point. A face match must not be the sole write-time check. Allergy information remains a safety alert that staff verifies against the authoritative source and food-safety process.</span></p>
+      <p class="capture-guardrail"><strong>Review and data boundary</strong><span>Capture only after the guest agrees; validate SDK microphone support. Whisper runs locally, but the transcript leaves the local stack for Google’s Gemini API. Use only a hotel-approved paid/enterprise project, disable request storage where supported (including <code>store=false</code> for the Interactions API), verify logging and retention settings, and remove names/room identifiers where practical; never send guest IDs or profile fields. Do not use unpaid quota for guest transcripts. Keep audio, transcript, and draft transient locally; do not associate notes through face matching. Allergy statements remain unverified until staff checks the authoritative hotel source and food-safety process.</span></p>
     </section>
 
     <section class="output-contract" aria-labelledby="output-contract-heading">
@@ -617,9 +663,10 @@
       const caption = document.getElementById("mode-caption");
       const buttons = Array.from(document.querySelectorAll("[data-mode]"));
       const captions = {
-        all: "Entry creates an expiring candidate; the recognition loop matches only against current lounge candidates.",
+        all: "The proposed note-worker sits beside face-worker; lounge-control coordinates review and saves only staff-approved notes.",
         tap: "A card tap resolves a synthetic profile and creates or clears temporary lounge presence.",
-        recognition: "The phone relays sampled frames; stable matches return as short cues on the glasses."
+        recognition: "The phone relays sampled frames; stable matches return as short cues on the glasses.",
+        audio: "With guest agreement, the phone sends staff-triggered audio through lounge-control to note-worker; local Whisper transcribes it and Gemini 2.5 Flash returns a draft for staff review."
       };
 
       for (const button of buttons) {
