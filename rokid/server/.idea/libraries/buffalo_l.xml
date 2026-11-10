@@ -1,0 +1,9 @@
+<component name="libraryTable">
+  <library name="buffalo_l">
+    <CLASSES>
+      <root url="jar://$PROJECT_DIR$/models/insightface/models/buffalo_l.zip!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES />
+  </library>
+</component>

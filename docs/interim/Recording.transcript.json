@@ -1,0 +1,1951 @@
+{
+  "source": "Recording.mp4",
+  "source_sha256": "8e01a8b1ac4401bd775c519237236ee3aee90bd6e6140be505f417983416fc8f",
+  "duration_seconds": 1757.824,
+  "presentation_date": "2026-11-05",
+  "transcribed_date": "2026-11-10",
+  "language": "en",
+  "method": "Local faster-whisper large-v3-turbo transcription, compared with a second large-v3 pass; terminology checked against Slides.pdf.",
+  "editorial_note": "Machine-generated transcript, checked against a second speech-model pass and the supplied slides for names and technical terminology. This is a lightly edited record, not a certified verbatim transcript. Speakers have not been reliably diarised. Timestamps are approximate. Setup audio and several live-demo exchanges are indistinct and are marked in brackets; unresolved words have not been guessed. Spoken claims are preserved and are assessed separately in the report. The recording ends as Q&A begins.",
+  "chapters": [
+    {
+      "start": 0,
+      "title": "Setup audio and indistinct speech"
+    },
+    {
+      "start": 80.17,
+      "title": "Hotel context and project introduction"
+    },
+    {
+      "start": 241.82,
+      "title": "Service quality and LQA"
+    },
+    {
+      "start": 360.41,
+      "title": "Satisfaction and personalisation"
+    },
+    {
+      "start": 580.95,
+      "title": "Current practice and information handover"
+    },
+    {
+      "start": 772.17,
+      "title": "First-time guests and design challenge"
+    },
+    {
+      "start": 838.57,
+      "title": "Functions, requirements, and concepts"
+    },
+    {
+      "start": 1022.49,
+      "title": "Proposed journey and visualisation"
+    },
+    {
+      "start": 1090.57,
+      "title": "Technical implementation and iterations"
+    },
+    {
+      "start": 1203.93,
+      "title": "Preference-extraction experiments"
+    },
+    {
+      "start": 1251.33,
+      "title": "Display design and contextual retrieval"
+    },
+    {
+      "start": 1398.91,
+      "title": "Usability findings and requirements check"
+    },
+    {
+      "start": 1494.05,
+      "title": "Limitations and next steps"
+    },
+    {
+      "start": 1559.37,
+      "title": "Live demonstration"
+    },
+    {
+      "start": 1732.01,
+      "title": "Opening Q&A; file ends"
+    }
+  ],
+  "segments": [
+    {
+      "start": 0,
+      "end": 80.17,
+      "text": "[Setup audio, silence and indistinct speech; no reliable word-for-word transcription.]",
+      "asr_text": "Thank you so much for watching.",
+      "uncertain": true
+    },
+    {
+      "start": 80.19,
+      "end": 106.82,
+      "text": "Let's pretend you're choosing a lovely hotel to stay at in Singapore."
+    },
+    {
+      "start": 106.82,
+      "end": 110.82,
+      "text": "There are a lot of options, and honestly there's really no right choice."
+    },
+    {
+      "start": 110.82,
+      "end": 114.82,
+      "text": "Guests choose the hotel they want to stay at based off of multiple different factors,",
+      "asr_text": "Just choose the hotel they want to stay at based off of multiple different factors,"
+    },
+    {
+      "start": 114.82,
+      "end": 121.42,
+      "text": "like the star rating, its reviews, and even how much they charge per night."
+    },
+    {
+      "start": 121.42,
+      "end": 126.72,
+      "text": "Currently, Singapore has 408 licensed hotels, which means you have plenty of options to choose from."
+    },
+    {
+      "start": 127.7,
+      "end": 134.45,
+      "text": "But zooming into the luxury hospitality segment, almost 50% of the market is dominated by just five players."
+    },
+    {
+      "start": 135.48,
+      "end": 142.5,
+      "text": "In an industry that's so cutthroat and competitive, what makes these five players so special that they occupy such a big part of the pie?"
+    },
+    {
+      "start": 143.58,
+      "end": 151.74,
+      "text": "Good afternoon, I'm Neha, and our team is exploring how we can drive profit margins for hotels, especially in the luxury industry [final phrase unclear].",
+      "asr_text": "Good afternoon, I'm Neymar, and our team is exploring how we can drive profit margins from hotels, especially in the luxury industry across the area.",
+      "uncertain": true
+    },
+    {
+      "start": 153.78,
+      "end": 156.66,
+      "text": "Now, profit for hotels looks very similar to any other industry."
+    },
+    {
+      "start": 157.02,
+      "end": 158.96,
+      "text": "It's really just revenue minus cost."
+    },
+    {
+      "start": 160.68,
+      "end": 164.6,
+      "text": "But our industry partner said they're noticing diminishing profits recently,"
+    },
+    {
+      "start": 165.0,
+      "end": 167.62,
+      "text": "mostly due to increasing manpower and operational costs."
+    },
+    {
+      "start": 168.62,
+      "end": 171.22,
+      "text": "Now, if we try to reduce costs of luxury hotels,"
+    },
+    {
+      "start": 171.52,
+      "end": 174.22,
+      "text": "it might be counterintuitive because guests",
+      "asr_text": "it might be counterintuitive because, yes,"
+    },
+    {
+      "start": 174.22,
+      "end": 176.5,
+      "text": "expect a certain standard of products and services.",
+      "asr_text": "we expect a certain standard of products and services."
+    },
+    {
+      "start": 177.14,
+      "end": 179.44,
+      "text": "So let's focus on how we can increase revenue instead."
+    },
+    {
+      "start": 182.16,
+      "end": 185.26,
+      "text": "Now, revenue in hotels is measured by this term called RevPAR,",
+      "asr_text": "Now, revenue in hotels is measured by this term called revpar,"
+    },
+    {
+      "start": 185.26,
+      "end": 191.1,
+      "text": "or revenue for available room, which is essentially the product of the average daily rate of the hotel"
+    },
+    {
+      "start": 191.1,
+      "end": 196.76,
+      "text": "and the occupancy rate. Now, there are some factors that both of these terms have in common.",
+      "asr_text": "and the output of the space. Now, there are some factors that both of these terms have in common."
+    },
+    {
+      "start": 197.56,
+      "end": 202.2,
+      "text": "They're both influenced by the location of the hotel, the season that you book it in,"
+    },
+    {
+      "start": 202.84,
+      "end": 207.68,
+      "text": "economic conditions, and the competitive landscape. However, all of these are factors"
+    },
+    {
+      "start": 207.68,
+      "end": 213.35,
+      "text": "that are not really in the hotel's control. So what can be controlled? Average daily rate"
+    },
+    {
+      "start": 213.35,
+      "end": 219.19,
+      "text": "heavily depends on classification, or the star rating of a hotel, which is why five-star"
+    },
+    {
+      "start": 219.19,
+      "end": 223.69,
+      "text": "hotels can afford to charge so much more than a three-star or four-star hotel and still"
+    },
+    {
+      "start": 223.69,
+      "end": 224.83,
+      "text": "be justified in their prices.",
+      "asr_text": "be justified in a price."
+    },
+    {
+      "start": 225.25,
+      "end": 230.72,
+      "text": "On the other hand, occupancy rate heavily depends on reputation and reviews, which is"
+    },
+    {
+      "start": 230.72,
+      "end": 233.24,
+      "text": "a direct representation of customer satisfaction."
+    },
+    {
+      "start": 236.21,
+      "end": 239.83,
+      "text": "So let's look at how we're going to try to include both of these factors, starting with"
+    },
+    {
+      "start": 239.83,
+      "end": 240.23,
+      "text": "classification."
+    },
+    {
+      "start": 241.76,
+      "end": 246.32,
+      "text": "In luxury hotels, classification is a measure of the hotel's quality."
+    },
+    {
+      "start": 246.64,
+      "end": 250.84,
+      "text": "which is measured by Leading Quality Assurance, an industry-wide standard."
+    },
+    {
+      "start": 251.75,
+      "end": 256.05,
+      "text": "Now, LQA consists of various different standards across different departments and dimensions."
+    },
+    {
+      "start": 256.57,
+      "end": 260.89,
+      "text": "It measures things like your emotional intelligence, the personalization in your service,"
+    },
+    {
+      "start": 261.23,
+      "end": 263.03,
+      "text": "sustainability, and so much more."
+    },
+    {
+      "start": 263.9,
+      "end": 265.56,
+      "text": "And it's not just a one-time thing."
+    },
+    {
+      "start": 265.96,
+      "end": 269.66,
+      "text": "Hotels consistently get audited to make sure that they meet these standards."
+    },
+    {
+      "start": 269.9,
+      "end": 273.22,
+      "text": "So in order for our hotels to increase their ranking and their ratings,"
+    },
+    {
+      "start": 273.64,
+      "end": 276.34,
+      "text": "they need to be compliant with as many of these standards as possible."
+    },
+    {
+      "start": 277.22,
+      "end": 283.16,
+      "text": "And if you notice, these are just a few of the many, many standards, and they're very, very specific."
+    },
+    {
+      "start": 283.76,
+      "end": 285.88,
+      "text": "But we noticed a trend among a lot of these standards."
+    },
+    {
+      "start": 286.32,
+      "end": 290.4,
+      "text": "A lot of them revolve around how personalized your service is for guests."
+    },
+    {
+      "start": 293.54,
+      "end": 297.8,
+      "text": "Now, we talked to our industry partner, and they said they noticed a gap in following these standards."
+    },
+    {
+      "start": 298.48,
+      "end": 301.86,
+      "text": "Staff follow them when there's someone paying attention to them."
+    },
+    {
+      "start": 302.12,
+      "end": 304.82,
+      "text": "But when they're not, it's very difficult for staff to keep track."
+    },
+    {
+      "start": 305.14,
+      "end": 307.52,
+      "text": "Now, this could be due to multiple different factors."
+    },
+    {
+      "start": 307.52,
+      "end": 310.94,
+      "text": "It could be staff negligence, or it could even be just overworked staff."
+    },
+    {
+      "start": 311.38,
+      "end": 317.36,
+      "text": "When you have so many different standards to follow, how do you still make sure you follow all these standards while still delivering service?"
+    },
+    {
+      "start": 317.86,
+      "end": 318.72,
+      "text": "[Short phrase unclear.]",
+      "asr_text": "It's not so greedy.",
+      "uncertain": true
+    },
+    {
+      "start": 320.19,
+      "end": 323.43,
+      "text": "So to mitigate this, our industry partner have tried multiple times."
+    },
+    {
+      "start": 324.05,
+      "end": 328.37,
+      "text": "They even hired the first female butler that ever served the queen to come down and train their staff."
+    },
+    {
+      "start": 329.19,
+      "end": 332.69,
+      "text": "Along with this, they also do very frequent training programs for all their staff."
+    },
+    {
+      "start": 333.72,
+      "end": 335.76,
+      "text": "And yet, the gap still persists."
+    },
+    {
+      "start": 335.76,
+      "end": 347.86,
+      "text": "Our industry partner quoted one specific incident that stood out, where there was a sick person in the lobby, and there were staff around, but none of them noticed because they were all mixed up in a lot of different tasks [last phrase unclear].",
+      "asr_text": "Our industry partner quoted one specific incident that stood out, where there was a sick person in the lobby, and there were staff brown, but none of them noticed because they were all mixed up in a lot of different tasks, focused on their skills.",
+      "uncertain": true
+    },
+    {
+      "start": 348.87,
+      "end": 357.44,
+      "text": "In this sort of situation, there's really missing interpersonal communication and a gap in making sure you cater service towards individual guests."
+    },
+    {
+      "start": 360.41,
+      "end": 365.53,
+      "text": "On the other hand, reputation and reviews heavily depend on customer satisfaction.",
+      "asr_text": "On the other hand, reputation and views heavily depend on the customer satisfaction."
+    },
+    {
+      "start": 366.43,
+      "end": 370.11,
+      "text": "Now, occupancy rate comes from two different paths."
+    },
+    {
+      "start": 370.96,
+      "end": 374.82,
+      "text": "If you have a satisfied guest, then you tend to be loyal members coming back,"
+    },
+    {
+      "start": 374.94,
+      "end": 376.06,
+      "text": "including your occupancy rate."
+    },
+    {
+      "start": 376.62,
+      "end": 380.2,
+      "text": "On the other hand, satisfied guests also post good reviews about your hotel,"
+    },
+    {
+      "start": 380.36,
+      "end": 381.64,
+      "text": "driving and customer acquisition."
+    },
+    {
+      "start": 382.57,
+      "end": 385.07,
+      "text": "So it's a multi-factor increase in occupancy."
+    },
+    {
+      "start": 385.49,
+      "end": 390.76,
+      "text": "Now, we conducted surveys on guests, and we asked them what hotels made them want to return."
+    },
+    {
+      "start": 391.96,
+      "end": 396.4,
+      "text": "And they said, one of them said, quoted Marriott's loyalty program in particular,"
+    },
+    {
+      "start": 396.72,
+      "end": 402.16,
+      "text": "saying that their consistent standards really helped them want to keep coming back to the hotel."
+    },
+    {
+      "start": 402.16,
+      "end": 409.36,
+      "text": "Now we did some market research and this shows you the number of members of Marriott that were"
+    },
+    {
+      "start": 409.36,
+      "end": 414.24,
+      "text": "returning guests. So out of all of Marriott's guests, two-thirds of them happened to be returning"
+    },
+    {
+      "start": 414.24,
+      "end": 421.98,
+      "text": "members, which just shows you how important customer satisfaction is to hotel. But there's"
+    },
+    {
+      "start": 421.98,
+      "end": 427.66,
+      "text": "a bit of a gap in satisfaction right now in that it's been fairly stagnant over the past few years."
+    },
+    {
+      "start": 428.36,
+      "end": 433.9,
+      "text": "It did rise a little bit from the COVID years, but all in all, it seems to be capped at a pretty constant threshold.",
+      "asr_text": "It did rise a little bit from the cold years, but all in all, it seems to be capped at a pretty constant threshold."
+    },
+    {
+      "start": 435.09,
+      "end": 436.07,
+      "text": "Now, why is this happening?"
+    },
+    {
+      "start": 436.67,
+      "end": 439.09,
+      "text": "One major reason is rising expectations."
+    },
+    {
+      "start": 439.78,
+      "end": 443.54,
+      "text": "When luxury service becomes the standard, people start expecting more time."
+    },
+    {
+      "start": 444.4,
+      "end": 447.8,
+      "text": "Now, the problem here is that they start expecting different things as well."
+    },
+    {
+      "start": 447.8,
+      "end": 453.83,
+      "text": "For example, a lot of hotels around Singapore and [unclear] have implemented automated check-in kiosks.",
+      "asr_text": "For example, a lot of hotels around Singapore and Gugli have implemented automated check-in kiosks.",
+      "uncertain": true
+    },
+    {
+      "start": 454.35,
+      "end": 458.05,
+      "text": "We've seen this at PARKROYAL. We've even seen this at [hotel name unclear] at NUS.",
+      "asr_text": "We've seen this at Park Royal. We've even seen this at The Bridge at NUS.",
+      "uncertain": true
+    },
+    {
+      "start": 458.65,
+      "end": 460.97,
+      "text": "And this has kind of mixed reviews."
+    },
+    {
+      "start": 461.45,
+      "end": 464.45,
+      "text": "There's one demographic of people that really enjoy this kind of service."
+    },
+    {
+      "start": 464.61,
+      "end": 466.07,
+      "text": "They can just check in and move on with it."
+    },
+    {
+      "start": 466.69,
+      "end": 471.33,
+      "text": "There's another demographic that isn't a big fan because they expect to be treated face-to-face"
+    },
+    {
+      "start": 471.33,
+      "end": 474.13,
+      "text": "and have a personalized experience when they enter the hotel."
+    },
+    {
+      "start": 475.11,
+      "end": 480.49,
+      "text": "So when we increase the number of automations and try to scale these kind of features in hotels,"
+    },
+    {
+      "start": 480.93,
+      "end": 482.71,
+      "text": "often it ends up in standardization."
+    },
+    {
+      "start": 483.33,
+      "end": 486.53,
+      "text": "So how do we meet different expectations of different guests?",
+      "asr_text": "So how do we meet different expectations of different desks?"
+    },
+    {
+      "start": 486.53,
+      "end": 491.53,
+      "text": "we need to make sure that we can cater experiences to be more individualized."
+    },
+    {
+      "start": 491.53,
+      "end": 495.2,
+      "text": "So let's recap."
+    },
+    {
+      "start": 495.2,
+      "end": 501.2,
+      "text": "We've now understood that revenue for available room depends on ADR and occupancy."
+    },
+    {
+      "start": 501.2,
+      "end": 506.36,
+      "text": "Both of these factors are heavily influenced by the quality of service hotel provide,"
+    },
+    {
+      "start": 506.36,
+      "end": 508.61,
+      "text": "as well as customer satisfaction."
+    },
+    {
+      "start": 508.61,
+      "end": 513.61,
+      "text": "We know that there's a big gap in terms of how personalized this service is"
+    },
+    {
+      "start": 513.61,
+      "end": 520.22,
+      "text": "and how customer satisfaction is very related to how individualized your service is."
+    },
+    {
+      "start": 520.22,
+      "end": 528.88,
+      "text": "Which is why we as a group are exploring how we can improve personalisation in luxury hotels.",
+      "asr_text": "Which is why we as a group are exploring how we can improve personalization and luxury business."
+    },
+    {
+      "start": 528.88,
+      "end": 532.88,
+      "text": "So now, enough with the theories of why do we actually need personalization,"
+    },
+    {
+      "start": 532.88,
+      "end": 535.88,
+      "text": "we want to know if actually the customers and businesses really want it."
+    },
+    {
+      "start": 535.88,
+      "end": 539.88,
+      "text": "So from our secondary research, we know that 86% of the travelers"
+    },
+    {
+      "start": 539.88,
+      "end": 543.88,
+      "text": "actually sought to have at least one of their experiences to be personalized."
+    },
+    {
+      "start": 543.88,
+      "end": 549.32,
+      "text": "And also, 61% of consumers are actually willing to pay more if their experiences are personalized,"
+    },
+    {
+      "start": 549.32,
+      "end": 552.2,
+      "text": "which means that it can actually help to drive out ADR,"
+    },
+    {
+      "start": 552.2,
+      "end": 556.44,
+      "text": "which actually links up to RevPAR, which helps with the business for the hotel.",
+      "asr_text": "which actually links up the red path, which helps with the business or the hotel."
+    },
+    {
+      "start": 557.0,
+      "end": 560.28,
+      "text": "87% of the guests are also more likely to recommend a hotel,"
+    },
+    {
+      "start": 560.28,
+      "end": 561.96,
+      "text": "which links to our acquisition path,"
+    },
+    {
+      "start": 561.96,
+      "end": 567.08,
+      "text": "where more customers might be coming as new guests when there are better reviews."
+    },
+    {
+      "start": 567.72,
+      "end": 571.56,
+      "text": "Our business partner also said that they actually see the impact"
+    },
+    {
+      "start": 571.56,
+      "end": 574.84,
+      "text": "when they try to do personalization in their operations right now,"
+    },
+    {
+      "start": 574.84,
+      "end": 578.76,
+      "text": "which helps to support this need for personalization to increase retention."
+    },
+    {
+      "start": 580.95,
+      "end": 583.75,
+      "text": "We've actually been to a few case studies.",
+      "asr_text": "We've actually been to a few studies."
+    },
+    {
+      "start": 583.75,
+      "end": 586.31,
+      "text": "This includes places like the Accor Group,"
+    },
+    {
+      "start": 586.31,
+      "end": 588.95,
+      "text": "where they are in charge of Sofitel and Novotel,",
+      "asr_text": "where they are in charge of like Sofitel and Nohotel,"
+    },
+    {
+      "start": 588.95,
+      "end": 590.79,
+      "text": "as well as [hotel name unclear] at NUS,",
+      "asr_text": "as well as the rich NUS,",
+      "uncertain": true
+    },
+    {
+      "start": 590.79,
+      "end": 593.59,
+      "text": "and also our business partners, which is PARKROYAL [location unclear].",
+      "asr_text": "and also our business partners, which is part of Royal Pembeck.",
+      "uncertain": true
+    },
+    {
+      "start": 594.23,
+      "end": 596.31,
+      "text": "So maybe I'll just go through one of the case studies,"
+    },
+    {
+      "start": 596.31,
+      "end": 597.99,
+      "text": "which is under the Accor Group,"
+    },
+    {
+      "start": 597.99,
+      "end": 602.87,
+      "text": "to give you a better understanding of what most of these hotels are doing for personalization."
+    },
+    {
+      "start": 602.87,
+      "end": 607.21,
+      "text": "Well, most of them have this database where they store this personalized info."
+    },
+    {
+      "start": 607.21,
+      "end": 611.01,
+      "text": "So the general manager will usually retrieve them and during the morning brief, brief the"
+    },
+    {
+      "start": 611.01,
+      "end": 615.17,
+      "text": "staff on the floor on the customer profiles and things to look out for to personalize"
+    },
+    {
+      "start": 615.17,
+      "end": 616.17,
+      "text": "their experiences."
+    },
+    {
+      "start": 616.17,
+      "end": 620.69,
+      "text": "Then, hard copy notes or information might be thumbed down on WhatsApp such that when"
+    },
+    {
+      "start": 620.69,
+      "end": 626.05,
+      "text": "the staff forgets any of this information, they can actually refer back to them as fallback."
+    },
+    {
+      "start": 626.05,
+      "end": 629.45,
+      "text": "Then the service will be personalized to the guests when they come."
+    },
+    {
+      "start": 629.45,
+      "end": 632.75,
+      "text": "And this information comes from the morning brief and the profiles."
+    },
+    {
+      "start": 632.75,
+      "end": 637.41,
+      "text": "Afterwards, new information that are being acquired during the conversation with the"
+    },
+    {
+      "start": 637.41,
+      "end": 644.68,
+      "text": "guests are then being pumped back into the database to give the profiles a richer context."
+    },
+    {
+      "start": 644.68,
+      "end": 647.76,
+      "text": "So let's break down what actually falls short for personalization."
+    },
+    {
+      "start": 647.76,
+      "end": 651.94,
+      "text": "Well, for the database and the hard copy notes for fallback, there's actually only a single"
+    },
+    {
+      "start": 651.94,
+      "end": 653.88,
+      "text": "source or retrieval for the data."
+    },
+    {
+      "start": 653.88,
+      "end": 658.42,
+      "text": "And a lot of this information is forgotten during the service period, which causes them to",
+      "asr_text": "And a lot of these information are forgotten during the sub-period, which cause them to"
+    },
+    {
+      "start": 658.42,
+      "end": 661.08,
+      "text": "need to frequently look up the hard copy."
+    },
+    {
+      "start": 661.08,
+      "end": 665.9,
+      "text": "And they also find it very hard to find the information on these guests and sometimes"
+    },
+    {
+      "start": 665.9,
+      "end": 669.84,
+      "text": "they are even unable to identify the guests that they need to personalise because they"
+    },
+    {
+      "start": 669.84,
+      "end": 674.52,
+      "text": "have to try to identify the guests from simply written with descriptions or the profile pictures"
+    },
+    {
+      "start": 674.52,
+      "end": 675.52,
+      "text": "in the database."
+    },
+    {
+      "start": 675.52,
+      "end": 681.65,
+      "text": "Then, during the service, it is also hard for them to refer to these personalised notes",
+      "asr_text": "Then, during the surveys, it's also hard for them to refer to these personalised notes"
+    },
+    {
+      "start": 681.65,
+      "end": 686.37,
+      "text": "during the conversation as they have to uphold a certain professionalism for their service,",
+      "asr_text": "during the conversation as they have to uphold a certain professionalism for their surveys,"
+    },
+    {
+      "start": 686.37,
+      "end": 689.39,
+      "text": "which means they have to do personalisation from their memory."
+    },
+    {
+      "start": 689.39,
+      "end": 693.62,
+      "text": "And it's hard for the staff to maintain a natural flow of the conversation while doing"
+    },
+    {
+      "start": 693.62,
+      "end": 698.5,
+      "text": "this, as well as being tasked to do additional questions on the customers, such that they"
+    },
+    {
+      "start": 698.5,
+      "end": 702.18,
+      "text": "can gain new info to update their database on data."
+    },
+    {
+      "start": 702.18,
+      "end": 706.46,
+      "text": "Lastly, for the entry, every staff actually has their own interpretation, their own way"
+    },
+    {
+      "start": 706.46,
+      "end": 710.54,
+      "text": "of understanding the customer's needs, which means they actually have an inconsistent way"
+    },
+    {
+      "start": 710.54,
+      "end": 713.7,
+      "text": "of entering new knowledge into the database."
+    },
+    {
+      "start": 713.7,
+      "end": 717.7,
+      "text": "As well as the staff are actually busy with a lot of workload, which means that they can"
+    },
+    {
+      "start": 717.7,
+      "end": 720.78,
+      "text": "only enter the data when they are free."
+    },
+    {
+      "start": 720.78,
+      "end": 725.38,
+      "text": "And this means that they might take a while before the staff enters the new data, and"
+    },
+    {
+      "start": 725.38,
+      "end": 729.06,
+      "text": "they might actually forget some of this data, as well as some of this data might be corrupted"
+    },
+    {
+      "start": 729.06,
+      "end": 731.66,
+      "text": "in their memory."
+    },
+    {
+      "start": 731.66,
+      "end": 737.7,
+      "text": "So the lack of the seamless recognition of the guests and the ease of finding and filtering"
+    },
+    {
+      "start": 737.7,
+      "end": 742.38,
+      "text": "information cause us to need recognition, as well as fast retrieval of information."
+    },
+    {
+      "start": 742.38,
+      "end": 746.94,
+      "text": "Secondly, the lack of information retrieval during the conversation itself, and the difficulty"
+    },
+    {
+      "start": 746.94,
+      "end": 752.94,
+      "text": "in asking new questions to gather data, cause us to need the ease of referencing information"
+    },
+    {
+      "start": 752.94,
+      "end": 754.94,
+      "text": "while maintaining professionalism."
+    },
+    {
+      "start": 754.94,
+      "end": 760.22,
+      "text": "Lastly, the lack of effortless data entry with consistent formats and accurate data"
+    },
+    {
+      "start": 760.22,
+      "end": 765.26,
+      "text": "inputs in your system cause us to need easy data inputs and reliable processing processes"
+    },
+    {
+      "start": 765.26,
+      "end": 772.17,
+      "text": "such as the data are standardized and useful."
+    },
+    {
+      "start": 772.17,
+      "end": 778.21,
+      "text": "So we have already told you the issues with personalization as a whole, but this issue"
+    },
+    {
+      "start": 778.21,
+      "end": 783.73,
+      "text": "is even more prevalent for new guests because personalization is only being able to be done"
+    },
+    {
+      "start": 783.73,
+      "end": 788.29,
+      "text": "when there's information. So with no information, it's hard to personalize for them which leads to"
+    },
+    {
+      "start": 788.29,
+      "end": 792.37,
+      "text": "low satisfaction and the customers don't come back causing a large proportion of the customers"
+    },
+    {
+      "start": 792.37,
+      "end": 798.21,
+      "text": "to be new customers. And this points to the two factors of being able to quickly enter information"
+    },
+    {
+      "start": 798.21,
+      "end": 804.13,
+      "text": "in database and real-time and fast retrieval of information to be even more crucial as these can"
+    },
+    {
+      "start": 804.13,
+      "end": 809.25,
+      "text": "help the data to be retrieved during the first day itself for the new guests and being able to"
+    },
+    {
+      "start": 809.25,
+      "end": 815.39,
+      "text": "try their best to personalize the experiences for them. This is also backed by our industry partner"
+    },
+    {
+      "start": 815.39,
+      "end": 819.87,
+      "text": "where they said that for the first-time guests, there's actually only a single-digit retention"
+    },
+    {
+      "start": 819.87,
+      "end": 825.15,
+      "text": "rate for them. So with all these, we come to our design statement which is how might we actually"
+    },
+    {
+      "start": 825.15,
+      "end": 830.27,
+      "text": "enable luxury hotel staff to capture, share, and access relevant guest information seamlessly"
+    },
+    {
+      "start": 830.27,
+      "end": 834.59,
+      "text": "so that they can deliver consistent, personalised, high-quality service.",
+      "asr_text": "so that they can deliver consistent, personalised, high-quality activities."
+    },
+    {
+      "start": 838.56,
+      "end": 841.52,
+      "text": "As mentioned before, we are going to capture information,"
+    },
+    {
+      "start": 841.52,
+      "end": 844.88,
+      "text": "enter information, retrieve information, and display the information."
+    },
+    {
+      "start": 845.52,
+      "end": 849.28,
+      "text": "We have categorised these needs into two main functions,"
+    },
+    {
+      "start": 849.28,
+      "end": 851.2,
+      "text": "capture plus process, and display.",
+      "asr_text": "capture past process and display."
+    },
+    {
+      "start": 851.97,
+      "end": 855.73,
+      "text": "For capture and process, you will be able to capture preferences and complaints of the guest,",
+      "asr_text": "For capturing the process, you will be able to capture preferences and complaints of the guest,"
+    },
+    {
+      "start": 856.45,
+      "end": 858.85,
+      "text": "associate the interaction with the guest,"
+    },
+    {
+      "start": 858.85,
+      "end": 861.25,
+      "text": "and also process and store information for easy lookup.",
+      "asr_text": "and also process and start information for easy lookup."
+    },
+    {
+      "start": 861.25,
+      "end": 868.35,
+      "text": "For display, you will be able to select information for the current service task based on context"
+    },
+    {
+      "start": 868.35,
+      "end": 874.27,
+      "text": "and also display concise visuals so that the staff will be able to see important information"
+    },
+    {
+      "start": 874.27,
+      "end": 878.4,
+      "text": "quickly."
+    },
+    {
+      "start": 878.4,
+      "end": 888.07,
+      "text": "So as mentioned before, we want to capture, display, and also retrieve without much disruption"
+    },
+    {
+      "start": 888.07,
+      "end": 893.29,
+      "text": "of the natural conversation between the staff and the customer."
+    },
+    {
+      "start": 893.29,
+      "end": 898.05,
+      "text": "So through this, from the two functions, we have [unclear] into two more criteria.",
+      "asr_text": "So through this, from the two functions, we have one shot into two more criteria.",
+      "uncertain": true
+    },
+    {
+      "start": 898.05,
+      "end": 902.77,
+      "text": "So on-time service support and glanceable interaction allow staff to retrieve data quickly",
+      "asr_text": "So on-time service support and gun support interaction allow staff to retrieve data quickly"
+    },
+    {
+      "start": 902.77,
+      "end": 910.56,
+      "text": "and also see data quickly so as to not disrupt the conversation and have a good service.",
+      "asr_text": "and also see data quickly so as to not disrupt the accommodation and have a good service."
+    },
+    {
+      "start": 910.56,
+      "end": 915.96,
+      "text": "Low effort capture addresses the need of capturing information and entering information easily"
+    },
+    {
+      "start": 915.96,
+      "end": 918.26,
+      "text": "and it's not as difficult as before."
+    },
+    {
+      "start": 918.26,
+      "end": 922.7,
+      "text": "And preference continuity allows staff to pass information from staff to staff so that"
+    },
+    {
+      "start": 922.7,
+      "end": 926.7,
+      "text": "there are more consistent loads and better standardized input."
+    },
+    {
+      "start": 926.7,
+      "end": 933.01,
+      "text": "We also link these criteria into some of the LQA service standards,",
+      "asr_text": "We also link these criteria into some of the LCA service standards,"
+    },
+    {
+      "start": 933.01,
+      "end": 939.01,
+      "text": "such as timely support, natural conversation, active listening, and personalized service."
+    },
+    {
+      "start": 939.01,
+      "end": 946.27,
+      "text": "How are we going to measure this is to have time taken for each of the criteria,"
+    },
+    {
+      "start": 946.27,
+      "end": 951.27,
+      "text": "such as below one second for the first visible cue,",
+      "asr_text": "such as below one second for the first visible queue,"
+    },
+    {
+      "start": 951.27,
+      "end": 958.52,
+      "text": "how long the staff needs to see the information, how many times the attention shifts, time"
+    },
+    {
+      "start": 958.52,
+      "end": 962.52,
+      "text": "capturing information, and whether the correct preference reaches the next staff."
+    },
+    {
+      "start": 962.52,
+      "end": 971.44,
+      "text": "We also compare the different ways to achieve these criteria, such as the current workflow,"
+    },
+    {
+      "start": 971.44,
+      "end": 974.44,
+      "text": "smart glasses, or even audio badge and earpiece.",
+      "asr_text": "smart grasser, or even audio batch and earpiece."
+    },
+    {
+      "start": 974.44,
+      "end": 979.44,
+      "text": "As you can see, for the current workflow, it is very manual as staff need to",
+      "asr_text": "As you can see, for the current workflow, it's very manual as staff need to remember"
+    },
+    {
+      "start": 979.44,
+      "end": 984.83,
+      "text": "remember the customer, and also type all the information manually into the database.",
+      "asr_text": "member the customer, and also type all the information manually into the database."
+    },
+    {
+      "start": 984.83,
+      "end": 989.23,
+      "text": "In comparison, if you use an audio badge and earpiece, the information of the guest can",
+      "asr_text": "In comparison, if you use any alone webs and their face, the information of the guest can"
+    },
+    {
+      "start": 989.23,
+      "end": 993.83,
+      "text": "be recorded automatically, but the staff still need to recognize the guest to be able to"
+    },
+    {
+      "start": 993.83,
+      "end": 997.92,
+      "text": "link the information and the guest's information."
+    },
+    {
+      "start": 997.92,
+      "end": 1001.92,
+      "text": "In the best case, which is your smart glasses, you can use computer vision to identify",
+      "asr_text": "In the best case, which is your smart glasses, you can use the computer region to identify"
+    },
+    {
+      "start": 1001.92,
+      "end": 1007.3,
+      "text": "the guest, use the glasses display to have a concise cue [last word unclear], so that",
+      "asr_text": "the guest, use the glasses display to have a considerable queue map so that the staff",
+      "uncertain": true
+    },
+    {
+      "start": 1007.3,
+      "end": 1015.17,
+      "text": "the staff will be able to see the guest information easily, hands-free audio capture and also record",
+      "asr_text": "the staff will be able to see the guest information easily, hence free audio capture and also recorded"
+    },
+    {
+      "start": 1015.17,
+      "end": 1022.45,
+      "text": "information with a standardised format easily. So this will be our proposed current staff journey.",
+      "asr_text": "information with a standardized format easily. So this will be our proposed current self journey."
+    },
+    {
+      "start": 1022.45,
+      "end": 1028.02,
+      "text": "When I see the customer, for example if I'm the staff, I will start capturing [unclear]. The",
+      "asr_text": "When I see the customer, for example if I'm myself, I'll start capturing very poor. The",
+      "uncertain": true
+    },
+    {
+      "start": 1028.02,
+      "end": 1034.1,
+      "text": "glasses will retrieve the profile and show any relevant customer information such as allergy",
+      "asr_text": "customers will retrieve profile and show any relevant customer information such as allergy"
+    },
+    {
+      "start": 1034.1,
+      "end": 1039.9,
+      "text": "and Preference. If guests have a Preference and Allergy, the standardized approach is"
+    },
+    {
+      "start": 1039.9,
+      "end": 1044.58,
+      "text": "to greet the guests, offer preference to guests, and also offer alternatives for food allergies."
+    },
+    {
+      "start": 1044.58,
+      "end": 1049.54,
+      "text": "Else, they can do otherwise. And on this conversation, it's recorded, processed, and locked for"
+    },
+    {
+      "start": 1049.54,
+      "end": 1057.56,
+      "text": "further training. And also, it will be LQA-benchmarked. Next, we also have a short video demonstration",
+      "asr_text": "further training. And also, it will be OK benchmarked. Next, we also have a short video demonstration"
+    },
+    {
+      "start": 1057.56,
+      "end": 1078.31,
+      "text": "of how the proposed solution would work. As you can see, the staff will be able to see"
+    },
+    {
+      "start": 1078.31,
+      "end": 1083.63,
+      "text": "the guest information, name, preferences, allergies, also offer accordingly."
+    },
+    {
+      "start": 1083.63,
+      "end": 1085.63,
+      "text": "And all this information is tracked.",
+      "asr_text": "And all this information detract."
+    },
+    {
+      "start": 1085.63,
+      "end": 1090.59,
+      "text": "Next, I will pass to Ping Hui, who will talk about [unclear].",
+      "asr_text": "Next, I'll pass to Ping Hei, which will talk about over the tab.",
+      "uncertain": true
+    },
+    {
+      "start": 1090.59,
+      "end": 1095.59,
+      "text": "Okay, so having seen how guests and staff interact with the smart glasses,"
+    },
+    {
+      "start": 1095.59,
+      "end": 1098.59,
+      "text": "now I will be talking about how we are going to implement it."
+    },
+    {
+      "start": 1098.59,
+      "end": 1103.59,
+      "text": "So for the Capture Pipeline, we will have the smart glasses capture and record interaction with guests."
+    },
+    {
+      "start": 1103.59,
+      "end": 1107.59,
+      "text": "Then this information will be processed to extract relevant insights"
+    },
+    {
+      "start": 1107.59,
+      "end": 1114.09,
+      "text": "and it will be associated with guests through facial recognition and this data will be recorded in the database."
+    },
+    {
+      "start": 1114.09,
+      "end": 1122.31,
+      "text": "So our first iteration involves changing the processing from continuous to temple-touch activation.",
+      "asr_text": "So our first iteration involves changing the processing from continuous to a temperature deviation."
+    },
+    {
+      "start": 1122.31,
+      "end": 1124.31,
+      "text": "This is to reduce the battery usage.",
+      "asr_text": "This is to reduce the battery unit."
+    },
+    {
+      "start": 1124.31,
+      "end": 1129.81,
+      "text": "Because our initial design has the smart glasses continuously process and record all frames,"
+    },
+    {
+      "start": 1129.81,
+      "end": 1135.81,
+      "text": "even when the staff are not interacting with any guests, this wasted a lot of power."
+    },
+    {
+      "start": 1135.81,
+      "end": 1144.91,
+      "text": "So now the staff will activate the session by pressing the temple, and it will only stop after 15 seconds of audio silence.",
+      "asr_text": "So now the staff will activate the session by pressing the tempo, and it will only stop after 15 seconds of audio silence."
+    },
+    {
+      "start": 1144.91,
+      "end": 1157.36,
+      "text": "This allows for pauses during conversations, and it prevents the recording to be continuous."
+    },
+    {
+      "start": 1157.36,
+      "end": 1163.36,
+      "text": "And this will cause a reduction in battery drainage by around 67%."
+    },
+    {
+      "start": 1163.36,
+      "end": 1170.86,
+      "text": "Then our next iteration involves changing the processing from local to server."
+    },
+    {
+      "start": 1170.86,
+      "end": 1176.86,
+      "text": "During our initial testing, we have all the heavy processing done within the glasses itself.",
+      "asr_text": "During our initial testing, we have all the heavy processing done within the cluster itself."
+    },
+    {
+      "start": 1176.86,
+      "end": 1180.86,
+      "text": "And this causes the processing time to be around 1.6 seconds."
+    },
+    {
+      "start": 1180.86,
+      "end": 1188.86,
+      "text": "Thus, we look into the pipeline and we discover that there are a few steps that have processing that is very heavy."
+    },
+    {
+      "start": 1188.86,
+      "end": 1194.86,
+      "text": "So we move all of those steps into the server so that it can be processed faster."
+    },
+    {
+      "start": 1194.86,
+      "end": 1200.36,
+      "text": "This causes a reduction of the processing time to around 1.1 in a second, which corresponds"
+    },
+    {
+      "start": 1200.36,
+      "end": 1203.92,
+      "text": "to around a 30% reduction in processing time."
+    },
+    {
+      "start": 1203.92,
+      "end": 1208.56,
+      "text": "So for preference extraction, we have two approaches that we are diving deep into."
+    },
+    {
+      "start": 1208.56,
+      "end": 1213.5,
+      "text": "So for the first approach, we have audio transcribed by Whisper, and we use the transcription",
+      "asr_text": "So for the first approach, we have audio transcribed by WISPR, and we use the transcription"
+    },
+    {
+      "start": 1213.5,
+      "end": 1217.84,
+      "text": "to do a transcription that will be sent to a model for analysis."
+    },
+    {
+      "start": 1217.84,
+      "end": 1223.84,
+      "text": "So we tested three models, and we found out that Qwen is the best model to extract preferences in",
+      "asr_text": "So we tested three models, and we found out that CRAN is the best model to extract preferences"
+    },
+    {
+      "start": 1223.84,
+      "end": 1234.45,
+      "text": "the least amount of time. However, we found out that it might think questions or complaints"
+    },
+    {
+      "start": 1234.45,
+      "end": 1240.37,
+      "text": "as preferences, which is inaccurate. That is why we need further iterations in our next step,",
+      "asr_text": "as references, which is inaccurate. That's why we need further iterations in our next step,"
+    },
+    {
+      "start": 1240.37,
+      "end": 1246.45,
+      "text": "before incorporating video input, which is for approach to see whether the"
+    },
+    {
+      "start": 1247.01,
+      "end": 1251.33,
+      "text": "higher processing power is being justified by the video input."
+    },
+    {
+      "start": 1251.33,
+      "end": 1263.48,
+      "text": "Then for the display of information, we are looking into the position of where the display"
+    },
+    {
+      "start": 1263.48,
+      "end": 1264.98,
+      "text": "information should be at."
+    },
+    {
+      "start": 1264.98,
+      "end": 1268.66,
+      "text": "Then during our user testing, we found out that having the display information right"
+    },
+    {
+      "start": 1268.66,
+      "end": 1277.68,
+      "text": "inside the guest space is the best because this will reduce the time that the staff will"
+    },
+    {
+      "start": 1277.68,
+      "end": 1281.68,
+      "text": "look away from the guest and is more easily interpreted."
+    },
+    {
+      "start": 1281.68,
+      "end": 1288.1,
+      "text": "To do so, we will have face detection within the glasses itself, which will figure out"
+    },
+    {
+      "start": 1288.1,
+      "end": 1292.1,
+      "text": "the coordinates of the face to display the information right beside the guest."
+    },
+    {
+      "start": 1292.1,
+      "end": 1300.54,
+      "text": "However, if we have too much information about the guest, the long description may get too"
+    },
+    {
+      "start": 1300.54,
+      "end": 1304.54,
+      "text": "long and the staff have to read all these long descriptions while maintaining a conversation"
+    },
+    {
+      "start": 1304.54,
+      "end": 1307.54,
+      "text": "with the guest, which might be very disruptive."
+    },
+    {
+      "start": 1307.54,
+      "end": 1312.54,
+      "text": "That is why we change these long descriptions into icons, so we split these main symbols",
+      "asr_text": "That's why we change these long descriptions into icons, so we speed these main zippers"
+    },
+    {
+      "start": 1312.54,
+      "end": 1315.54,
+      "text": "into categories like food and room type."
+    },
+    {
+      "start": 1315.54,
+      "end": 1318.54,
+      "text": "Then it will be labelled by markers."
+    },
+    {
+      "start": 1318.54,
+      "end": 1320.54,
+      "text": "So a heart shape indicates a preference,"
+    },
+    {
+      "start": 1320.54,
+      "end": 1323.54,
+      "text": "and a warning sign indicates an allergy.",
+      "asr_text": "and a warning sign indicates an energy."
+    },
+    {
+      "start": 1323.54,
+      "end": 1329.69,
+      "text": "This is so that the staff can easily interpret this design."
+    },
+    {
+      "start": 1329.69,
+      "end": 1332.69,
+      "text": "Then for our proposed iteration,"
+    },
+    {
+      "start": 1332.69,
+      "end": 1334.69,
+      "text": "we found out that for returning customers,"
+    },
+    {
+      "start": 1334.69,
+      "end": 1337.69,
+      "text": "they might have a long list of preferences."
+    },
+    {
+      "start": 1337.69,
+      "end": 1340.69,
+      "text": "So displaying them all at once will still be very disruptive."
+    },
+    {
+      "start": 1340.69,
+      "end": 1347.45,
+      "text": "Hence, we propose contextual retrieval of preferences.",
+      "asr_text": "Hence, we propose a contextual receiver of preferences."
+    },
+    {
+      "start": 1347.45,
+      "end": 1352.51,
+      "text": "So what the solution will do is that you will take in the audio transcription of the interaction"
+    },
+    {
+      "start": 1352.51,
+      "end": 1358.09,
+      "text": "and figure out the context of the interaction between guests."
+    },
+    {
+      "start": 1358.09,
+      "end": 1363.47,
+      "text": "So for example, in a restaurant setting, when guests and staff are talking about food,"
+    },
+    {
+      "start": 1363.47,
+      "end": 1367.8,
+      "text": "they will show preferences only on food."
+    },
+    {
+      "start": 1367.8,
+      "end": 1374.06,
+      "text": "And [unclear] the preferences on room type, which will disrupt the staff in the conversations. [Negation unclear in the audio.]",
+      "asr_text": "And we will show the preferences on Moontide, which will disrupt the staff in the conversations.",
+      "uncertain": true
+    },
+    {
+      "start": 1374.06,
+      "end": 1380.31,
+      "text": "So this is a simplified system architecture of our whole solution."
+    },
+    {
+      "start": 1380.31,
+      "end": 1386.31,
+      "text": "The key points are the glasses and the server will be communicating through Wi-Fi, and the",
+      "asr_text": "The key points are the clusters and the server will be communicated through Wi-Fi, and the"
+    },
+    {
+      "start": 1386.31,
+      "end": 1391.31,
+      "text": "guest database will be stored in the server, so it can be actively updated by all staff."
+    },
+    {
+      "start": 1391.31,
+      "end": 1395.31,
+      "text": "And at the same time, they can be retrieved by all staff, so that there is a preference"
+    },
+    {
+      "start": 1395.31,
+      "end": 1398.88,
+      "text": "continuity as stated in our design requirement.",
+      "asr_text": "continuity as stated in our design environment."
+    },
+    {
+      "start": 1398.88,
+      "end": 1404.88,
+      "text": "So we conducted concept walkthrough and product testing with 10 participants."
+    },
+    {
+      "start": 1404.88,
+      "end": 1411.27,
+      "text": "However, they are not actual hotel staff, so it's mainly for usability testing."
+    },
+    {
+      "start": 1411.27,
+      "end": 1414.27,
+      "text": "All of them mentioned that capturing information is easy.",
+      "asr_text": "All of them mentioned that capturing information is busy."
+    },
+    {
+      "start": 1414.27,
+      "end": 1423.59,
+      "text": "However, most participants found that to incorporate these visual cues into the interaction might be a bit challenging."
+    },
+    {
+      "start": 1423.59,
+      "end": 1428.27,
+      "text": "So we have to conduct actual hotel testing"
+    },
+    {
+      "start": 1428.27,
+      "end": 1431.51,
+      "text": "to see whether is it cause of a lack of staff training"
+    },
+    {
+      "start": 1431.51,
+      "end": 1436.16,
+      "text": "or is there any other ways we can improve our process."
+    },
+    {
+      "start": 1436.16,
+      "end": 1439.5,
+      "text": "So we weigh our smart glasses against the design requirement"
+    },
+    {
+      "start": 1439.5,
+      "end": 1441.46,
+      "text": "that [name unclear] had stated earlier.",
+      "asr_text": "that Ray had stated earlier.",
+      "uncertain": true
+    },
+    {
+      "start": 1441.46,
+      "end": 1442.96,
+      "text": "So for on-time service support,"
+    },
+    {
+      "start": 1442.96,
+      "end": 1447.46,
+      "text": "we have to achieve our less than one second service window."
+    },
+    {
+      "start": 1447.46,
+      "end": 1452.04,
+      "text": "However, we only managed to reduce it to 1.18 seconds."
+    },
+    {
+      "start": 1452.04,
+      "end": 1454.62,
+      "text": "However, we believe that this could be improved further,"
+    },
+    {
+      "start": 1454.62,
+      "end": 1456.64,
+      "text": "because now currently all the processing"
+    },
+    {
+      "start": 1456.64,
+      "end": 1458.34,
+      "text": "is being done on my laptop,"
+    },
+    {
+      "start": 1458.34,
+      "end": 1461.06,
+      "text": "which has limited processing power."
+    },
+    {
+      "start": 1461.06,
+      "end": 1462.62,
+      "text": "Then for low-effort capture,",
+      "asr_text": "Then for lower advert capture,"
+    },
+    {
+      "start": 1462.62,
+      "end": 1465.14,
+      "text": "I believe we can all agree that by simply"
+    },
+    {
+      "start": 1465.14,
+      "end": 1468.3,
+      "text": "tapping the temple of the glasses is very easy.",
+      "asr_text": "tapping a sample of the glasses is very easy."
+    },
+    {
+      "start": 1468.3,
+      "end": 1470.8,
+      "text": "Then for glanceable interaction, it is incomplete",
+      "asr_text": "Then for gun server interaction, it's incomplete"
+    },
+    {
+      "start": 1470.8,
+      "end": 1474.48,
+      "text": "because it's still hard for staff"
+    },
+    {
+      "start": 1474.48,
+      "end": 1477.72,
+      "text": "to incorporate these visual cues into conversations,"
+    },
+    {
+      "start": 1477.72,
+      "end": 1481.08,
+      "text": "leading to occasional pauses and attention shifts."
+    },
+    {
+      "start": 1481.08,
+      "end": 1487.48,
+      "text": "And for our preference continuity, the shared database really allows all staff to receive the most updated information.",
+      "asr_text": "And for our preference community, the shared database really allows all staff to receive the most updated information."
+    },
+    {
+      "start": 1488.26,
+      "end": 1491.1,
+      "text": "However, preferences are still not being extracted consistently.",
+      "asr_text": "However, preferences are still not being attracted consistently."
+    },
+    {
+      "start": 1491.68,
+      "end": 1493.68,
+      "text": "So we will look into it in the next semester."
+    },
+    {
+      "start": 1493.98,
+      "end": 1499.22,
+      "text": "The main limitation of our smart glasses is the PDPA concerns."
+    },
+    {
+      "start": 1499.76,
+      "end": 1504.58,
+      "text": "Because it requires data consent for collecting and retaining these preferences data."
+    },
+    {
+      "start": 1504.58,
+      "end": 1515.9,
+      "text": "However, from our survey, most responders are willing to provide this data to have a more personalized service."
+    },
+    {
+      "start": 1515.9,
+      "end": 1523.02,
+      "text": "This is our next step that we should be doing for our next semester."
+    },
+    {
+      "start": 1523.02,
+      "end": 1529.02,
+      "text": "Key points such as preference extraction and contextual retrieval of preferences that I mentioned earlier.",
+      "asr_text": "Key points such as having preference attraction and contextual retrieval or preferences that I mentioned earlier."
+    },
+    {
+      "start": 1529.02,
+      "end": 1535.26,
+      "text": "Then we will also conduct actual hotel staff usability pilot testing to identify is there a need",
+      "asr_text": "Then we also contact actual hotel staff usability pilot testing to identify is there a need"
+    },
+    {
+      "start": 1535.26,
+      "end": 1540.02,
+      "text": "for staff training to incorporate these visual cues into conversations naturally."
+    },
+    {
+      "start": 1540.02,
+      "end": 1549.02,
+      "text": "We might also have cues for staff to ask guiding questions to capture more preferences data."
+    },
+    {
+      "start": 1549.02,
+      "end": 1555.02,
+      "text": "Then lastly, we will implement LQA scoring for each staff to ensure that they adhere"
+    },
+    {
+      "start": 1555.02,
+      "end": 1558.64,
+      "text": "to service standards during their interaction with guests."
+    },
+    {
+      "start": 1559.37,
+      "end": 1561.37,
+      "text": "So now we'll move on to the demo."
+    },
+    {
+      "start": 1561.37,
+      "end": 1580.11,
+      "text": "[Brief demo setup speech unclear.]",
+      "asr_text": "This tool.",
+      "uncertain": true
+    },
+    {
+      "start": 1580.11,
+      "end": 1583.36,
+      "text": "We'll make sure it's connected."
+    },
+    {
+      "start": 1583.36,
+      "end": 1602.36,
+      "text": "Move this up, right?"
+    },
+    {
+      "start": 1602.36,
+      "end": 1604.39,
+      "text": "It's connected already ah?"
+    },
+    {
+      "start": 1604.39,
+      "end": 1606.39,
+      "text": "It should be connected already ah."
+    },
+    {
+      "start": 1606.39,
+      "end": 1615.2,
+      "text": "Move it up."
+    },
+    {
+      "start": 1615.2,
+      "end": 1622.83,
+      "text": "Move it up."
+    },
+    {
+      "start": 1622.83,
+      "end": 1624.83,
+      "text": "[Brief demo setup speech unclear.]",
+      "asr_text": "I can't wait to stop.",
+      "uncertain": true
+    },
+    {
+      "start": 1624.83,
+      "end": 1631.39,
+      "text": "So the glasses output is shared on the screen"
+    },
+    {
+      "start": 1631.39,
+      "end": 1649.14,
+      "text": "and you're using an Android emulator to show it."
+    },
+    {
+      "start": 1649.14,
+      "end": 1659.25,
+      "text": "So when Ping Hui looks at me in the eye, he will capture my face and then show a preference",
+      "asr_text": "So when Tingfei looks at me in the eye, you'll capture my face and then show a preference"
+    },
+    {
+      "start": 1659.25,
+      "end": 1662.04,
+      "text": "beside my face."
+    },
+    {
+      "start": 1662.04,
+      "end": 1664.72,
+      "text": "And this is limited within the [field of view; wording unclear].",
+      "asr_text": "And this is limited within the...",
+      "uncertain": true
+    },
+    {
+      "start": 1664.72,
+      "end": 1669.36,
+      "text": "Yeah, you can try it and take a look. [Partly unclear.]",
+      "asr_text": "Yeah, I tell you, you can try it and like take a moment.",
+      "uncertain": true
+    },
+    {
+      "start": 1669.36,
+      "end": 1673.52,
+      "text": "[Demo discussion about position or focal distance; words unclear.]",
+      "asr_text": "Or you need your professor's course, your focal line is better.",
+      "uncertain": true
+    },
+    {
+      "start": 1673.52,
+      "end": 1674.52,
+      "text": "That's it."
+    },
+    {
+      "start": 1674.52,
+      "end": 1675.52,
+      "text": "Okay."
+    },
+    {
+      "start": 1675.52,
+      "end": 1676.96,
+      "text": "[Brief demo discussion unclear.]",
+      "asr_text": "Start and create a table.",
+      "uncertain": true
+    },
+    {
+      "start": 1676.96,
+      "end": 1680.4,
+      "text": "[Brief demo discussion unclear.]",
+      "asr_text": "Start and create a table.",
+      "uncertain": true
+    },
+    {
+      "start": 1680.4,
+      "end": 1681.4,
+      "text": "Nice."
+    },
+    {
+      "start": 1681.4,
+      "end": 1682.4,
+      "text": "I think you touched the side."
+    },
+    {
+      "start": 1682.4,
+      "end": 1689.81,
+      "text": "[First phrase unclear.] You need to look already.",
+      "asr_text": "recording and captioning. You need to look already.",
+      "uncertain": true
+    },
+    {
+      "start": 1689.81,
+      "end": 1695.81,
+      "text": "You can see the name and the icon, looking around.",
+      "asr_text": "You can see the name and the type on, looking around."
+    },
+    {
+      "start": 1695.81,
+      "end": 1699.81,
+      "text": "You must look up. You must maintain eye contact."
+    },
+    {
+      "start": 1699.81,
+      "end": 1705.81,
+      "text": "So if two persons are standing together, only when you are looking at [name unclear].",
+      "asr_text": "You're sure if like two persons standing together, only when you're looking at brain.",
+      "uncertain": true
+    },
+    {
+      "start": 1705.81,
+      "end": 1709.94,
+      "text": "Sorry, sorry, sorry."
+    },
+    {
+      "start": 1709.94,
+      "end": 1712.94,
+      "text": "That's why I'm concerned that you have to keep looking at her."
+    },
+    {
+      "start": 1712.94,
+      "end": 1713.94,
+      "text": "Yeah."
+    },
+    {
+      "start": 1713.94,
+      "end": 1716.2,
+      "text": "You have to maintain eye contact."
+    },
+    {
+      "start": 1716.2,
+      "end": 1717.2,
+      "text": "Yeah."
+    },
+    {
+      "start": 1717.2,
+      "end": 1718.2,
+      "text": "It's only when you maintain eye contact."
+    },
+    {
+      "start": 1718.2,
+      "end": 1719.2,
+      "text": "[Short phrase unclear.]",
+      "asr_text": "That's when you speak now.",
+      "uncertain": true
+    },
+    {
+      "start": 1719.2,
+      "end": 1720.2,
+      "text": "Yeah."
+    },
+    {
+      "start": 1720.2,
+      "end": 1721.2,
+      "text": "Yeah."
+    },
+    {
+      "start": 1721.2,
+      "end": 1722.2,
+      "text": "Yeah."
+    },
+    {
+      "start": 1722.2,
+      "end": 1728.01,
+      "text": "It is only who you are looking at, then you [rest unclear].",
+      "asr_text": "It's only who you are looking at then you are.",
+      "uncertain": true
+    },
+    {
+      "start": 1728.01,
+      "end": 1729.01,
+      "text": "Yeah."
+    },
+    {
+      "start": 1729.01,
+      "end": 1730.04,
+      "text": "Okay."
+    },
+    {
+      "start": 1730.04,
+      "end": 1731.04,
+      "text": "Yeah."
+    },
+    {
+      "start": 1731.04,
+      "end": 1732.04,
+      "text": "That's all for our presentation."
+    },
+    {
+      "start": 1732.04,
+      "end": 1734.97,
+      "text": "Open to Q&A now."
+    },
+    {
+      "start": 1734.97,
+      "end": 1735.97,
+      "text": "[Brief response unclear.]",
+      "asr_text": "One.",
+      "uncertain": true
+    },
+    {
+      "start": 1735.97,
+      "end": 1738.83,
+      "text": "[Brief response unclear.]",
+      "asr_text": "One.",
+      "uncertain": true
+    },
+    {
+      "start": 1738.83,
+      "end": 1739.83,
+      "text": "Yeah."
+    },
+    {
+      "start": 1739.83,
+      "end": 1743.36,
+      "text": "Just open to Q&A."
+    },
+    {
+      "start": 1743.36,
+      "end": 1757.42,
+      "text": "Basically, the team looks at [unclear]. The business is challenged, right? So like the earlier team said— [Recording ends mid-sentence.]",
+      "asr_text": "Basically, the team looks at, the fact would be that the business is challenged, so like the earlier team said,",
+      "uncertain": true
+    }
+  ]
+}
