@@ -89,7 +89,7 @@ def build_report():
 <div><span class="big">28 → 9</span><span class="label">Battery drop, percentage points</span><small>Team-confirmed 20-minute comparison.<br>Battery gauge depletion, not measured power.</small></div>
 </div>'''
     (HERE / 'index.html').write_text(frame(TITLE, nav, hero, rendered), encoding='utf-8')
-    print(f'Report built: approximately {count:,} main-body words.')
+    print(f'Report built: approximately {count:,} words before appendices, including references.')
 
 
 def build_transcript():

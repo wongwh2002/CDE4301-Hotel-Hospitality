@@ -2,7 +2,15 @@
 
 Open [index.html](index.html) for the report or [transcript.html](transcript.html) for the searchable presentation transcript.
 
-The report was prepared on 10 November 2026 from the 5 November presentation, supplied slides and recording, repository implementation and benchmark records, project research, hotel-visit notes, and the team's clarifications about contributions and the battery test. It contains approximately 4,167 words in the main body, within the 6,000-word limit for a four-person group. References and appendices follow the main report.
+The report was prepared on 10 November 2026 from the 5 November presentation, supplied slides and recording, repository implementation and benchmark records, project research, hotel-visit notes, and the team's clarifications about contributions and the battery test. It contains approximately 5,998 words before the appendices, including references, within the 6,000-word limit for a four-person group.
+
+Chapter 4 introduces the solution's models, database setup, operating assumptions, and intended staff journey, then illustrates each activation, processing, display, and contextual-retrieval iteration before presenting the full architecture. The journey includes updating the shared preference database as a normal solution step; implementation readiness is assessed separately. Chapter 5 covers user validation, the requirements/system check, limitations and guest acceptance, and next steps. Both chapters stand independently of the presentation. Current testing is framed as problem finding and prototyping, with hotel-staff and broader system validation planned for the next stage.
+
+Pipeline SVGs redraw the presentation's capture, server allocation, display, and contextual-retrieval flows. The three before/after comparisons use unchanged generated images from `rokid/output/slide-20-ui/screenshots`, copied into `assets/ui/` for Pages. These illustrate UI choices, not measured device performance. The report's full architecture figure uses a general local-detector label; the original architecture assets remain unchanged.
+
+Section 4.2 groups capture activation, selective offloading, and independent preference extraction as Sections 4.2.1–4.2.3, using measured battery, timing, and extraction results. Section 4.3 groups display positioning, icons, and contextual retrieval as Sections 4.3.1–4.3.3, guided by user feedback. Section 4.4 presents the complete architecture. Qwen is the provisional preference-extraction choice based on guest facts and runtime, rather than staff assessment labels.
+
+The complete icon figure is copied unchanged from `rokid/output/guest-preferences/icon-reference.svg` and its PNG. The team-supplied extraction testing image is transcribed in `evidence/preference-extraction-test-summary.md`; it is a reported-results summary, not raw experiment logs.
 
 ## Files
 
@@ -15,7 +23,7 @@ The report was prepared on 10 November 2026 from the 5 November presentation, su
 | `Recording.vtt` | English caption track using the speech model's approximate segment boundaries |
 | `Recording.transcript.json` | Transcript source, segment times, source fingerprint, and original ASR wording for edited segments |
 | `Slides.pdf` / `Recording.mp4` | Original supplied materials, unchanged |
-| `assets/` | Local styling, JavaScript, architecture figure, and reused prototype icons |
+| `assets/` | Local styling, JavaScript, architecture and pipeline diagrams, generated UI comparisons, and prototype icons |
 | `build.py` | Optional rebuild helper; the published site does not run Python |
 | `preview.py` | Local preview server with byte-range support for video seeking |
 
@@ -46,7 +54,7 @@ python -m pip install -r docs/interim/requirements.txt
 python docs/interim/build.py
 ```
 
-The source marker `<!-- APPENDICES -->` defines the end of the main body for the approximate word count. Do not edit only the generated HTML if the change needs to survive a rebuild.
+The source marker `<!-- APPENDICES -->` defines the start of the appendices for the approximate word count; references are included in that count. Do not edit only the generated HTML if the change needs to survive a rebuild.
 
 ## Presentation references
 
