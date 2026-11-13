@@ -2,7 +2,7 @@
 
 Open [index.html](index.html) for the report or [transcript.html](transcript.html) for the searchable presentation transcript.
 
-The report was prepared on 10 November 2026 and revised on 13 November to integrate the speaker script for slides 22–25, clarify the first-time guest continuity target and timing criteria, strengthen the phone/PMS–audio–glasses comparison, and detail the proposed staff journey. It contains approximately 5,989 words before appendices, including references, within the 6,000-word limit for a four-person group.
+The report was prepared on 10 November 2026 and revised on 14 November to expand the functional requirements and first-time guest handover, compare phone/PMS, audio, camera-free glasses, and vision-assisted glasses row by row, and clarify the proposed staff journey and evaluation measures. It contains approximately 5,821 words before appendices, including references, within the 6,000-word limit for a four-person group.
 
 Chapter 4 introduces the solution's models, database setup, operating assumptions, and intended staff journey, then illustrates each activation, processing, display, and contextual-retrieval iteration before presenting the full architecture. The journey includes updating the shared preference database as a normal solution step; implementation readiness is assessed separately. Chapter 5 covers user validation, the requirements/system check, limitations and guest acceptance, and next steps. Both chapters stand independently of the presentation. Current testing is framed as problem finding and prototyping, with hotel-staff and broader system validation planned for the next stage.
 

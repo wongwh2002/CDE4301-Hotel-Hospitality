@@ -80,7 +80,7 @@ def build_report():
 <p class="eyebrow">Hotel & hospitality · Team IS-432</p>
 <h1>{TITLE}</h1>
 <p class="standfirst">Helping hotel staff carry useful guest knowledge from one encounter to the next. A Semester 1 investigation into capture, recognition, and concise cues.</p>
-<p class="byline">Neha Rajan · Tan Ping Hui · Wong Weng Hong · Nigel Yeo Tong Wei<br>Interim presentation: 5 November 2026 &nbsp; / &nbsp; Report prepared: 10 November 2026 &nbsp; / &nbsp; Revised: 13 November 2026<br>Approximately {count:,} words in the main report · Four-person group limit: 6,000 words excluding appendices</p>
+<p class="byline">Neha Rajan · Tan Ping Hui · Wong Weng Hong · Nigel Yeo Tong Wei<br>Interim presentation: 5 November 2026 &nbsp; / &nbsp; Report prepared: 10 November 2026 &nbsp; / &nbsp; Revised: 14 November 2026<br>Approximately {count:,} words in the main report · Four-person group limit: 6,000 words excluding appendices</p>
 <div class="hero-links"><a class="button primary" href="#executive-summary">Read the report ↓</a><a class="button" href="transcript.html">Read the transcript</a><a class="button" href="Slides.pdf">View the slides ↗</a></div>
 </header>
 <div class="overview" aria-label="Interim evidence at a glance">
