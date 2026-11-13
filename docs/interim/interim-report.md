@@ -17,34 +17,6 @@ Four documented successful warm rendering samples averaged **1.18 seconds** from
 
 ## 1. Context, evidence, and design opportunity {#context}
 
-### 1.1 From hotel performance to an actionable service problem
-
-The presentation begins with a hotel-management concern: preserving service quality while manpower and operating costs rise. Revenue per available room, RevPAR, equals average daily rate multiplied by occupancy expressed as a fraction. Personalised service might influence guest evaluations and future choices, but many other factors affect those financial measures. Neither a working wearable nor a positive usability response demonstrates increased RevPAR. The present project therefore measures the nearer outcomes it can influence: accurate information, timely retrieval, and an appropriate service action. [P1](#p1)
-
-Here, **personalisation** means using relevant, permitted knowledge about an individual guest to adapt an interaction or service. Recognition, context access, service adaptation, and the guest's perception of fit are separate steps. Lei et al.'s three-study investigation shows that a hotel's personalisation attempt need not be perceived as personal by its recipient. This distinction makes cue comprehension and relevance necessary evaluation outcomes alongside technical performance. [R1](#r1)
-
-Medallia's study of 1,749 U.S. hotel guests found a relationship between perceived personalisation and satisfaction, with opportunities to improve ordinary interactions during a stay. Its findings are survey associations from a vendor-produced report. Piccoli, Lui, and Grün's observational hotel study also connects structured preference capture with service/value evaluations and booking-channel behaviour. These sources justify investigating continuity of guest knowledge; they do not prove that glasses cause loyalty or profit. [R2](#r2), [R3](#r3)
-
-### 1.2 What the fieldwork establishes
-
-The team investigated hotel operations through visits and stakeholder discussions. Two documented cases are particularly useful. They describe different properties and should retain that distinction. [P2](#p2)
-
-| Setting and evidence | Relevant observation | Design implication |
-|---|---|---|
-| Novotel Singapore on Stevens; formatted visit notes | ACDC guest profiles, pre-arrival review, role-dependent access, and memory or hardcopy aids in F&B service were described. | Test whether relevant context can be retrieved during an encounter with less searching. ACDC belongs to this Accor example. |
-| PARKROYAL; visit summary and later discussion transcript | Interest in lounge guest recognition; guest information already entered into a PMS; some notes surfaced through the breakfast system, with reports as a fallback. | Build on existing information flows. Investigate where visibility, confirmation, or action still breaks down. |
-| Interim presentation and walkthrough | The team described delayed manual entry, inconsistent interpretation, and difficulty referring to notes during conversation. | Treat timely capture and natural interaction as requirements, then measure them in the target workflow. |
-
-PARKROYAL's existing PMS-to-breakfast flow is significant: the problem is more specific than an absence of guest data. The notes are qualitative evidence, not a measured incidence of missed preferences. Unclear system names and numerical claims in the noisy visit transcript require confirmation before becoming specifications.
-
-First-time guests motivate the same-stay focus because little historical interaction data may exist. They can nevertheless supply booking details, pre-arrival preferences, requests, and conversational context. The design opportunity is to make that emerging knowledge useful during the current stay. The presentation's single-digit retention statement is stakeholder-reported; no cohort definition or retention dataset is available for analysis. [P1](#p1), [P2](#p2)
-
-### 1.3 The service opportunity
-
-Suppose a guest says they usually drink coffee with oat milk. A later server can offer it and confirm today's choice. Past orders do not automatically establish permanent preferences; a complaint about sweetness applies to that drink, not every future beverage.
-
-The lounge offers a bounded place to study repeated food-and-drink encounters and staff handovers. The project records permission to use PARKROYAL's lounge as a POC setting; the conditions for staff participation, live guest data, and biometric testing still need to be established. [P2](#p2), [P6](#p6)
-
 # Guest-Information Workflow and Design Problem
 
 ## Evidence and scope
