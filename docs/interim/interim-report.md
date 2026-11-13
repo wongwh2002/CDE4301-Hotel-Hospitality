@@ -67,7 +67,28 @@ The presentation uses a guest's coffee order and preferred room settings as exam
 
 **Capture and continuity.** Staff may defer database entry until their workload allows it. By then, a detail may be forgotten or recalled inaccurately. Individual staff members can also interpret and phrase the same preference differently, making the record difficult for others to use. A guest interaction therefore needs to become a clear, shareable record promptly enough to inform the next relevant staff member.
 
-[Insert Figure 1: Cause-and-effect map linking observed workflow gaps to service consequences and design needs]
+```mermaid
+flowchart LR
+    A1["Guest recognition is difficult;<br/>information is hard to find or filter"]
+    A2["Staff may miss the correct profile<br/>or a relevant preference"]
+    A3["Staff need to identify the guest<br/>and locate pertinent details quickly"]
+    A4["Recognition and fast<br/>information retrieval"]
+    A1 --> A2 --> A3 --> A4
+
+    B1["Notes are hard to consult during conversation;<br/>staff must also learn new preferences"]
+    B2["Looking up details can interrupt eye contact<br/>and the flow of service"]
+    B3["Staff need access to information<br/>without disrupting the interaction"]
+    B4["Easy referencing while<br/>maintaining professionalism"]
+    B1 --> B2 --> B3 --> B4
+
+    C1["Busy staff delay updates;<br/>each person records details differently"]
+    C2["Guest information may be lost,<br/>inaccurate or inconsistent"]
+    C3["Updates need to be quick and<br/>recorded in a consistent format"]
+    C4["Easy data input and reliable processing<br/>into useful, standardised information"]
+    C1 --> C2 --> C3 --> C4
+```
+
+*Figure 1. Derivation of design needs from observed guest-information workflow gaps.*
 
 Figure 1 sets out the reasoning behind these needs. Its intermediate links are the team's interpretation of the case-study workflow: recognition difficulties can lead to missed preferences; intrusive lookup can disrupt service; and delayed, inconsistent entry can weaken a shared profile. The figure is a design synthesis, not a claim that these consequences have been measured in every hotel. P&C Global's industry commentary similarly argues that the relevant differentiator is “data accessibility at the moment of service” ([P&C Global, n.d.](pandcglobal.com/research-insights/hyper-personalization-in-luxury-hospitality-the-new-standard/)). The team's synthesis also emphasises making information learned at that moment accessible for later service.
 
