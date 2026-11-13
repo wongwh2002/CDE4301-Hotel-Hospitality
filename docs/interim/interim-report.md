@@ -41,7 +41,7 @@ First-time guests motivate the same-stay focus because little historical interac
 
 ### 1.3 The service opportunity
 
-An illustrative case is a guest telling one employee that they usually drink coffee with oat milk. A later server can offer that option and confirm whether the guest wants it now. Remembering the statement supports continuity; automatically treating every past order as a permanent preference would undermine it. A complaint that a drink is too sweet is also time-specific evidence, rather than permission to infer every future beverage choice.
+Suppose a guest says they usually drink coffee with oat milk. A later server can offer it and confirm today's choice. Past orders do not automatically establish permanent preferences; a complaint about sweetness applies to that drink, not every future beverage.
 
 The lounge offers a bounded place to study repeated food-and-drink encounters and staff handovers. The project records permission to use PARKROYAL's lounge as a POC setting; the conditions for staff participation, live guest data, and biometric testing still need to be established. [P2](#p2), [P6](#p6)
 
@@ -58,7 +58,7 @@ The design question is:
 
 > How might we enable luxury-hotel staff to capture, share, and access relevant guest information seamlessly, so they can deliver consistently personalised, high-quality service?
 
-The Semester 1 objective is to establish a viable technical and interaction foundation for that workflow. The first scope comprises a lounge encounter, a small enrolled gallery, demo profiles, concise cues, and a manually triggered session. It includes recognition-and-retrieval prototyping and exploratory preference extraction. It excludes validated production PMS integration, autonomous allergy decisions, proven guest-experience improvements, and commercial deployment. [P1](#p1)
+First-time guests may have little prior history, although booking or pre-arrival details may exist. The target is same-stay continuity: capture an explicit preference early, verify its guest/stay link, and make the checked detail available to the next employee at a relevant service moment. Semester 1 builds the technical and interaction foundation for that handover. Initial scope covers a lounge encounter, a small enrolled gallery, demo profiles, concise cues, and manual activation. It includes recognition/retrieval prototyping and exploratory preference extraction. Production PMS integration, autonomous allergy decisions, proven service outcomes, and commercial deployment remain out of scope. [P1](#p1)
 
 LQA provides useful service behaviours against which to frame requirements, including anticipatory service, natural communication, discreet name use, and reconfirmation of dietary needs. The repository contains a selected 15-item F&B table. It is a departmental subset with reviewer evidence requirements, rather than a complete audit or a new official LQA score. LQA benchmarking should also be distinguished from hotel star classification. [P8](#p8), [R4](#r4)
 
@@ -75,15 +75,16 @@ The sub-second latency target is a team engineering aspiration, not a timing rul
 
 ## 3. Concept generation and selection {#concepts}
 
-The team's functional exploration separates capture and processing from retrieval and display. It considers how to associate a conversation with a guest, convert it into a useful record, and deliver relevant context to the next employee. Three complete concepts were compared qualitatively; measured preference for the complete glasses workflow has not yet been established. [P1](#p1)
+Concept comparison uses the same first-stay scenario: one guest shares a preference early in the stay and another employee needs it later. The three workflows are compared qualitatively; no measured winner has been established. [P1](#p1)
 
-| Concept | Capture and guest association | Retrieval during service | Principal trade-off |
+| Criterion | Phone/PMS | Audio badge + earpiece | Vision-assisted smart glasses |
 |---|---|---|---|
-| Manual/shared profile plus phone | Staff select the guest and type a note. | Open the profile and select relevant details. | Uses familiar infrastructure and avoids face matching; effort and attention costs depend on the actual workflow. |
-| Audio badge plus earpiece | Speech can reduce typing; staff still need a reliable guest association. | Brief spoken prompts. | Hands-free presentation, but transient audio can interrupt conversation or expose information audibly. |
-| Camera/display smart glasses plus server | Local tracking and server recognition associate a visible guest; extraction is a separate development task. | Compact visual cues beside the selected face. | Promising access while hands are occupied; introduces recognition, display, battery, privacy, and network constraints. |
+| Capture and guest link | Staff selects guest/stay and types a note. | Push-to-talk captures speech; staff selects guest/stay in a companion interface. | Camera proposes a match from the loaded gallery; active-stay cohort is separate. |
+| Retrieval cue | Open and scan the guest profile on a phone. | Receive a short earpiece prompt; audibility and comfort need testing. | View a concise cue beside the selected face; interruption needs testing. |
+| Effort and information handling | Familiar workflow, but requires screen navigation. | No camera, but speech capture, attribution and audibility need review. | Hands-free visual association, with added face-data, battery and display constraints. |
+| Fallback | Manual profile lookup. | Manual lookup if speech is unclear. | Suppress personal cues for uncertain matches; use manual lookup. |
 
-The glasses concept was selected for prototyping because it combines guest association and a private visual channel within the encounter. This is a reason to test it, rather than proof of superiority. A fair next comparison gives the phone baseline the same current profile and equivalent capture support, avoiding an artificially weak comparator.
+Smart glasses were selected for prototyping because they combine visual guest association with a compact cue during service. This is a direction to test, not proof of superiority. Later testing should give each workflow equivalent guest information and review support, then compare complete workflows.
 
 Existing products establish substantial prior capability. Oracle OPERA Cloud documents profiles containing preferences and images. hotelkit supports guest-request assignment, escalation, and follow-up. SoftServe has demonstrated wearable AR face identification, including VIP recognition. Consequently, face recognition on glasses and shared guest records are not themselves novel. [R5](#r5), [R6](#r6), [R7](#r7)
 
@@ -108,9 +109,9 @@ For example, an employee could offer a known oat-milk preference and confirm tod
 
 <figure>
 <a href="assets/staff-journey.svg" target="_blank" rel="noopener" aria-label="Open the intended staff service journey">
-<img src="assets/staff-journey.svg" alt="Intended service journey: approach the guest, see useful context, adapt the offer, confirm and listen, then Update Preference: Update database shared with all employees." width="1200" height="350">
+<img src="assets/staff-journey.svg" alt="Intended service journey: approach the guest, see context, adapt the offer and confirm today's need; a proposed, reviewed preference update may inform later staff." width="1200" height="350">
 </a>
-<figcaption><strong>Figure 2.</strong> Intended staff journey. Recognition supplies context; personalisation depends on a suitable employee action and confirmation of the guest's current need.</figcaption>
+<figcaption><strong>Figure 2.</strong> Intended staff journey. The preference update and shared handover remain planned; staff confirms today's need.</figcaption>
 </figure>
 
 The iterations address unnecessary activity, processing delay, distracting placement, excessive content, and irrelevant cues. Chapter 5 assesses their combined effect.

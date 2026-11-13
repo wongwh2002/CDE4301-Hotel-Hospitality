@@ -2,7 +2,7 @@
 
 Open [index.html](index.html) for the report or [transcript.html](transcript.html) for the searchable presentation transcript.
 
-The report was prepared on 10 November 2026 from the 5 November presentation, supplied slides and recording, repository implementation and benchmark records, project research, hotel-visit notes, and the team's clarifications about contributions and the battery test. It contains approximately 5,999 words before the appendices, including references, within the 6,000-word limit for a four-person group.
+The report was prepared on 10 November 2026 from the 5 November presentation, supplied slides and recording, repository implementation and benchmark records, project research, hotel-visit notes, and the team's clarifications about contributions and the battery test. It contains approximately 5,981 words before the appendices, including references, within the 6,000-word limit for a four-person group.
 
 Chapter 4 introduces the solution's models, database setup, operating assumptions, and intended staff journey, then illustrates each activation, processing, display, and contextual-retrieval iteration before presenting the full architecture. The journey includes updating the shared preference database as a normal solution step; implementation readiness is assessed separately. Chapter 5 covers user validation, the requirements/system check, limitations and guest acceptance, and next steps. Both chapters stand independently of the presentation. Current testing is framed as problem finding and prototyping, with hotel-staff and broader system validation planned for the next stage.
 
