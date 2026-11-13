@@ -178,23 +178,25 @@ The offloaded mean of **1,350.6 ms still exceeds one second**. Only one CPU lapt
 
 #### 4.2.3 Independent preference-extraction testing {#preference-extraction}
 
-For **DR4, preference continuity**, independent feasibility and accuracy tests isolate interpretation errors before glasses integration. Input is currently text; Whisper/audio capture is not connected. [P13](#p13)
+For **DR4, preference continuity**, extraction is tested separately to check accuracy before glasses integration. Current tests use written transcripts; audio transcription is not connected. [P13](#p13)
 
-Two synthetic, speaker-labelled conversations supply three expected guest facts. The text-only prompt requests category, value, and exact guest quote in schema-constrained JSON. Python checks quotations against guest turns and requires values to appear in them. Outputs remain pending, without guest-record writes. The exploratory M1 Mac comparison evaluates guest-fact matches and processing time. [P1](#p1), [P13](#p13)
+Three local models processed two invented, speaker-labelled conversations containing three expected guest facts. Outputs use a fixed data format (JSON) for category, value, and guest quote; automated checks compare these with the guest's words. Results remain drafts without guest-record changes. The M1 Mac results compare fact matches and runtime. [P1](#p1), [P13](#p13)
 
-| Reported local model | Valid JSON calls | Guest facts matched | Mean time/transcript |
+| Reported local model | Correct JSON format | Guest facts matched | Mean time/transcript |
 |---|---:|---:|---:|
 | `llama3.2:3b` | 2/2 | 1/3 | 76.1 s |
 | `qwen3:4b-instruct` | 2/2 | 2/3 | 67.2 s |
 | `gemma4:e2b` | 2/2 | 2/3 | 86.4 s |
 
-**Qwen is the provisional best model:** it tied Gemma at 2/3 guest facts and was fastest at 67.2 seconds. Three facts cannot establish general accuracy; timing excludes recognition. [P1](#p1), [P13](#p13)
+**Qwen is the provisional best model:** it tied Gemma at 2/3 facts and was fastest at 67.2 seconds. This small test cannot establish general accuracy; timing covers extraction only. [P1](#p1), [P13](#p13)
 
-Valid JSON did not prevent semantic confusion: Gemma treated “too sweet” as a preference and a dessert-safety question as dietary information. These errors motivate improvements **before integration**, including distinguishing complaints from lasting preferences and questions from disclosures. Quote/role checks, category rules, and refusal handling have been added; reviewer-labelled, held-out cases should test negation, corrections, attribution, and repeatability. Evaluate transcription separately when adding audio. [P13](#p13)
+Gemma treated “too sweet” as a preference and a dessert-safety question as dietary information, despite correct formatting. Further tests must distinguish complaints/questions from preferences, check corrections and negative statements, assign facts to the correct speaker, and repeat inputs to assess consistency. [P13](#p13)
+
+After improving text-only extraction, compare it with added video of the same interactions. Measure whether visual information adds enough correct detail to justify the extra processing. Audio transcription should be evaluated separately.
 
 ### 4.3 Display {#display}
 
-Display testing uses user feedback on placement, readability, and relevance (Section 5.1); implementation checks verify rendering and stale-cue suppression. The pipeline identifies the guest, retrieves their record, and returns cues.
+Display testing uses user feedback on placement, readability, and relevance. The pipeline identifies the guest, retrieves their record, and returns cues.
 
 <figure>
 <a href="assets/display-pipeline.svg" target="_blank" rel="noopener"><img src="assets/display-pipeline.svg" alt="Display pipeline: temple touch activates capture on the glasses, the server recognises the guest and retrieves preferences, then returns information for display." width="1200" height="328" loading="lazy"></a>
@@ -205,67 +207,63 @@ Display testing uses user feedback on placement, readability, and relevance (Sec
 
 Initially, cues occupied a fixed display position. User feedback and prototype validation prompted face-relative placement and central guest selection, aiming to reduce looking away from the guest and competing details from several visible faces. These iterations address **DR3, glanceability**. [P1](#p1), [P7](#p7)
 
-Google **ML Kit**, an on-device machine-learning toolkit, detects faces and tracks positions locally; InsightFace identifies the guest. The central **30% of both view axes** defines the selection region, choosing the face nearest its centre. This aims to show preferences for the guest receiving the employee's eye contact, avoiding details for everyone visible. Technically, it uses head direction as a proxy, not measured gaze. Only the latest frame is kept; a padded selected-face crop is sent about every two seconds. Bystanders may remain inside that crop. [P3](#p3), [R11](#r11)
+Google **ML Kit**, an on-device machine-learning toolkit, detects faces and tracks positions locally; InsightFace identifies the guest. The central **30% of both view axes** defines the selection region, choosing the face nearest its centre. This aims to show preferences for the guest receiving the employee's attention, avoiding details for everyone visible. Selection uses where the glasses point; it does not measure eye contact. [P3](#p3), [R11](#r11)
 
-Local tracking updates placement between server responses. Calibration checks boundaries and overlap, suppressing labels without suitable space. Wearer fit and distance still need evaluation.
+Face coordinates also allow cropping before image preparation, removing a 2.2–2.4-second full-frame preparation delay. In an earlier SFace-model test, 14 uploads averaged 200 ms from image-analysis callback to server response. This supports the cropping change for **DR1**; the timing excludes tap handling and display and is separate from the current-model benchmark. [P3](#p3)
 
 <figure>
 <div class="comparison-grid">
 <div><p class="comparison-label">Before · fixed position</p><a href="assets/ui/01-position-before.png" target="_blank" rel="noopener"><img src="assets/ui/01-position-before.png" alt="Generated UI before placement refinement: Ethan Tan's name is at the upper right, away from his face." width="1200" height="1200" loading="lazy"></a></div>
 <div><p class="comparison-label">After · beside the face</p><a href="assets/ui/02-position-after.png" target="_blank" rel="noopener"><img src="assets/ui/02-position-after.png" alt="Generated UI after placement refinement: Ethan Tan's name is beside his face." width="1200" height="1200" loading="lazy"></a></div>
 </div>
-<figcaption><strong>Figure 8.</strong> Generated UI comparison: local tracking brings the cue beside the guest; eye contact is unmeasured. [P12](#p12)</figcaption>
+<figcaption><strong>Figure 8.</strong> Generated UI comparison: local tracking brings the cue beside the guest; eye contact is unmeasured. <a href="#p12">P12</a></figcaption>
 </figure>
-
-**Current identity matters (DR5).** Crossing, sudden movement, or ambiguity clears the association. Responses older than two seconds are rejected, identities expire four seconds after submission, and stalled tracking clears cues within 500 ms. Tests check these safeguards and coordinate mapping, not field error rates. [P11](#p11)
-
-For DR1, cropping before processing removed a 2.2–2.4-second full-frame preparation bottleneck. On 27 October, the earlier SFace configuration averaged 200 ms from analysis callback to parsed response across 14 uploads. This supports that image-path iteration, not current-model or optical-display performance. [P3](#p3)
 
 #### 4.3.2 Replacing descriptions with concise icons {#display-content}
 
-For **DR3**, long descriptions become a name and two compact cues; DR6 requires preferences and safety warnings to remain distinct. [P1](#p1)
+Even beside the guest's face, long descriptions require staff to read while listening. To support **DR3**, the display instead shows a name and up to two icons. **DR6** requires preferences and allergy alerts to remain distinguishable. [P1](#p1)
 
 <figure>
 <div class="comparison-grid">
 <div><p class="comparison-label">Before · written description</p><a href="assets/ui/03-content-before.png" target="_blank" rel="noopener"><img src="assets/ui/03-content-before.png" alt="Generated UI before content refinement: Ethan Tan's name and the words Shellfish allergy." width="1200" height="1200" loading="lazy"></a></div>
 <div><p class="comparison-label">After · compact icon</p><a href="assets/ui/04-content-after.png" target="_blank" rel="noopener"><img src="assets/ui/04-content-after.png" alt="Generated UI after content refinement: the written allergy description becomes a shellfish symbol with a warning marker." width="1200" height="1200" loading="lazy"></a></div>
 </div>
-<figcaption><strong>Figure 9.</strong> Generated UI comparison: text becomes an item-and-warning icon. The allergy is a fictional demo cue. [P12](#p12)</figcaption>
+<figcaption><strong>Figure 9.</strong> Generated UI comparison: text becomes an item-and-warning icon. The allergy is a fictional demo cue. <a href="#p12">P12</a></figcaption>
 </figure>
 
-Item symbols combine with heart, crossed-out-heart, and warning markers for preference, dislike, and fictional allergy, without relying on colour alone. Bundled icons appear beneath the name without extra downloads. [P3](#p3)
+The main icon shows an item, such as coffee; its corner marker means preference (heart), dislike (crossed-out heart), or allergy alert (warning triangle). Icons appear beneath the name and are stored on the glasses, avoiding extra downloads. [P3](#p3)
 
 <figure>
 <a href="assets/icon-reference.svg" target="_blank" rel="noopener"><img src="assets/icon-reference.png" alt="Complete supported icon catalogue: king room, twin room, suite, smoking-allowed room, black coffee, green tea, still water, vegetarian food, shellfish, peanuts, milk, and eggs; separate prefer, dislike, and demo-allergy markers; three combined examples." width="1600" height="1000" loading="lazy"></a>
-<figcaption><strong>Figure 10.</strong> All 12 supported item icons and three independent markers, with combined examples. Allergy assignments are fictional. [P3](#p3)</figcaption>
+<figcaption><strong>Figure 10.</strong> All 12 supported item icons and three independent markers, with combined examples. Allergy assignments are fictional. <a href="#p3">P3</a></figcaption>
 </figure>
 
-Two-cue limits, warning priority, and Unknown suppression are implemented. Device/tracking tests verify cue placement and simultaneous name/icon clearing; unaided symbol comprehension needs user evaluation. [P11](#p11)
+The prototype shows at most two icons, puts allergy alerts first, and hides personal details when a guest is unrecognised or the face association is lost. Automated checks verify placement and that names and icons disappear together. [P11](#p11)
 
-Transient content follows platform guidance, while attention research cautions against assuming unobtrusiveness. Comprehension, glance duration, and conversational use need evaluation in Section 5.1. [R8](#r8), [R9](#r9)
+Concise information follows display guidance, but short symbols can still distract. User testing must check whether people understand the icons without coaching and use them without interrupting conversation. [R8](#r8), [R9](#r9)
 
 #### 4.3.3 Retrieving contextually relevant preferences {#contextual-retrieval}
 
-In the proposed pipeline, face recognition determines **whose record** to retrieve; audio-derived conversation context determines **which fields** to show. The server combines them to return selected preferences.
+The next proposed iteration selects information to fit the conversation. Face recognition determines **whose record** to retrieve; conversation analysis determines **which details** to show. During breakfast, food and drink preferences could be prioritised over room arrangements.
 
 <figure>
 <a href="assets/context-pipeline.svg" target="_blank" rel="noopener"><img src="assets/context-pipeline.svg" alt="Proposed server pipeline: audio determines conversation context, face recognition determines guest identity, and both guide retrieval of selected guest preferences for display." width="1200" height="400" loading="lazy"></a>
 <figcaption><strong>Figure 11.</strong> Proposed contextual retrieval, combining identity and conversation context.</figcaption>
 </figure>
 
-A twin-room icon may be readable but irrelevant to a drinks order. Filtering targets **DR3 and DR6** by selecting a confirmed drink preference during dining, using checked records for DR4. Safety-related information needs explicit priority and hotel verification rules rather than disappearing when another topic is selected. [P1](#p1)
+This addresses **DR3 and DR6**: an easily understood room icon can still be unhelpful during a drinks order. The proposed filter would select relevant, checked preferences from the shared record (DR4), while retaining priority for allergy alerts under the hotel's verification rules. [P1](#p1)
 
 <figure>
 <div class="comparison-grid">
 <div><p class="comparison-label">Before · unrelated room preferences</p><a href="assets/ui/05-context-before-extra-room-icons.png" target="_blank" rel="noopener"><img src="assets/ui/05-context-before-extra-room-icons.png" alt="Generated UI before contextual filtering: several room preference icons are displayed during a restaurant interaction." width="1254" height="1254" loading="lazy"></a></div>
 <div><p class="comparison-label">Proposed after · relevant drink preference</p><a href="assets/ui/06-context-after.png" target="_blank" rel="noopener"><img src="assets/ui/06-context-after.png" alt="Generated UI of the proposed context refinement: a coffee preference replaces unrelated room icons during dining." width="1200" height="1200" loading="lazy"></a></div>
 </div>
-<figcaption><strong>Figure 12.</strong> Generated UI comparison illustrating the proposed relevance filter; it is not evidence of implemented conversation understanding. [P12](#p12)</figcaption>
+<figcaption><strong>Figure 12.</strong> Generated UI comparison illustrating the proposed relevance filter; it is not evidence of implemented conversation understanding. <a href="#p12">P12</a></figcaption>
 </figure>
 
-**Implementation boundary.** The prototype prioritises warnings and selects up to two prepared cues. Conversation-based ranking is not implemented; microphone activity only controls session duration. [P3](#p3)
+**Current status.** The prototype shows up to two stored reminders, with allergy alerts first. It does not yet interpret conversations to select preferences; microphone activity only controls how long the session runs. [P3](#p3)
 
-Participants' feedback motivates comparing filtering in identical scenarios, recording useful/omitted cues, interpretation, and interruption.
+Testing should compare the same scenarios with and without filtering: does the system identify the topic correctly, show useful information, or hide something staff need? This tests relevance as well as readability.
 
 ### 4.4 Complete system architecture {#system-architecture}
 
@@ -278,15 +276,13 @@ Figure 13 combines the iterations in the **Rokid RV101 → Wi-Fi/HTTP → laptop
 <figcaption><strong>Figure 13.</strong> Full implemented architecture and proposed audio-preference extension. <a href="assets/system-architecture.svg" target="_blank" rel="noopener">Open the scalable diagram ↗</a> or <a href="assets/system-architecture.png" target="_blank" rel="noopener">view the full-resolution PNG ↗</a>. Source: <a href="#p10">P10</a>.</figcaption>
 </figure>
 
-**Communication.** One request at a time prevents backlogs; expiry rejects late answers. A swipe checks connectivity. [P3](#p3)
+**Communication.** The glasses send one recognition request at a time to avoid a queue of old images. Late results are ignored so outdated details are not displayed. A swipe checks the server connection. [P3](#p3)
 
-**Recognition.** Cached-template matching uses a 0.45 similarity threshold and 0.10 margin over the next identity. Lowering the threshold from 0.50 after frequent Unknown results made acceptance more permissive; false matches need representative validation. Similarity is not a correctness probability. [P3](#p3), [P11](#p11)
+**Recognition.** The server compares faces with stored references. A match needs at least 0.45 similarity and must beat the next candidate by 0.10. Lowering the minimum from 0.50 reduced unrecognised results but may admit wrong matches. These scores measure similarity, not confidence percentages. [P3](#p3), [P11](#p11)
 
-**Records.** Cached profiles avoid repeated reads; Unknown/missing profiles receive no cues. Incoming camera images are not saved.
+**Shared records.** The server loads guest profiles into memory at startup. This speeds lookup, but database edits require a restart before displayed information changes. DR4 therefore still needs reliable updates reaching another employee. Unique guest IDs should replace name-based lookup to distinguish guests with the same name. Incoming camera images are not saved; unrecognised guests receive no personal details.
 
-For DR4, SQLite edits still require restart to refresh cues; opaque guest IDs must replace name-based lookup for same-name guests. Shared storage alone cannot establish live continuity.
-
-The dashed extension adds audio upload, local Whisper, hosted Gemini extraction, and reviewed SQLite updates; no cloud endpoint is connected yet. The separate card-entry scaffold's active cohort and temporal voting are not integrated here. [P6](#p6), [P10](#p10)
+The dashed extension would add audio upload, local Whisper transcription, Gemini extraction, and staff-reviewed database updates. These are not connected to the glasses workflow yet. The separate card-entry prototype is also not integrated. [P6](#p6), [P10](#p10)
 
 ## 5. User validation and system evaluation {#testing}
 
@@ -300,36 +296,36 @@ The team conducted a walkthrough and product testing with **10 non-hotel partici
 | Could cues help serve guests? | 70% saw potential usefulness, but some icons were unrelated to the conversation. | Develop contextual retrieval and assess whether it enables a specific service action. |
 | Can cues be used naturally? | Most described a quick glance as sufficient, but incorporating cues into conversation was challenging. | Test timing, meaning, and conversational flow together; investigate design changes as well as training. |
 
-The distinction between reading and using a cue is central. Recognising a coffee icon does not establish when or how to introduce a preference naturally. The findings connect the icon iteration in Section 4.3.2 to the relevance iteration in Section 4.3.3: shorter content can still interrupt service if it is poorly timed or unrelated to the task.
+Understanding an icon and using it in conversation are different tasks. A participant may recognise a coffee preference but be unsure when to mention it. The feedback connects shorter icons (Section 4.3.2) with relevant selection (Section 4.3.3): staff need information that fits the current interaction.
 
-Without a controlled baseline, archived individual responses, or objective glance/attention measurements, the non-staff study cannot establish hotel-employee usability. Its value is identifying problems for the next prototype, rather than proving reduced cognitive load, maintained eye contact, or satisfaction.
+This small non-staff study identifies improvements for the next prototype. It did not compare ordinary profile lookup or measure gaze and attention, so it cannot establish improved hotel service or reduced distraction.
 
 ### 5.2 Design requirements and whole-system testing {#requirements-check}
 
-The requirements check combines the walkthrough with the demonstrated **tap → guest selection → recognition → prepared-profile retrieval → rendering** path. Conversation → approved preference update → another employee's appropriate service action remains incomplete. The assessment below covers Chapter 2's service requirements and the safeguards needed for correct association and appropriate information.
+System testing covers **tap → select guest → recognise face → retrieve stored profile → display information**. The further step—turning a conversation into an approved update that helps another employee—remains incomplete. The assessment combines measured results, implementation checks, and user feedback against Chapter 2's requirements.
 
-On 3 November, 13 live activations included rapid retaps. Five produced known-name-plus-icon drawing events; four also recorded Android frame commits. Those four successful warm retaps averaged **1,180 ms**, median **1,198.5 ms**, range **974–1,349 ms**. [P4](#p4)
+On 3 November, 13 live activations included quick repeat taps while capture was already running. Five produced a recognised name and icons in the app's drawing process; four also recorded an Android frame commit, confirming a completed frame was submitted for display. These four averaged **1,180 ms**, median **1,198.5 ms**, range **974–1,349 ms**. [P4](#p4)
 
-| Integrated stage, four recorded commits | Mean |
+| Measured stage, four completed frames | Mean |
 |---|---:|
-| Handled tap → successful request sent: camera, detection, selection, encoding, scheduling | 693 ms |
-| HTTP request → parsed response, including inference | 302 ms |
-| Parsed response → name/icon drawing | 101.3 ms |
-| Drawing → Android frame commit | 83.8 ms |
+| Tap handled → selected image sent: camera, face selection, image preparation, scheduling | 693 ms |
+| Request sent → server response read, including recognition | 302 ms |
+| Response read → app draws name and icons | 101.3 ms |
+| Drawing → Android confirms frame submitted | 83.8 ms |
 | Total | **1,180 ms** |
 
-Inference averaged 177.5 ms within HTTP time and must not be counted twice. The largest stage precedes sending the successful request, directing improvement toward capture/selection and scheduling as well as server inference. One additional draw took 4,412 ms without a commit recorded before the next activation; eight activations had no accepted information draw before another tap. Retaps interrupt work, so these counts do not establish accuracy or an independent success rate. Frame commit is a software endpoint, and clean cold-start performance remains unconfirmed.
+Server recognition took 177.5 ms within the 302 ms request stage; it is not an additional delay. The largest delay was before sending the image, so optimisation must address capture and selection as well as server speed. Another activation took 4,412 ms to draw information without a completed frame recorded before the next tap; eight had no accepted name/icon output before another tap. Repeat taps can interrupt processing, so these counts do not establish a success rate. Independent starts from idle and physical on-lens timing still need testing.
 
 | Requirement | Current evidence | Assessment and next verification |
 |---|---|---|
 | **DR1 · Timely support:** cue within <1 s | Four successful warm commits averaged 1.18 s; slower/interrupted cases also occurred. | **Target not met.** Repeat independent cold/warm trials and count failures. |
-| **DR2 · Low effort:** single tap and automatic silence expiry | Activation was easy for all 10 participants; component checks support the deadline and resource release. | **Supported formatively.** Test staff task interference and expiry in realistic noise. |
+| **DR2 · Low effort:** single tap and automatic silence expiry | All 10 participants found activation easy; checks verify timeout and camera/microphone shutdown. | **Early support.** Test staff task interference and stopping behaviour in realistic noise. |
 | **DR3 · Glanceability:** concise cues during conversation | Icons are implemented; 70% reported needing only a quick glance, but natural conversational use remained difficult. | **Partially achieved.** Compare comprehension, attention shifts, and conversational flow with a baseline. |
-| **DR4 · Preference continuity:** approved update reaches another employee | Prepared profiles are retrieved; extraction is inconsistent and profiles are cached at startup. | **Incomplete.** Test captured statement → review → refreshed record → next employee's action. |
-| **DR5 · Correct association:** suppress uncertain/stale cues | Tests exercise Unknown, reused/crossing tracks, expiry, and cancellation. | **Safeguards implemented; field performance unknown.** Count wrong-profile reveals and misses on held-out, crowded scenes. |
+| **DR4 · Preference continuity:** approved update reaches another employee | Stored profiles are retrieved; new facts are not consistently extracted and profile changes require restart. | **Incomplete.** Test captured statement → review → updated record → next employee's action. |
+| **DR5 · Correct association:** hide uncertain/outdated details | Tests check unrecognised guests, tracking changes, expired results, and cancellation. | **Safeguards implemented; real-world error rates unknown.** Count wrong guest details and missed matches in new, crowded test scenes. |
 | **DR6 · Appropriate information:** relevant fields and distinct allergy handling | Two-cue limit and fictional allergy markers exist; irrelevant content was reported. | **Partially achieved in demo data.** Validate contextual selection, interpretation, permissions, and fallback. |
 
-The system demonstrates a working retrieval-and-display mechanism, while the service benefit and complete handover remain evaluation tasks. The component offloading experiment has different timing boundaries and cannot enlarge the four-commit sample.
+Retrieval and display work; the service benefit and complete handover still need evaluation. The photo benchmark and four live frame measurements cover different stages and must be reported separately.
 
 ### 5.3 Limitations and guest acceptance {#guest-acceptance}
 
@@ -343,9 +339,9 @@ The implemented microphone currently detects activity locally, whereas the plann
 
 The findings identify three priorities for the next phase, each with evidence needed to judge progress. Hotel-staff evaluation will determine whether the revised workflow is useful in practice. [P1](#p1)
 
-**Refine extraction and contextual retrieval.** Create a human-labelled set covering explicit preferences, requests, complaints, negation, corrections, and multiple speakers. Compare transcript-only and multimodal processing on the same cases, retaining prompts, model versions, supporting excerpts, and timing. Add staff correction and approval before a write, reliable guest association, and cache refresh. Success requires a supported preference to reach a second employee, with irrelevant or superseded cues withheld; a shared database alone is insufficient.
+**Improve extraction and relevant selection.** Build a reviewed test set covering preferences, requests, complaints, negation, corrections, and multiple speakers. Compare text-only processing with added video on the same cases, recording prompts, model versions, evidence, and timing. Add staff correction/approval, correct guest association, and automatic profile refresh. Demonstrate that an approved preference reaches a second employee while unrelated or outdated information is withheld.
 
-**Run a hotel-staff usability pilot.** Compare glasses with ordinary profile lookup using equivalent guest information, counterbalanced scenarios, and equal practice. Measure correct interpretation, service action, time to the first useful cue, interruptions, and perceived conversational fit. Distinguish interface problems from training needs. Guiding-question cues may help staff elicit preferences, but should be tested for naturalness rather than installed as a mandatory script. Broader cold/warm latency, identity, network-failure, and battery trials should accompany the service tasks.
+**Run a hotel-staff pilot.** Compare glasses with ordinary profile lookup using the same information and equal practice; vary the order to reduce practice effects. Measure correct interpretation, service action, time to useful information, interruptions, and conversational fit. Test whether suggested questions help staff discover preferences naturally. Repeat timing from idle and during active capture, alongside recognition, network-failure, and battery tests.
 
 **Develop evidence-linked LQA support.** Begin with the selected 15-item F&B subset and provisional, human-reviewed observations. Each output should identify the applicable criterion, timestamped supporting evidence, and missing context. Keep “not applicable,” “insufficient evidence,” and a supported service gap distinct. Compare outputs with trained reviewers before using them for coaching or service recovery; the prototype cannot yet justify an overall LQA grade or automatic employee ranking. [P8](#p8)
 
