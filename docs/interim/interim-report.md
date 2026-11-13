@@ -45,6 +45,64 @@ Suppose a guest says they usually drink coffee with oat milk. A later server can
 
 The lounge offers a bounded place to study repeated food-and-drink encounters and staff handovers. The project records permission to use PARKROYAL's lounge as a POC setting; the conditions for staff participation, live guest data, and biometric testing still need to be established. [P2](#p2), [P6](#p6)
 
+# Guest-Information Workflow and Design Problem
+
+## Evidence and scope
+
+The preceding analysis establishes why personalised service matters to luxury hotels. This section examines the operational problem: how guest information reaches staff, how it is used during an interaction, and how newly learned information becomes available to colleagues. The analysis draws on the team's case-study mapping and industry-partner discussions, supported by published research.
+
+The presentation cites two indicators of demand: 86% of respondents in Hilton's travel survey wanted at least one personalised element, while Medallia found that 61% of consumers would spend more for a customised experience. The latter figure concerns consumers across industries, not hotel guests specifically ([Hilton, 2022](stories.hilton.com/releases/2023-travel-trends); [Medallia, 2024](medallia.com/wp-content/…/Medallia-Understanding-Personalization-Efforts-in-the-Hospitality-and-Retail-Industries-Report.pdf)). More directly, Medallia surveyed 1,749 hotel guests: 23% rated their recent stay 9 or 10 out of 10 for personalisation, while the surveyed in-stay elements averaged 46% recall, lower than at other journey stages. Higher perceived personalisation was associated with higher satisfaction, though the survey does not establish causation. These findings direct our attention to service encounters, when staff can act on what the hotel knows about a guest.
+
+## Current guest-information workflow
+
+The Accor Customer Digital Card case study, as presented by the team, illustrates an existing information cycle. A general manager retrieves guest details from a database and communicates relevant points during a morning briefing. Staff may receive hard-copy notes as a fallback; the transcript also mentions information shared through WhatsApp. They then use the briefing and guest profiles to tailor service, while details learned through conversation are entered into the database afterwards.
+
+The presentation uses a guest's coffee order and preferred room settings as examples of details the industry partner wants staff to know. In the mapped workflow, using such details depends on staff remembering the briefing, finding the correct profile or note, and recording new information after serving the guest. Each step introduces a possible delay or loss of context.
+
+## Guest-journey gaps
+
+**Recognition and retrieval.** Staff may have difficulty identifying a guest from a written description or profile picture. Even after finding the correct profile, they may need to search for the detail relevant to their task. A preference can therefore be missed despite being stored. Guest identification and retrieval must fit the short time available during service.
+
+**Use during conversation.** Staff may need to consult fallback notes when they cannot recall a detail from the morning briefing. Looking away or reading a profile in front of a guest can interrupt eye contact and the natural flow of conversation. At the same time, staff are expected to listen actively and ask questions that reveal new preferences. The challenge is to make useful information available without making the interaction feel procedural.
+
+**Capture and continuity.** Staff may defer database entry until their workload allows it. By then, a detail may be forgotten or recalled inaccurately. Individual staff members can also interpret and phrase the same preference differently, making the record difficult for others to use. A guest interaction therefore needs to become a clear, shareable record promptly enough to inform the next relevant staff member.
+
+[Insert Figure 1: Cause-and-effect map linking observed workflow gaps to service consequences and design needs]
+
+Figure 1 sets out the reasoning behind these needs. Its intermediate links are the team's interpretation of the case-study workflow: recognition difficulties can lead to missed preferences; intrusive lookup can disrupt service; and delayed, inconsistent entry can weaken a shared profile. The figure is a design synthesis, not a claim that these consequences have been measured in every hotel. P&C Global's industry commentary similarly argues that the relevant differentiator is “data accessibility at the moment of service” ([P&C Global, n.d.](pandcglobal.com/research-insights/hyper-personalization-in-luxury-hospitality-the-new-standard/)). The team's synthesis also emphasises making information learned at that moment accessible for later service.
+
+## First-time guests as a priority
+
+The information gap is most visible when a guest has no established profile. Returning guests may have recorded preferences, rewards history, and rapport with staff; first-time guests have little of this context. Medallia found that guests with previous experience of a hotel brand were more likely to report a personalised stay than first-timers ([Medallia, 2024](medallia.com/wp-content/…/Medallia-Understanding-Personalization-Efforts-in-the-Hospitality-and-Retail-Industries-Report.pdf)).
+
+The presentation attributes a single-digit first-time guest retention rate to the industry partner. The transcript does not specify its time period or definition, so it should be treated as a preliminary observation. The presentation frames a possible feedback loop: limited information constrains personalisation, which may reduce satisfaction and the likelihood of another visit. That loop is a working design hypothesis.
+
+The immediate opportunity is to use the first stay to build a useful profile. A preference entered too late may not reach colleagues in time to improve the current stay. If it is captured early, associated with the correct guest, and shared promptly, another staff member may be able to use it during that same stay. This matters when service passes between staff members and shifts.
+
+## Derived design needs and handoff
+
+The analysis yields three design needs:
+
+1. **Recognition and rapid retrieval:** Staff need to identify the correct guest and find information relevant to the immediate service task.
+2. **Discreet referencing:** Staff need to use information while maintaining natural, professional engagement with the guest.
+3. **Reliable capture and processing:** Staff need to record new preferences or concerns with little effort and make them accurate, consistent, and useful to colleagues.
+
+Together, these needs describe a continuous information cycle: recognise the guest, act on existing knowledge, and share newly learned knowledge for the next interaction. They provide the basis for the following section's **capture-and-process** and **display** functions. The team's subsequent design criteria make these needs more specific: on-time service support addresses retrieval speed; glanceable interaction addresses unobtrusive use; and low-effort capture and preference continuity address timely, reliable updates across staff. Those criteria, rather than the present problem analysis, define what the prototype must be tested against.
+
+## Design challenge
+
+> **How might we enable luxury hotel staff to capture, share, and access relevant guest information seamlessly, so that they can deliver consistent, personalised, high-quality service?**
+
+The mapped workflow, guest-journey analysis, and derived needs establish the problem to be addressed by the team's concept development and prototype evaluation. The intended value is a more usable flow of guest information during the first and subsequent stays; improvements in satisfaction or retention remain outcomes to investigate.
+
+**Individual contribution:** [Insert your actual contribution to the case-study analysis, guest-journey synthesis, and design-need formulation.]
+
+## References
+
+- Hilton. (2022). [*Hilton spotlights travelers' changing expectations as a record year of travel concludes*](stories.hilton.com/releases/2023-travel-trends).
+- Medallia. (2024). [*Understanding personalization efforts in the hospitality and retail industries*](medallia.com/wp-content/…/Medallia-Understanding-Personalization-Efforts-in-the-Hospitality-and-Retail-Industries-Report.pdf).
+- P&C Global. (n.d.). [*Hyper-personalization in luxury hospitality: The new standard*](pandcglobal.com/research-insights/hyper-personalization-in-luxury-hospitality-the-new-standard).
+
 <div class="flow" role="group" aria-label="Proposed service continuity loop">
 <div><b>01 · Capture</b>A guest states a preference.<small>Emerging capability</small></div>
 <div><b>02 · Check & share</b>Staff confirm the guest and meaning.<small>Planned approval workflow</small></div>
