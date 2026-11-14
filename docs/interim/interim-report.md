@@ -42,9 +42,9 @@ Guest satisfaction has stagnated over the past few years (Figure) [source], due 
 Hence, it is established that revenue depends on both service quality (driving ADR), which demands interpersonal service and customer satisfaction [Medallia] (driving OR) which requires addressing individual expectations. Synthesizing these needs leads to the demand for personalization in the luxury hotel industry.
 
 This is further supported by the following:
-86% of travelers sought at least 1 aspect of their experience to be personalized [c]
-61% of consumers are willing to spend more for personalized experiences [d]
-87% of guests are more likely to recommend a hotel if they receive a personalized experience (Appendix)
+> **86% of travelers sought at least 1 aspect of their experience to be personalized [c]**
+> **61% of consumers are willing to spend more for personalized experiences [d]**
+> **87% of guests are more likely to recommend a hotel if they receive a personalized experience (Appendix)**
 
 
 The broader case for personalised hotel service leads to an operational question: can staff obtain and use relevant guest information at the moment it is needed? In a Medallia survey of 1,749 hotel guests, 23% rated their recent stay 9 or 10 for personalisation, while recall of the surveyed in-stay elements averaged 46%. Perceived personalisation was associated with satisfaction, although the survey does not establish that access to guest data caused either outcome. The finding directs attention to service encounters, where recorded information must become a useful staff action. [R2](#r2)
