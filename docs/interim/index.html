@@ -154,7 +154,7 @@
 <figcaption><strong>Figure 3.</strong> Intended capture workflow, before refining activation and processing allocation.</figcaption>
 </figure>
 
-<h4 id="activation">4.2.1 Temple-touch activation</h4>
+<h4 id="activation">5.2.1 Temple-touch activation</h4>
 <p>Continuous capture requires less staff input but keeps processing active between encounters. Reported battery life was only slightly over an hour, insufficient for a hotel shift. Temple-touch activation trades a single tap for longer battery life. <a href="#p1">P1</a></p>
 <p>The timeout balances battery use with <strong>DR2, low effort</strong>: one tap starts capture, speech sustains it, and 15 seconds without speech ends it automatically, without repeated taps or a separate stop action. Expiry stops camera/microphone activity, cancels requests, and clears cues. Speech cannot activate idle capture. <a href="#p3">P3</a></p>
 <figure>
@@ -189,7 +189,7 @@
 </tr>
 </tbody></table></div>
 <p>Traffic fell by 75.9%; battery depletion fell by 19 percentage points, approximately 68% relative depletion. This measures battery-gauge change, not electrical power. <a href="#p1">P1</a>, <a href="#p7">P7</a></p>
-<h4 id="processing">4.2.2 Selective server processing</h4>
+<h4 id="processing">5.2.2 Selective server processing</h4>
 <p>On-device photo recognition averaged <strong>1,927.9 ms</strong>, longer than the proposed <strong>1.0 s</strong> end-to-end cue target. SCRFD and ArcFace recognition dominated the component path, motivating selective offloading. Camera handling, tracking, crop preparation, and rendering remain local; the laptop handles recognition and lookup. This targets <strong>DR1</strong> by keeping position updates responsive; a separate battery benefit remains unmeasured. <a href="#p3">P3</a>, <a href="#p5">P5</a></p>
 <figure>
 <a href="assets/capture-offload-pipeline.svg" target="_blank" rel="noopener"><img src="assets/capture-offload-pipeline.svg" alt="Capture responsibilities: glasses handle temple touch and video/audio sensing; the server handles heavier multimodal analysis, insight extraction, guest association, and database updates in the intended full pipeline." width="1200" height="260" loading="lazy"></a>
@@ -207,7 +207,7 @@
 </figure>
 
 <p>The offloaded mean remains above the proposed 1-second target, and the benchmark excludes camera, image preparation, and display. Only one CPU laptop was tested; a faster server or accelerated inference may help, but any gain needs complete-path testing (Section 6.2).</p>
-<h4 id="preference-extraction">4.2.3 Independent preference-extraction testing</h4>
+<h4 id="preference-extraction">5.2.3 Independent preference-extraction testing</h4>
 <p>Text extraction is tested separately for <strong>DR4, preference continuity</strong>; written transcripts are not connected to glasses audio. Two synthetic conversations contained three expected guest facts. Qwen and Gemma each matched two facts, with Qwen fastest at <strong>67.2 seconds per transcript</strong>. All models produced valid JSON, but Gemma misclassified a complaint and a safety question. These small tests provide examples for refinement, not general accuracy estimates. No result is written to a guest record; the full model comparison and checks are in Appendix D. <a href="#p1">P1</a>, <a href="#p13">P13</a></p>
 <p>Next, improve text-only extraction, then compare it with video from the same interactions to test whether visual context adds useful, supported detail. Evaluate audio transcription separately.</p>
 <h3 id="display">5.3 Display</h3>
@@ -217,7 +217,7 @@
 <figcaption><strong>Figure 7.</strong> Identity-to-record-to-display flow; the placement iteration adds local position updates.</figcaption>
 </figure>
 
-<h4 id="display-position">4.3.1 Positioning information beside the guest</h4>
+<h4 id="display-position">5.3.1 Positioning information beside the guest</h4>
 <p>Initially, cues occupied a fixed display position. User feedback and prototype validation prompted face-relative placement and central guest selection, aiming to reduce looking away from the guest and competing details from several visible faces. These iterations address <strong>DR3, glanceability</strong>. <a href="#p1">P1</a>, <a href="#p7">P7</a></p>
 <p>Google <strong>ML Kit</strong>, an on-device machine-learning toolkit, detects faces and tracks positions locally; InsightFace identifies the guest. The central <strong>30% of both view axes</strong> defines the selection region, choosing the face nearest its centre. This aims to show preferences for the guest receiving the employee&#39;s attention, avoiding details for everyone visible. Selection uses where the glasses point; it does not measure eye contact. <a href="#p3">P3</a>, <a href="#r11">R11</a></p>
 <p>Face coordinates also allow cropping before image preparation, removing a 2.2–2.4-second full-frame preparation delay. In an earlier SFace-model test, 14 uploads averaged 200 ms from image-analysis callback to server response. This supports the cropping change for <strong>DR1</strong>; the timing excludes tap handling and display and is separate from the current-model benchmark. <a href="#p3">P3</a></p>
@@ -229,7 +229,7 @@
 <figcaption><strong>Figure 8.</strong> Generated UI comparison: local tracking brings the cue beside the guest; eye contact is unmeasured. <a href="#p12">P12</a></figcaption>
 </figure>
 
-<h4 id="display-content">4.3.2 Replacing descriptions with concise icons</h4>
+<h4 id="display-content">5.3.2 Replacing descriptions with concise icons</h4>
 <p>Even beside the guest&#39;s face, long descriptions require staff to read while listening. To support <strong>DR3</strong>, the display instead shows a name and up to two icons. Preferences and allergy alerts must remain distinguishable. <a href="#p1">P1</a></p>
 <figure>
 <div class="comparison-grid">
@@ -247,7 +247,7 @@
 
 <p>The prototype shows at most two icons, puts allergy alerts first, and hides personal details when a guest is unrecognised or the face association is lost. Automated checks verify placement and that names and icons disappear together. <a href="#p11">P11</a></p>
 <p>Concise information follows display guidance, but short symbols can still distract. User testing must check whether people understand the icons without coaching and use them without interrupting conversation. <a href="#r8">R8</a>, <a href="#r9">R9</a></p>
-<h4 id="contextual-retrieval">4.3.3 Retrieving contextually relevant preferences</h4>
+<h4 id="contextual-retrieval">5.3.3 Retrieving contextually relevant preferences</h4>
 <p>The next proposed iteration selects information to fit the moment. Face recognition determines <strong>whose record</strong> to retrieve; conversation and service context determine <strong>which details</strong> to show. Location, task, urgency, and validity could rank the candidates: during breakfast, for example, a checked drink preference should take precedence over an unrelated room arrangement.</p>
 <figure>
 <a href="assets/context-pipeline.svg" target="_blank" rel="noopener"><img src="assets/context-pipeline.svg" alt="Proposed server pipeline: audio determines conversation context, face recognition determines guest identity, and both guide retrieval of selected guest preferences for display." width="1200" height="400" loading="lazy"></a>
