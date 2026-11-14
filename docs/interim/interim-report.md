@@ -15,37 +15,50 @@ Semester 1 produced a working smart-glasses recognition-and-display prototype, a
 
 Four successful warm frame commits averaged **1.18 seconds** from handled temple tap to Android submission; this cannot establish p95 or physical lens visibility, and the supplied slide's **<1 s** target conflicts with the script's proposed **1.5 s**. A 20-minute comparison reported battery-gauge drops of **28 versus 9 percentage points** for continuous and triggered operation. In a walkthrough with **10 non-hotel participants**, all found activation easy and 70% saw potential usefulness, while natural cue use remained difficult. These findings guide further prototyping; they do not establish recognition accuracy, improved guest satisfaction, or hotel performance. Next, the team should test extraction, cue relevance, and the complete handover against ordinary profile lookup with hotel staff. [P1](#p1), [P4](#p4), [P7](#p7)
 
-## 1. Context, evidence, and design opportunity {#context}
+## 1. Guest-information problem analysis {#context}
 
-Personalisation depends on staff being able to use relevant information during service. In a Medallia survey of 1,749 hotel guests, 23% rated their recent stay 9 or 10 for personalisation; surveyed in-stay elements averaged 46% recall. Perceived personalisation was associated with satisfaction, but causation was not established. [R2](#r2)
+The broader case for personalised hotel service leads to an operational question: can staff obtain and use relevant guest information at the moment it is needed? In a Medallia survey of 1,749 hotel guests, 23% rated their recent stay 9 or 10 for personalisation, while recall of the surveyed in-stay elements averaged 46%. Perceived personalisation was associated with satisfaction, although the survey does not establish that access to guest data caused either outcome. The finding directs attention to service encounters, where recorded information must become a useful staff action. [R2](#r2)
 
-## Current guest-information workflow
+### 1.1 Current guest-information workflow
 
-The team's Accor Customer Digital Card case study describes a general manager retrieving guest details for a morning briefing. Staff may receive hard-copy or WhatsApp notes, consult profiles during service, and enter new details afterwards. This relies on remembering the briefing, finding the right profile, and recording information promptly; each handoff can delay or lose context. [P1](#p1)
+The Accor Customer Digital Card case study maps a five-stage information cycle: a general manager retrieves guest details, briefs staff, provides hard-copy notes as a fallback, staff use the briefing or profile during service, and newly learned details are entered into the database afterwards. The accompanying account also describes WhatsApp as a possible fallback channel. [P1](#p1) This is a case-study workflow, not a measured description of every hotel or of PARKROYAL's daily operations.
 
-## Guest-journey gaps
+Information must cross several human and system handoffs in this cycle. Staff need to remember or find the right profile, select a detail relevant to the immediate interaction, and record new information accurately enough for another employee to use. A stored profile therefore has limited service value if access is slow, consultation interrupts conversation, or updates arrive after the next encounter.
 
-| Observed gap | Effect during service | Design need |
-|---|---|---|
-| Guest recognition and profile search can be difficult. | A relevant preference may be missed even when stored. | Identify the correct guest and retrieve task-relevant context. |
-| Phone or paper lookup competes with conversation. | Staff may look away while they should listen and engage naturally. | Reference information discreetly. |
-| Notes are delayed or recorded inconsistently. | Details may be forgotten, misphrased, or unavailable to colleagues. | Capture and share confirmed information promptly. |
+Information may already exist but remain difficult to act upon because it is separated from the service task, carried in a briefing that staff must remember, or entered only after the encounter has ended. Each route puts a different demand on staff: recall, search, or delayed documentation. These demands are especially consequential during short face-to-face exchanges, when there is little time to recover a missed detail.
 
-*Table 1. Translation from the team's mapped guest-information gaps to design needs.*
+### 1.2 Deriving the design needs
 
-## First-time guests
+The guest-journey mapping identifies three related gaps. First, recognising a guest from a description or profile photograph and filtering the profile can be difficult; a stored preference may consequently be missed. Second, consulting notes or a phone during conversation can divert attention from the guest while staff are expected to listen and engage naturally. Third, a busy employee may postpone an update, and different staff may phrase the same information differently, reducing its reliability for colleagues. [P1](#p1)
 
-A first-time guest may have booking or pre-arrival information but little service history. The presentation cites single-digit retention without a time period or definition; it is a preliminary observation, not a target. The design opportunity is to make an early, explicit detail usable later in the same stay. [P1](#p1)
+Guest identification and information relevance are distinct problems. Finding a profile quickly is insufficient if it belongs to the wrong person; finding the correct profile is also insufficient if staff must search through unrelated details while serving the guest. A preference about a drink may matter at the lounge, whereas a room-setting preference may not. The design need is therefore timely access to the *right* information for the *right* guest and task. This is a design inference from the mapped journey, not evidence that a particular retrieval method will improve service.
 
-## Derived design needs
+<figure>
+<a href="assets/guest-information-need-derivation.svg" target="_blank" rel="noopener" aria-label="Open the guest-information cause-to-need diagram">
+<img src="assets/guest-information-need-derivation.svg" alt="Three pathways connect guest recognition and search difficulties to missed preferences and a need for rapid retrieval; intrusive note lookup to interrupted conversation and discreet referencing; and delayed, inconsistent updates to lost or unclear details and reliable capture." width="1200" height="500">
+</a>
+<figcaption><strong>Problem-analysis diagram.</strong> Workflow gaps, likely service consequences, and derived needs. The arrows represent the team's design reasoning, not measured causal effects.</figcaption>
+</figure>
 
-1. **Recognise and retrieve:** identify the correct guest and task-relevant context.
-2. **Reference discreetly:** use information without disrupting professional engagement.
-3. **Capture reliably:** record new preferences or concerns with enough context for colleagues.
+The resulting needs are **recognition and rapid retrieval**, **discreet referencing during service**, and **prompt, consistent capture of confirmed information**. They form a connected information cycle: the correct guest must be identified before a cue is useful, and a new detail must be recorded in a usable form before it can support a later interaction.
 
-> **Design challenge:** How might hotel staff capture, share, and access relevant guest information seamlessly so they can deliver consistent, personalised, high-quality service?
+### 1.3 Why first-time guests sharpen the problem
 
-Section 2 translates this problem into functions and criteria; later chapters assess the stages demonstrated so far.
+Returning guests may have accumulated preferences and established rapport; first-time guests may have booking or pre-arrival details but less recorded service history. Their initial encounter is therefore an important opportunity to learn a specific, guest-confirmed detail. If that detail is captured and shared in time, another employee could use it during the same stay. If it remains only in one staff member's memory, the next interaction begins with much of the same information gap.
+
+This creates a possible feedback pattern: limited history offers fewer cues for tailoring service, while failure to capture what is learned leaves the history limited. The pattern is a hypothesis, rather than an established explanation of guest behaviour. It also shows why the first stay is a useful test case. The goal is not to build a complete long-term profile immediately; it is to determine whether one relevant detail from an early interaction can reach a later employee accurately and in time to inform their service.
+
+An industry-partner account reported a single-digit first-time guest retention figure, but its cohort, definition, and time period were not supplied. It is treated here as a preliminary observation, not a verified baseline or evidence that limited personalisation caused low retention. [P1](#p1) The proposed same-stay handover is consequently a design opportunity to test, rather than a demonstrated route to higher return visits.
+
+### 1.4 Design opportunity
+
+The problem is to make guest context available across encounters while preserving natural service. For the first employee, this means recognising the guest and recording an explicit preference or concern with sufficient context. For the next employee, it means finding the correct, relevant detail quickly enough to act on it appropriately.
+
+The intended value differs across the service relationship. Staff may spend less effort recalling briefings or searching notes; guests may experience greater continuity between interactions; and the hotel may have a more dependable basis for consistent personalised service. The next stage must establish whether faster access and more reliable sharing actually help staff make better service decisions without adding disruption or creating incorrect guest associations. These needs lead to the project's design question:
+
+> **How might we enable luxury hotel staff to capture, share, and access relevant guest information seamlessly so that they can deliver consistent, personalised, high-quality service?**
+
+Section 2 translates this problem into functions, criteria, and boundaries for the proposed solution.
 
 <div class="flow" role="group" aria-label="Proposed service continuity loop">
 <div><b>01 · Capture</b>A guest states a preference.<small>Emerging capability</small></div>
