@@ -52,50 +52,84 @@ The lounge offers a bounded place to study repeated food-and-drink encounters an
 <div><b>04 · Adapt</b>Staff make a suitable offer and confirm it.<small>Service benefit to evaluate</small></div>
 </div>
 
+These problem findings lead to the solution requirements in [Chapter 2: Aim, scope, and requirements](#requirements).
+
 ## 2. Aim, scope, and requirements {#requirements}
 
-The design question is:
+The preceding problem analysis identifies three needs: recognise and retrieve guest context quickly, refer to it discreetly during service, and capture new information reliably. These needs concern continuity across encounters. A guest-stated detail must be captured with its context and made available to another employee at the relevant service moment. This section translates the design challenge into two functions and four service criteria, providing a common basis for comparing phone/PMS, audio-cue, and smart-glasses concepts. [P1](#p1)
 
-> How might we enable luxury-hotel staff to capture, share, and access relevant guest information seamlessly, so they can deliver consistently personalised, high-quality service?
+**First-time guest use case.** A first-time guest may have booking or pre-arrival details but limited recorded service history. The target is to capture one useful, guest-confirmed detail during an early encounter and make it available to another employee during the same stay. For example, a request for unsweetened tea can inform a later lounge visit. A one-off request retains its encounter or stay context rather than becoming a permanent preference.
 
-The Semester 1 objective is to establish a viable technical and interaction foundation for that workflow. The first scope comprises a lounge encounter, a small enrolled gallery, demo profiles, concise cues, and a manually triggered session. It includes recognition-and-retrieval prototyping and exploratory preference extraction. It excludes validated production PMS integration, autonomous allergy decisions, proven guest-experience improvements, and commercial deployment. [P1](#p1)
+**Functional requirements.** The solution has two linked functions: capture and process guest context, then select and display information for the current service task.
 
-LQA provides useful service behaviours against which to frame requirements, including anticipatory service, natural communication, discreet name use, and reconfirmation of dietary needs. The repository contains a selected 15-item F&B table. It is a departmental subset with reviewer evidence requirements, rather than a complete audit or a new official LQA score. LQA benchmarking should also be distinguished from hotel star classification. [P8](#p8), [R4](#r4)
-
-| ID | User need and engineering requirement | Verification and interim status |
+| Function | Required behaviour | Output |
 |---|---|---|
-| DR1 · Timely support | Show a useful cue within a provisional **<1 s** target after activation. Define the timing boundary before comparing designs. | Four successful warm frame commits averaged 1.18 s; target not met. Independent cold-start performance remains unknown. |
-| DR2 · Low effort | Start with a single temple tap and stop after **15 s without detected speech**. | Implemented; documented device checks support timeout behaviour. Restaurant speech/noise accuracy remains untested. |
-| DR3 · Glanceability | Show a name and at most two concise cues near the selected face. | Implemented; formative feedback supports readability but reveals difficulty using cues naturally. |
-| DR4 · Preference continuity | Preserve an explicit preference with source, time, scope, and review status, then make the approved update available to another employee. | Shared demo store exists; reliable extraction and a complete approval-to-next-employee flow remain incomplete. |
-| DR5 · Correct association | Withhold guest-specific cues for unknown, ambiguous, lost, or stale tracks. | Suppression paths exist; field false-match/false-reveal rates have not been measured. |
-| DR6 · Appropriate information | Distinguish preferences from allergies, minimise displayed fields, and provide a manual path. | Fictional allergy cues are available; operational verification, access roles, and consent procedures require hotel review. |
+| **Capture and process** | In the proposed complete workflow, one tap starts guest recognition and conversation recording together. Extract explicit guest preferences, requests, or concerns with supporting wording, source, timestamp, guest association, and current-stay context. Prepare a draft for staff review, correction, and approval before saving. | Time-stamped interaction draft associated with the guest and stay; shared only after staff approval. |
+| **Select and display** | Retrieve the guest's context, select the smallest detail relevant to the current location, task, and urgency, and present it as a concise cue. Suppress personal cues for unknown, ambiguous, stale, or lost guest associations. | A short, actionable prompt for the employee serving the guest. |
 
-The sub-second latency target is a team engineering aspiration, not a timing rule supplied by LQA. Likewise, displaying information beside a face is a design choice to test; it does not itself establish maintained eye contact. [P1](#p1), [P3](#p3), [P4](#p4)
+**Service criteria and proposed measures.** The selected PARKROYAL F&B LQA items connect the functions to timely acknowledgement, active listening, natural engagement, and personalisation. [P8](#p8), [R4](#r4)
+
+| Criterion | Service behaviour | Design requirement and measure |
+|---|---|---|
+| **DR1 · On-time service support** | Timely acknowledgement and offer of service. | Deliver the first correct, readable cue within **1.0 s** of deliberate activation. On enrolled-guest trials with a relevant stored fact, measure activation-to-visible-cue latency and count late, missing, or incorrect cues as target nonattainment. Assess unknown-guest cue suppression separately. |
+| **DR2 · Low-effort capture** | Active listening and natural engagement. | Use one tap to start recognition and conversation recording together in the proposed workflow. Measure activation actions, capture time, correction effort, and disruption to listening. |
+| **DR3 · Glanceable interaction** | Natural engagement and discreet use of the guest's name. | Present the name and up to two task-relevant cues. Measure correct interpretation, glance duration, attention shifts, missed guest information, and conversational interruption. |
+| **DR4 · Preference continuity** | Use guest-confirmed information during a later encounter. | Preserve the statement, source, timestamp, and current-stay context. Measure whether another employee retrieves the correct detail for the correct guest and uses it appropriately during the same stay. |
+
+**Cue timing.** Shiwa et al. (2009) found that preference for a communication robot's response peaked at one second. This finding informs the project's **1.0-second cue-response target**. Applying a robot-response result to smart glasses is an analogy to test, not a smart-glasses standard or LQA requirement. The defined measurement includes capture, guest association, transfer, and rendering, ending when the first correct, readable cue appears. [R12](#r12)
+
+These requirements guide the concept comparison in [Chapter 3](#concepts).
 
 ## 3. Concept generation and selection {#concepts}
 
-The team's functional exploration separates capture and processing from retrieval and display. It considers how to associate a conversation with a guest, convert it into a useful record, and deliver relevant context to the next employee. Three complete concepts were compared qualitatively; measured preference for the complete glasses workflow has not yet been established. [P1](#p1)
+### 3.1 Functional comparison of the concepts
 
-| Concept | Capture and guest association | Retrieval during service | Principal trade-off |
+Three main concepts address the same first-stay scenario: a guest shares a preference, and another employee uses it during a later encounter. The concepts combine alternative methods of capture, guest association, processing, and cue delivery. A camera-free glasses configuration is also considered as a control to isolate the display's contribution. [P1](#p1)
+
+| Function or consideration | Phone/PMS baseline | Audio badge + earpiece | Vision-assisted smart glasses |
 |---|---|---|---|
-| Manual/shared profile plus phone | Staff select the guest and type a note. | Open the profile and select relevant details. | Uses familiar infrastructure and avoids face matching; effort and attention costs depend on the actual workflow. |
-| Audio badge plus earpiece | Speech can reduce typing; staff still need a reliable guest association. | Brief spoken prompts. | Hands-free presentation, but transient audio can interrupt conversation or expose information audibly. |
-| Camera/display smart glasses plus server | Local tracking and server recognition associate a visible guest; extraction is a separate development task. | Compact visual cues beside the selected face. | Promising access while hands are occupied; introduces recognition, display, battery, privacy, and network constraints. |
+| **Capture** | Staff type a note during or after the encounter. | A deliberate trigger captures speech hands-free. | The proposed tap starts recognition and conversation recording together. |
+| **Guest and stay association** | Staff select the guest and stay in the profile. | Staff select the guest through a companion interface. | Visual matching supplies guest context; uncertain matches lead to normal greeting or manual lookup. |
+| **Processing and storage** | Staff enter the information manually. | Speech processing extracts guest-stated information with source and stay context. | The same speech-processing function is combined with visual guest association. |
+| **Cue delivery** | Staff navigate and read a separate screen. | A short spoken prompt conveys the relevant fact. | A brief visual cue appears near the line of sight. |
+| **Staff effort** | Requires profile navigation and note entry. | Keeps the hands available; missed messages require replay and guest selection requires an interface. | Keeps the hands available and allows a brief recheck; fitting and display controls add device interaction. |
+| **Privacy and comfort** | Uses the existing profile and handheld screen. | This configuration avoids a camera; microphone use, earpiece fit, volume, and leakage require consideration. | Camera, microphone, and display affect collection, fit, environmental awareness, and acceptance. |
+| **Fallback** | Normal service and existing manual procedures. | Mute or replay the cue, or return to phone/PMS lookup. | Suppress personal details on uncertainty, then continue normal service or phone/PMS lookup. |
 
-The glasses concept was selected for prototyping because it combines guest association and a private visual channel within the encounter. This is a reason to test it, rather than proof of superiority. A fair next comparison gives the phone baseline the same current profile and equivalent capture support, avoiding an artificially weak comparator.
+Guest association and cue delivery are separate design choices. A camera-assisted match can feed either a visual or spoken cue, and display glasses can use manual guest selection. A camera-free glasses configuration therefore provides a useful control for isolating the display's contribution. The baseline, capture method, guest information, and processing should remain consistent when comparing output modalities.
 
-Existing products establish substantial prior capability. Oracle OPERA Cloud documents profiles containing preferences and images. hotelkit supports guest-request assignment, escalation, and follow-up. SoftServe has demonstrated wearable AR face identification, including VIP recognition. Consequently, face recognition on glasses and shared guest records are not themselves novel. [R5](#r5), [R6](#r6), [R7](#r7)
+### 3.2 Literature-based benchmarking of visual and audio cues
 
-The project's contribution is the investigation of a combined same-stay service workflow: low-effort guest-context capture, checked association, and timely presentation of a relevant cue. Its lounge proposal additionally explores an **active lounge cohort** bounded by entry and exit. The implemented standalone glasses demo currently recognises against its loaded gallery rather than this card-derived cohort. That distinction defines an integration milestone. [P3](#p3), [P6](#p6)
+We benchmarked the visual and audio concepts against published studies of competing speech, dual-task performance, and notifications during face-to-face interaction. This qualitative benchmark links the findings to the service criteria: preserving listening, keeping cues understandable, recovering missed information, and controlling attention demands. The cited studies use controlled tasks rather than hotel staff; they inform design hypotheses for a matched prototype comparison.
+
+Spoken earpiece cues introduce another speech stream into a service conversation. Brungart (2001) demonstrated interference between simultaneously presented spoken phrases. A cue delivered while the guest speaks can therefore compete with the message staff are trying to understand. For this conversation-centred task, a concise visual cue lets staff consult a factual prompt without receiving another spoken message and choose their own wording when replying. [R13](#r13)
+
+Visual presentation also places demands on attention. Lewis and Neider (2016) found that Google Glass information disrupted concurrent visual search. Ward et al. (2023) found interference from both HMD and audible word presentation during manual tracking. The selected display should consequently contain a small amount of task-relevant information, appear at an appropriate moment, and permit a brief recheck. [R9](#r9), [R16](#r16)
+
+| Benchmark consideration | Evidence from published research | Implication for the concept |
+|---|---|---|
+| **Listening during conversation** | Brungart (2001) found competing speech interfered with recognition of a target spoken phrase. [R13](#r13) | Prefer a short visual fact during guest speech. Reserve spoken cues for on-request delivery or a suitable conversational pause. |
+| **Visual attention and workload** | Lewis and Neider (2016) found HUD information disrupted visual search; Ward et al. (2023) observed tracking interference with HMD and audible words. [R9](#r9), [R16](#r16) | Keep either cue brief and relevant. Assess missed guest information and service interruption alongside cue comprehension. |
+| **Placement during social interaction** | Rzayev et al. (2020) found notification position and alignment affected perception during face-to-face communication. [R14](#r14) | Treat cue placement as part of the interaction design and assess whether staff can consult it naturally. |
+| **Visually demanding tasks** | Nees and Sampsell (2021) found visual icon alerts disrupted visual tracking more than auditory tones. [R15](#r15) | Retain audio as an alternative when visual attention is occupied. Distinguish a simple alert tone from a spoken factual message. |
+
+For this conversation-led lounge scenario, we prioritise visual factual cues to avoid adding a spoken message while the guest is talking. Audio remains a comparator for visually demanding tasks; spoken prompts can be offered on request or between conversational turns. Google's AI-glasses guidance reinforces the display treatment: concise, glanceable elements that appear when needed and recede after the task. [R8](#r8)
+
+For example, equivalent cues could communicate the same guest-stated tea preference: a short visual label or a brief spoken phrase. A matched comparison would measure correct comprehension, missed guest details, service action, time to act, conversational interruptions, rechecks or replays, and comfort. Keeping the fact and task constant separates the effect of the cue modality from the effect of receiving more or less information.
+
+### 3.3 Selected concept and design rationale
+
+**Vision-assisted smart glasses are selected for the prototype** because they package three functions for the lounge encounter: hands-free capture, guest-context retrieval, and a concise visual prompt. Capture can reduce device switching, matching can reduce profile search when reliable, and a short visual fact can be rechecked without adding another voice while the guest speaks. Staff remain free to choose natural wording. These features address DR2 and DR3, while guest association and same-stay information reuse address DR1 and DR4.
+
+The phone/PMS workflow remains the baseline and manual fallback. The camera-free glasses configuration separates visual presentation from face matching, and the audio concept remains a comparator for visually demanding service tasks. The contribution is the connected service workflow: capture a guest-stated detail with its context, retrieve it for the correct guest, and present it when it supports another employee's service action.
+
+[Section 4.1](#initial-concept) translates this selected concept into the proposed staff journey, linking the functional requirements to the interaction and capture design that follow.
 
 ## 4. System architecture and prototype development {#prototype}
 
 ### 4.1 Solution overview and staff journey {#initial-concept}
 
-Chapter 3 selected smart glasses to combine guest recognition with information available during face-to-face service. From the employee's perspective, the concept is simple: look towards a guest, see their name and useful context, and use it to make an appropriate offer without searching a separate profile.
-
-Figure 1 identifies the core technology. SQLite stores guest profiles and preferences; reference photos are stored separately. At startup, InsightFace `buffalo_l` detects and aligns reference faces, then ArcFace converts them into normalised 512-number vectors cached in RAM. A live face vector is compared with these references without reprocessing every photo. Initially, the camera would stay on continuously, capturing and analysing every frame. [P3](#p3)
+The proposed workflow carries one guest-confirmed detail from an early encounter to another employee's later service moment. It links capture, guest/stay association, staff review, and a task-relevant cue. [Chapter 2: requirements](#requirements), [Chapter 3: concept comparison](#concepts)
 
 <figure>
 <a href="assets/initial-concept.svg" target="_blank" rel="noopener" aria-label="Open the initial smart-glasses concept diagram">
@@ -104,16 +138,30 @@ Figure 1 identifies the core technology. SQLite stores guest profiles and prefer
 <figcaption><strong>Figure 1.</strong> Core functions, models, and guest-data setup, before examining the design iterations.</figcaption>
 </figure>
 
-For example, an employee could offer a known oat-milk preference and confirm today's choice. The solution journey ends by updating the database shared with all employees, so new information supports the next encounter. Figure 2 presents these as the normal steps of the intended service workflow.
+**Proposed staff journey**
+
+1. **Start recognition and recording.** The employee taps the glasses once to start guest recognition and conversation recording together. Staff begin normal service while the system retrieves relevant context.
+2. **Check guest association.** A stable, sufficiently supported match enables personal context. For unknown, ambiguous, or lost matches, suppress personal details and continue with normal greeting or phone/PMS lookup.
+3. **Present relevant context.** Show only the small amount of information useful to the current task. A lounge drinks cue takes priority over an unrelated room preference.
+4. **Confirm today's need.** Staff use the cue to make a natural offer and confirm that the preference still applies, accepting corrections from the guest.
+5. **Verify allergy information.** Staff check the authorised guest record and the relevant menu or kitchen source before advising the guest or proposing food.
+6. **Process the interaction.** Extract explicit guest statements from the captured conversation and retain their supporting wording, source, timestamp, guest association, and current-stay context.
+7. **Review and approve.** Staff correct the wording and confirm the guest and stay before approving the update. The information remains a draft until this check is complete.
+8. **Carry context forward.** Another employee retrieves the approved detail during a later encounter, confirms the guest's present need, and uses it to support a suitable service action.
 
 <figure>
-<a href="assets/staff-journey.svg" target="_blank" rel="noopener" aria-label="Open the intended staff service journey">
-<img src="assets/staff-journey.svg" alt="Intended service journey: approach the guest, see useful context, adapt the offer, confirm and listen, then Update Preference: Update database shared with all employees." width="1200" height="350">
-</a>
-<figcaption><strong>Figure 2.</strong> Intended staff journey. Recognition supplies context; personalisation depends on a suitable employee action and confirmation of the guest's current need.</figcaption>
+<div class="flow" role="group" aria-label="Proposed same-stay staff journey">
+<div><b>01 · Activate</b>One tap starts recognition and recording.</div>
+<div><b>02 · Serve</b>Use relevant context, confirm today's need, and verify allergy information.</div>
+<div><b>03 · Process and review</b>Prepare a sourced, stay-scoped draft; staff correct, confirm, and approve it before saving.</div>
+<div><b>04 · Carry forward</b>A later employee retrieves the relevant detail and confirms the guest's present need.</div>
+</div>
+<figcaption><strong>Figure 2.</strong> Proposed staff journey, from deliberate activation to reuse during the same stay. Unknown or ambiguous guest associations lead to normal greeting or manual lookup.</figcaption>
 </figure>
 
-The iterations address unnecessary activity, processing delay, distracting placement, excessive content, and irrelevant cues. Chapter 5 assesses their combined effect.
+For example, a guest requests unsweetened tea during an early lounge visit. The information is associated with that guest and stay. During a later encounter, another employee receives the relevant cue and asks whether the guest would like unsweetened tea again. The detail informs the offer while the guest remains free to change their preference.
+
+This journey defines the intended behaviour from a single activation to a later service encounter. [Section 4.2: Capture](#capture) develops the capture component through temple-touch activation, session timeout, and processing allocation. It connects these service requirements to the prototype's implementation decisions.
 
 ### 4.2 Capture {#capture}
 
@@ -217,13 +265,13 @@ Local tracking updates placement between server responses. Calibration checks bo
 <figcaption><strong>Figure 8.</strong> Generated UI comparison: local tracking brings the cue beside the guest; eye contact is unmeasured. [P12](#p12)</figcaption>
 </figure>
 
-**Current identity matters (DR5).** Crossing, sudden movement, or ambiguity clears the association. Responses older than two seconds are rejected, identities expire four seconds after submission, and stalled tracking clears cues within 500 ms. Tests check these safeguards and coordinate mapping, not field error rates. [P11](#p11)
+**Current identity safeguard.** Crossing, sudden movement, or ambiguity clears the association. Responses older than two seconds are rejected, identities expire four seconds after submission, and stalled tracking clears cues within 500 ms. Tests check these safeguards and coordinate mapping, not field error rates. [P11](#p11)
 
 For DR1, cropping before processing removed a 2.2–2.4-second full-frame preparation bottleneck. On 27 October, the earlier SFace configuration averaged 200 ms from analysis callback to parsed response across 14 uploads. This supports that image-path iteration, not current-model or optical-display performance. [P3](#p3)
 
 #### 4.3.2 Replacing descriptions with concise icons {#display-content}
 
-For **DR3**, long descriptions become a name and two compact cues; DR6 requires preferences and safety warnings to remain distinct. [P1](#p1)
+For **DR3**, long descriptions become a name and two compact cues; Preferences and safety warnings must remain distinct. [P1](#p1)
 
 <figure>
 <div class="comparison-grid">
@@ -253,7 +301,7 @@ In the proposed pipeline, face recognition determines **whose record** to retrie
 <figcaption><strong>Figure 11.</strong> Proposed contextual retrieval, combining identity and conversation context.</figcaption>
 </figure>
 
-A twin-room icon may be readable but irrelevant to a drinks order. Filtering targets **DR3 and DR6** by selecting a confirmed drink preference during dining, using checked records for DR4. Safety-related information needs explicit priority and hotel verification rules rather than disappearing when another topic is selected. [P1](#p1)
+A twin-room icon may be readable but irrelevant to a drinks order. Filtering targets **DR3** and the task-relevance safeguard by selecting a confirmed drink preference during dining, using checked records for DR4. Safety-related information needs explicit priority and hotel verification rules rather than disappearing when another topic is selected. [P1](#p1)
 
 <figure>
 <div class="comparison-grid">
@@ -290,6 +338,8 @@ The dashed extension adds audio upload, local Whisper, hosted Gemini extraction,
 
 ## 5. User validation and system evaluation {#testing}
 
+This chapter checks the requirements in [Chapter 2](#requirements) and the concept taken forward in [Chapter 3](#concepts) against the narrower demonstrated journey in [Chapter 4](#prototype). It distinguishes observed prototype behaviour from the proposed capture-to-approved-record-to-next-employee workflow.
+
 ### 5.1 User validation {#user-validation}
 
 The team conducted a walkthrough and product testing with **10 non-hotel participants**, examining activation, potential usefulness, and cue use. This formative work supports problem finding and prototyping, rather than proving improved hotel service. [P1](#p1)
@@ -322,12 +372,12 @@ Inference averaged 177.5 ms within HTTP time and must not be counted twice. The 
 
 | Requirement | Current evidence | Assessment and next verification |
 |---|---|---|
-| **DR1 · Timely support:** cue within <1 s | Four successful warm commits averaged 1.18 s; slower/interrupted cases also occurred. | **Target not met.** Repeat independent cold/warm trials and count failures. |
+| **DR1 · Timely support:** cue within 1.0 s | Four successful warm commits averaged 1.18 s; slower/interrupted cases also occurred. | **Target not met.** Repeat independent cold/warm trials and count failures. |
 | **DR2 · Low effort:** single tap and automatic silence expiry | Activation was easy for all 10 participants; component checks support the deadline and resource release. | **Supported formatively.** Test staff task interference and expiry in realistic noise. |
 | **DR3 · Glanceability:** concise cues during conversation | Icons are implemented; 70% reported needing only a quick glance, but natural conversational use remained difficult. | **Partially achieved.** Compare comprehension, attention shifts, and conversational flow with a baseline. |
 | **DR4 · Preference continuity:** approved update reaches another employee | Prepared profiles are retrieved; extraction is inconsistent and profiles are cached at startup. | **Incomplete.** Test captured statement → review → refreshed record → next employee's action. |
-| **DR5 · Correct association:** suppress uncertain/stale cues | Tests exercise Unknown, reused/crossing tracks, expiry, and cancellation. | **Safeguards implemented; field performance unknown.** Count wrong-profile reveals and misses on held-out, crowded scenes. |
-| **DR6 · Appropriate information:** relevant fields and distinct allergy handling | Two-cue limit and fictional allergy markers exist; irrelevant content was reported. | **Partially achieved in demo data.** Validate contextual selection, interpretation, permissions, and fallback. |
+| **Cross-cutting safeguard · Correct association:** suppress uncertain/stale cues | Tests exercise Unknown, reused/crossing tracks, expiry, and cancellation. | **Safeguards implemented; field performance unknown.** Count wrong-profile reveals and misses on held-out, crowded scenes. |
+| **Cross-cutting safeguard · Appropriate information:** relevant fields and distinct allergy handling | Two-cue limit and fictional allergy markers exist; irrelevant content was reported. | **Partially achieved in demo data.** Validate contextual selection, interpretation, permissions, and fallback. |
 
 The system demonstrates a working retrieval-and-display mechanism, while the service benefit and complete handover remain evaluation tasks. The component offloading experiment has different timing boundaries and cannot enlarge the four-commit sample.
 
@@ -384,7 +434,7 @@ The team confirmed the following division, following the presentation split. Thi
 |---|---|
 | Neha Rajan | Problem investigation and framing; hotel/business context, service quality, and the rationale for personalisation. |
 | Nigel Yeo Tong Wei | Problem investigation and framing; current guest-information practices, first-time guest needs, and the design challenge. |
-| Wong Weng Hong | Solution development; functional requirements, concept comparison, and the proposed staff/guest journey. |
+| Wong Weng Hong | Solution development: [functional requirements](#requirements), [concept comparison](#concepts), and the [proposed staff/guest journey](#initial-concept). |
 | Tan Ping Hui | Solution development; technical implementation, prototype iterations, testing, and the next development steps. |
 
 The interim contribution is an implemented service-support mechanism and a clearer account of what must be tested next. Whether the mechanism improves hotel service remains the central evaluation question for the next stage.
@@ -404,6 +454,11 @@ The interim contribution is an implemented service-support mechanism and a clear
 <p id="r9"><strong>R9.</strong> Lewis, J. E., & Neider, M. B. (2016). “Through the Google Glass: The impact of heads-up displays on visual attention.” <em>Cognitive Research: Principles and Implications, 1</em>, 13. <a href="https://doi.org/10.1186/s41235-016-0015-6">Open-access article</a>.</p>
 <p id="r10"><strong>R10.</strong> Personal Data Protection Commission Singapore (2022). <a href="https://www.pdpc.gov.sg/-/media/files/pdpc/pdf-files/other-guides/guide-to-biometric_17may2022.pdf">Guide on Responsible Use of Biometric Data in Security Applications</a>. Scope: security applications. See also <a href="https://sso.agc.gov.sg/Act/PDPA2012">Personal Data Protection Act 2012</a>, Singapore Statutes Online.</p>
 <p id="r11"><strong>R11.</strong> Google. <a href="https://developers.google.com/ml-kit/vision/face-detection">Face detection documentation</a>. On-device detection and tracking, distinct from identity recognition; accessed 10 November 2026.</p>
+<p id="r12"><strong>R12.</strong> Shiwa, T., Kanda, T., Imai, M., Ishiguro, H., &amp; Hagita, N. (2009). “How Quickly Should a Communication Robot Respond? Delaying Strategies and Habituation Effects.” <em>International Journal of Social Robotics, 1</em>, 141–155. <a href="https://doi.org/10.1007/s12369-009-0012-8">DOI and publisher abstract</a>. Used only as an analogy for the proposed response target.</p>
+<p id="r13"><strong>R13.</strong> Brungart, D. S. (2001). “Informational and energetic masking effects in the perception of two simultaneous talkers.” <em>Journal of the Acoustical Society of America, 109</em>(3), 1101–1109. <a href="https://doi.org/10.1121/1.1345696">DOI</a> · <a href="https://scholar.usuhs.edu/en/publications/informational-and-energetic-masking-effects-in-the-perception-of--2/">Author’s institutional abstract</a>.</p>
+<p id="r14"><strong>R14.</strong> Rzayev, R., Korbely, S., Maul, M., Schark, A., Schwind, V., &amp; Henze, N. (2020). “Effects of Position and Alignment of Notifications on AR Glasses during Social Interaction.” <em>Proceedings of the 11th Nordic Conference on Human-Computer Interaction</em>. <a href="https://doi.org/10.1145/3419249.3420095">DOI and conference paper</a>. Face-to-face notification study with 32 participants in 16 pairs.</p>
+<p id="r15"><strong>R15.</strong> Nees, M. A., &amp; Sampsell, N. G. (2021). “Simple auditory and visual interruptions of a continuous visual tracking task: modality effects and time course of interference.” <em>Ergonomics, 64</em>(7), 879–890. <a href="https://doi.org/10.1080/00140139.2021.1873424">DOI</a>. The alerts were simple visual icons and auditory tones in a laboratory tracking task.</p>
+<p id="r16"><strong>R16.</strong> Ward, M. D., Smith, S. L., &amp; Helton, W. S. (2023). “Dual-task Interference while Receiving Information on a Head Mounted Display, Visually on the Same Depth Plane, or Audibly.” <em>Proceedings of the Human Factors and Ergonomics Society Annual Meeting, 67</em>(1), 888–892. <a href="https://doi.org/10.1177/21695067231192613">DOI and publisher abstract</a>. Compared HMD, same-plane visual, and audible word presentation during manual tracking.</p>
 <p id="p1"><strong>P1.</strong> Team IS-432 (5 November 2026). <a href="Slides.pdf">Interim presentation, 37 slides</a>; <a href="Recording.mp4">presentation recording, 29 min 18 s</a>; <a href="transcript.html">timestamped transcript</a>. Slide numbers in this report refer to the supplied PDF.</p>
 <p id="p2"><strong>P2.</strong> Project field records: <a href="https://github.com/wongwh2002/CDE4301-Hotel-Hospitality/blob/main/hotel-visit/novotel-formatted.md">Novotel formatted visit notes</a>; <a href="https://github.com/wongwh2002/CDE4301-Hotel-Hospitality/blob/main/hotel-visit/parkroyal-main-points.md">PARKROYAL visit summary</a>; <a href="https://github.com/wongwh2002/CDE4301-Hotel-Hospitality/blob/main/hotel-visit/raw-notes/parkroyal-oct-visit-transcript.md">later PARKROYAL discussion transcript and source caveats</a>. These records have different evidence quality; formatted field notes are paraphrases.</p>
 <p id="p3"><strong>P3.</strong> <a href="https://github.com/wongwh2002/CDE4301-Hotel-Hospitality/blob/main/rokid/README.md">Rokid prototype implementation and validation notes</a>; <a href="https://github.com/wongwh2002/CDE4301-Hotel-Hospitality/tree/main/rokid/app/src/main/java/com/example/rokid_app">Android implementation</a>; <a href="https://github.com/wongwh2002/CDE4301-Hotel-Hospitality/blob/main/rokid/server/GUEST_PREFERENCES.md">demo guest cue schema and rendering</a>.</p>
@@ -443,6 +498,8 @@ This appendix records differences between presentation summaries and the narrowe
 **Staged service comparison.** Recruit an approved formative staff sample, record role and relevant experience, and use synthetic profiles with consenting role-play guests. Counterbalance phone and glasses conditions and scenario order. Give both conditions the same guest context and equal practice. Include a relevant drink preference, an unrelated room preference, a corrected preference, an unknown guest, two nearby enrolled guests, a fictional allergy alert, and a disconnected-server case.
 
 For each trial, record activation, first correctly rendered cue, correct interpretation, chosen service action, interruptions/attention shifts, assistance, and completion. Count all attempts, including no-result cases. Ask the role-play guest whether the action fitted the stated need. Use an observer and a fixed rubric; separate interpretation errors from wrong guest association and model extraction failures. Report participant-level results and uncertainty rather than treating repeated trials from one wearer as independent users.
+
+To isolate the output channel, add a matched role-play comparison that keeps the guest information, capture, processing, association method, and service task constant while varying only the cue: brief in-lens text; an equivalent short spoken earpiece prompt delivered on request or between turns; and the phone/PMS baseline. If proactive audio timing is explored, use a consenting role-play scenario and treat prompts during guest speech as a deliberate interruption condition, not a proposed service default. Record missed guest details, correct interpretation and action, interruptions or conversational repairs, attention shifts, time to an actionable response, cue rechecks or replays, staff workload, and role-play guest comfort. Report cue onset separately from the time needed to read or hear the actionable information.
 
 **Extraction evaluation.** Define reference facts before comparing models. Two reviewers should identify the speaker, explicit statement, current-stay/enduring scope, and whether a preference is actually supported. Include negation, corrections, ambiguity, requests, complaints, and visual-only evidence. Report true supported facts, missed facts, unsupported facts, attribution errors, and processing time. Compare transcript-only and multimodal approaches on identical cases and retain model version, prompts, parameters, input hashes, and reviewed outputs.
 
