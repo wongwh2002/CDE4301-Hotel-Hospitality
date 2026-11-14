@@ -1,0 +1,631 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="description" content="CDE4301 Team IS-432 interim capstone: guest-context cues for personalised hotel service"><title>Report | CDE4301 Hospitality</title><link rel="stylesheet" href="style.css"></head><body><header><nav class="nav"><a class="brand" href="index.html">CDE4301 / IS-432</a><button class="menu" aria-label="Toggle navigation">Menu ☰</button><div class="navlinks"><a class="" href="index.html">Home</a><a class="" href="about.html">About Us</a><a class="active" href="report.html">Report</a><a class="" href="prototype.html">Prototype</a></div></nav></header><main><section class="page-head"><div><span class="eyebrow">Interim assessment · 10 November 2026</span><h1 class="page-title">Interim report</h1><p>Guest-context cues for personalised hotel service · Complete source report, figures, evaluation, references and appendices.</p></div></section><div class="report-layout"><aside class="toc" aria-label="Report table of contents"><b>ON THIS PAGE</b><input class="searchbar" id="toc-search" placeholder="Filter sections..." aria-label="Filter sections"><a href="#executive-summary">Executive summary</a><a href="#context">1 · Context &amp; evidence</a><a href="#requirements">2 · Requirements</a><a href="#concepts">3 · Concept selection</a><a href="#prototype">4 · Development</a><a href="#testing">5 · Evaluation</a><a href="#next-stage">6 · Next-stage plan</a><a href="#contributions">7 · Team contributions</a><a href="#references">References</a><a href="#evidence-notes">Appendix A · Evidence</a><a href="#evaluation-protocol">Appendix B · Evaluation</a><a href="#supporting-material">Appendix C · Materials</a></aside><article class="report-content"><div class="report-tools"><a href="interim-report.md" download>↓ Download Markdown</a><a href="#references">↗ References</a><a href="#evidence-notes">↗ Appendices</a><button onclick="window.print()">Print / Save PDF</button></div><div class="notice">Some diagrams, screenshots and supporting files are referenced from the original GitHub repository. If a source asset is unavailable there, its image or link may not load. The report text and tables are included in full.</div><h1>Guest-context cues for personalised hotel service</h1>
+<p><strong>CDE4301 Innovation &amp; Design Capstone · Interim assessment · Team IS-432</strong><br/>
+<strong>Team:</strong> Neha Rajan · Tan Ping Hui · Wong Weng Hong · Nigel Yeo Tong Wei<br/>
+<strong>Presentation:</strong> 5 November 2026 · <strong>Report prepared:</strong> 10 November 2026<br/>
+<strong>Case setting:</strong> PARKROYAL club lounge · <strong>Stage:</strong> Semester 1 proof of concept</p>
+<!-- REPORT_BODY -->
+<h2 id="executive-summary">Executive summary</h2>
+<p>Hotels can collect guest preferences without consistently turning them into useful service at the next encounter. This project investigates how luxury-hotel staff could capture, share, and retrieve relevant guest context during the same stay, particularly when a first-time guest has little prior service history. The initial application is food-and-drink service in a club lounge. The intended value is continuity between employees: something a guest tells one employee becomes available to the next, at a suitable moment.</p>
+<p>Semester 1 produced a working smart-glasses recognition-and-display prototype, a separate lounge-services scaffold, early preference-extraction experiments, and formative testing. The Rokid application tracks faces locally, sends a selected face crop to a laptop for recognition, and displays a recognised name with one or two fictional preference/allergy cues. A temple tap activates the session; 15 seconds without detected speech ends it. Automatic conversation-to-profile updating and contextual cue selection remain development tasks. <a href="#p1">P1</a>, <a href="#p3">P3</a></p>
+<p>Four documented successful warm rendering samples averaged <strong>1.18 seconds</strong> from handled temple tap to Android frame commit, above the project's provisional sub-second target. A team-confirmed 20-minute comparison reported battery-level drops of <strong>28 versus 9 percentage points</strong> for continuous and triggered operation. In a walkthrough with <strong>10 non-hotel participants</strong>, all described activation as easy and 70% saw potential usefulness, but incorporating cues naturally remained difficult. These findings support further development; they do not establish improved guest satisfaction, recognition accuracy, or hotel revenue. The next phase prioritises reliable extraction, relevant cues, and comparison with ordinary profile lookup using hotel staff. <a href="#p1">P1</a>, <a href="#p4">P4</a>, <a href="#p7">P7</a></p>
+<h2 id="context">1. Context, evidence, and design opportunity</h2>
+<h3>1.1 From hotel performance to an actionable service problem</h3>
+<p>The presentation begins with a hotel-management concern: preserving service quality while manpower and operating costs rise. Revenue per available room, RevPAR, equals average daily rate multiplied by occupancy expressed as a fraction. Personalised service might influence guest evaluations and future choices, but many other factors affect those financial measures. Neither a working wearable nor a positive usability response demonstrates increased RevPAR. The present project therefore measures the nearer outcomes it can influence: accurate information, timely retrieval, and an appropriate service action. <a href="#p1">P1</a></p>
+<p>Here, <strong>personalisation</strong> means using relevant, permitted knowledge about an individual guest to adapt an interaction or service. Recognition, context access, service adaptation, and the guest's perception of fit are separate steps. Lei et al.'s three-study investigation shows that a hotel's personalisation attempt need not be perceived as personal by its recipient. This distinction makes cue comprehension and relevance necessary evaluation outcomes alongside technical performance. <a href="#r1">R1</a></p>
+<p>Medallia's study of 1,749 U.S. hotel guests found a relationship between perceived personalisation and satisfaction, with opportunities to improve ordinary interactions during a stay. Its findings are survey associations from a vendor-produced report. Piccoli, Lui, and Grün's observational hotel study also connects structured preference capture with service/value evaluations and booking-channel behaviour. These sources justify investigating continuity of guest knowledge; they do not prove that glasses cause loyalty or profit. <a href="#r2">R2</a>, <a href="#r3">R3</a></p>
+<h3>1.2 What the fieldwork establishes</h3>
+<p>The team investigated hotel operations through visits and stakeholder discussions. Two documented cases are particularly useful. They describe different properties and should retain that distinction. <a href="#p2">P2</a></p>
+<table>
+<thead>
+<tr>
+<th>Setting and evidence</th>
+<th>Relevant observation</th>
+<th>Design implication</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Novotel Singapore on Stevens; formatted visit notes</td>
+<td>ACDC guest profiles, pre-arrival review, role-dependent access, and memory or hardcopy aids in F&amp;B service were described.</td>
+<td>Test whether relevant context can be retrieved during an encounter with less searching. ACDC belongs to this Accor example.</td>
+</tr>
+<tr>
+<td>PARKROYAL; visit summary and later discussion transcript</td>
+<td>Interest in lounge guest recognition; guest information already entered into a PMS; some notes surfaced through the breakfast system, with reports as a fallback.</td>
+<td>Build on existing information flows. Investigate where visibility, confirmation, or action still breaks down.</td>
+</tr>
+<tr>
+<td>Interim presentation and walkthrough</td>
+<td>The team described delayed manual entry, inconsistent interpretation, and difficulty referring to notes during conversation.</td>
+<td>Treat timely capture and natural interaction as requirements, then measure them in the target workflow.</td>
+</tr>
+</tbody>
+</table>
+<p>PARKROYAL's existing PMS-to-breakfast flow is significant: the problem is more specific than an absence of guest data. The notes are qualitative evidence, not a measured incidence of missed preferences. Unclear system names and numerical claims in the noisy visit transcript require confirmation before becoming specifications.</p>
+<p>First-time guests motivate the same-stay focus because little historical interaction data may exist. They can nevertheless supply booking details, pre-arrival preferences, requests, and conversational context. The design opportunity is to make that emerging knowledge useful during the current stay. The presentation's single-digit retention statement is stakeholder-reported; no cohort definition or retention dataset is available for analysis. <a href="#p1">P1</a>, <a href="#p2">P2</a></p>
+<h3>1.3 The service opportunity</h3>
+<p>An illustrative case is a guest telling one employee that they usually drink coffee with oat milk. A later server can offer that option and confirm whether the guest wants it now. Remembering the statement supports continuity; automatically treating every past order as a permanent preference would undermine it. A complaint that a drink is too sweet is also time-specific evidence, rather than permission to infer every future beverage choice.</p>
+<p>The lounge offers a bounded place to study repeated food-and-drink encounters and staff handovers. The project records permission to use PARKROYAL's lounge as a POC setting; the conditions for staff participation, live guest data, and biometric testing still need to be established. <a href="#p2">P2</a>, <a href="#p6">P6</a></p>
+<div aria-label="Proposed service continuity loop" class="flow" role="group">
+<div><b>01 · Capture</b>A guest states a preference.<small>Emerging capability</small></div>
+<div><b>02 · Check &amp; share</b>Staff confirm the guest and meaning.<small>Planned approval workflow</small></div>
+<div><b>03 · Retrieve</b>The next employee sees relevant context.<small>Demo profiles implemented</small></div>
+<div><b>04 · Adapt</b>Staff make a suitable offer and confirm it.<small>Service benefit to evaluate</small></div>
+</div>
+<h2 id="requirements">2. Aim, scope, and requirements</h2>
+<p>The design question is:</p>
+<blockquote>
+<p>How might we enable luxury-hotel staff to capture, share, and access relevant guest information seamlessly, so they can deliver consistently personalised, high-quality service?</p>
+</blockquote>
+<p>The Semester 1 objective is to establish a viable technical and interaction foundation for that workflow. The first scope comprises a lounge encounter, a small enrolled gallery, demo profiles, concise cues, and a manually triggered session. It includes recognition-and-retrieval prototyping and exploratory preference extraction. It excludes validated production PMS integration, autonomous allergy decisions, proven guest-experience improvements, and commercial deployment. <a href="#p1">P1</a></p>
+<p>LQA provides useful service behaviours against which to frame requirements, including anticipatory service, natural communication, discreet name use, and reconfirmation of dietary needs. The repository contains a selected 15-item F&amp;B table. It is a departmental subset with reviewer evidence requirements, rather than a complete audit or a new official LQA score. LQA benchmarking should also be distinguished from hotel star classification. <a href="#p8">P8</a>, <a href="#r4">R4</a></p>
+<table>
+<thead>
+<tr>
+<th>ID</th>
+<th>User need and engineering requirement</th>
+<th>Verification and interim status</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>DR1 · Timely support</td>
+<td>Show a useful cue within a provisional <strong>&lt;1 s</strong> target after activation. Define the timing boundary before comparing designs.</td>
+<td>Four successful warm frame commits averaged 1.18 s; target not met. Independent cold-start performance remains unknown.</td>
+</tr>
+<tr>
+<td>DR2 · Low effort</td>
+<td>Start with a single temple tap and stop after <strong>15 s without detected speech</strong>.</td>
+<td>Implemented; documented device checks support timeout behaviour. Restaurant speech/noise accuracy remains untested.</td>
+</tr>
+<tr>
+<td>DR3 · Glanceability</td>
+<td>Show a name and at most two concise cues near the selected face.</td>
+<td>Implemented; formative feedback supports readability but reveals difficulty using cues naturally.</td>
+</tr>
+<tr>
+<td>DR4 · Preference continuity</td>
+<td>Preserve an explicit preference with source, time, scope, and review status, then make the approved update available to another employee.</td>
+<td>Shared demo store exists; reliable extraction and a complete approval-to-next-employee flow remain incomplete.</td>
+</tr>
+<tr>
+<td>DR5 · Correct association</td>
+<td>Withhold guest-specific cues for unknown, ambiguous, lost, or stale tracks.</td>
+<td>Suppression paths exist; field false-match/false-reveal rates have not been measured.</td>
+</tr>
+<tr>
+<td>DR6 · Appropriate information</td>
+<td>Distinguish preferences from allergies, minimise displayed fields, and provide a manual path.</td>
+<td>Fictional allergy cues are available; operational verification, access roles, and consent procedures require hotel review.</td>
+</tr>
+</tbody>
+</table>
+<p>The sub-second latency target is a team engineering aspiration, not a timing rule supplied by LQA. Likewise, displaying information beside a face is a design choice to test; it does not itself establish maintained eye contact. <a href="#p1">P1</a>, <a href="#p3">P3</a>, <a href="#p4">P4</a></p>
+<h2 id="concepts">3. Concept generation and selection</h2>
+<p>The team's functional exploration separates capture and processing from retrieval and display. It considers how to associate a conversation with a guest, convert it into a useful record, and deliver relevant context to the next employee. Three complete concepts were compared qualitatively; measured preference for the complete glasses workflow has not yet been established. <a href="#p1">P1</a></p>
+<table>
+<thead>
+<tr>
+<th>Concept</th>
+<th>Capture and guest association</th>
+<th>Retrieval during service</th>
+<th>Principal trade-off</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Manual/shared profile plus phone</td>
+<td>Staff select the guest and type a note.</td>
+<td>Open the profile and select relevant details.</td>
+<td>Uses familiar infrastructure and avoids face matching; effort and attention costs depend on the actual workflow.</td>
+</tr>
+<tr>
+<td>Audio badge plus earpiece</td>
+<td>Speech can reduce typing; staff still need a reliable guest association.</td>
+<td>Brief spoken prompts.</td>
+<td>Hands-free presentation, but transient audio can interrupt conversation or expose information audibly.</td>
+</tr>
+<tr>
+<td>Camera/display smart glasses plus server</td>
+<td>Local tracking and server recognition associate a visible guest; extraction is a separate development task.</td>
+<td>Compact visual cues beside the selected face.</td>
+<td>Promising access while hands are occupied; introduces recognition, display, battery, privacy, and network constraints.</td>
+</tr>
+</tbody>
+</table>
+<p>The glasses concept was selected for prototyping because it combines guest association and a private visual channel within the encounter. This is a reason to test it, rather than proof of superiority. A fair next comparison gives the phone baseline the same current profile and equivalent capture support, avoiding an artificially weak comparator.</p>
+<p>Existing products establish substantial prior capability. Oracle OPERA Cloud documents profiles containing preferences and images. hotelkit supports guest-request assignment, escalation, and follow-up. SoftServe has demonstrated wearable AR face identification, including VIP recognition. Consequently, face recognition on glasses and shared guest records are not themselves novel. <a href="#r5">R5</a>, <a href="#r6">R6</a>, <a href="#r7">R7</a></p>
+<p>The project's contribution is the investigation of a combined same-stay service workflow: low-effort guest-context capture, checked association, and timely presentation of a relevant cue. Its lounge proposal additionally explores an <strong>active lounge cohort</strong> bounded by entry and exit. The implemented standalone glasses demo currently recognises against its loaded gallery rather than this card-derived cohort. That distinction defines an integration milestone. <a href="#p3">P3</a>, <a href="#p6">P6</a></p>
+<h2 id="prototype">4. System architecture and prototype development</h2>
+<h3 id="initial-concept">4.1 Solution overview and staff journey</h3>
+<p>Chapter 3 selected smart glasses to combine guest recognition with information available during face-to-face service. From the employee's perspective, the concept is simple: look towards a guest, see their name and useful context, and use it to make an appropriate offer without searching a separate profile.</p>
+<p>Figure 1 identifies the core technology. SQLite stores guest profiles and preferences; reference photos are stored separately. At startup, InsightFace <code>buffalo_l</code> detects and aligns reference faces, then ArcFace converts them into normalised 512-number vectors cached in RAM. A live face vector is compared with these references without reprocessing every photo. Initially, the camera would stay on continuously, capturing and analysing every frame. <a href="#p3">P3</a></p>
+<figure>
+<a aria-label="Open the initial smart-glasses concept diagram" href="https://raw.githubusercontent.com/wongwh2002/CDE4301-Hotel-Hospitality/main/docs/interim/assets/initial-concept.svg" rel="noopener noreferrer" target="_blank">
+<img alt="The wearer interface sends faces for recognition against cached ArcFace reference vectors. A recognised identity selects the SQLite guest record, which returns name and preference cues directly to the wearer interface." height="505" src="https://raw.githubusercontent.com/wongwh2002/CDE4301-Hotel-Hospitality/main/docs/interim/assets/initial-concept.svg" width="1200"/>
+</a>
+<figcaption><strong>Figure 1.</strong> Core functions, models, and guest-data setup, before examining the design iterations.</figcaption>
+</figure>
+<p>For example, an employee could offer a known oat-milk preference and confirm today's choice. The solution journey ends by updating the database shared with all employees, so new information supports the next encounter. Figure 2 presents these as the normal steps of the intended service workflow.</p>
+<figure>
+<a aria-label="Open the intended staff service journey" href="https://raw.githubusercontent.com/wongwh2002/CDE4301-Hotel-Hospitality/main/docs/interim/assets/staff-journey.svg" rel="noopener noreferrer" target="_blank">
+<img alt="Intended service journey: approach the guest, see useful context, adapt the offer, confirm and listen, then Update Preference: Update database shared with all employees." height="350" src="https://raw.githubusercontent.com/wongwh2002/CDE4301-Hotel-Hospitality/main/docs/interim/assets/staff-journey.svg" width="1200"/>
+</a>
+<figcaption><strong>Figure 2.</strong> Intended staff journey. Recognition supplies context; personalisation depends on a suitable employee action and confirmation of the guest's current need.</figcaption>
+</figure>
+<p>The iterations address unnecessary activity, processing delay, distracting placement, excessive content, and irrelevant cues. Chapter 5 assesses their combined effect.</p>
+<h3 id="capture">4.2 Capture</h3>
+<p>Capture iterations use measurable tests: battery depletion, traffic, silence-timeout duration, latency, and guest facts matched against expected answers. The intended pipeline associates insights with guests and records checked preferences; automatic extraction and updates remain under development.</p>
+<figure>
+<a href="https://raw.githubusercontent.com/wongwh2002/CDE4301-Hotel-Hospitality/main/docs/interim/assets/capture-pipeline.svg" rel="noopener noreferrer" target="_blank"><img alt="Intended capture pipeline: video/audio clip, multimodal processing, relevant insight extraction, guest association through face recognition, then recording preferences in the database." height="245" loading="lazy" src="https://raw.githubusercontent.com/wongwh2002/CDE4301-Hotel-Hospitality/main/docs/interim/assets/capture-pipeline.svg" width="1200"/></a>
+<figcaption><strong>Figure 3.</strong> Intended capture workflow, before refining activation and processing allocation.</figcaption>
+</figure>
+<h4 id="activation">4.2.1 Temple-touch activation</h4>
+<p>Continuous capture requires less staff input but keeps processing active between encounters. Reported battery life was only slightly over an hour, insufficient for a hotel shift. Temple-touch activation trades a single tap for longer battery life. <a href="#p1">P1</a></p>
+<p>The timeout balances battery use with <strong>DR2, low effort</strong>: one tap starts capture, speech sustains it, and 15 seconds without speech ends it automatically, without repeated taps or a separate stop action. Expiry stops camera/microphone activity, cancels requests, and clears cues. Speech cannot activate idle capture. <a href="#p3">P3</a></p>
+<figure>
+<a href="https://raw.githubusercontent.com/wongwh2002/CDE4301-Hotel-Hospitality/main/docs/interim/assets/activation-iteration.svg" rel="noopener noreferrer" target="_blank"><img alt="Continuous activity is replaced by idle, tap-activated interaction, and automatic stopping after 15 seconds without speech; speech extends the active session." height="415" loading="lazy" src="https://raw.githubusercontent.com/wongwh2002/CDE4301-Hotel-Hospitality/main/docs/interim/assets/activation-iteration.svg" width="1200"/></a>
+<figcaption><strong>Figure 4.</strong> Encounter activation and speech-controlled session expiry.</figcaption>
+</figure>
+<p>Local WebRTC voice activity detection distinguishes speech-like activity from silence. The timeout was tested and verified at approximately <strong>15.4 seconds in a quiet-room setting</strong>; restaurant and front-desk conditions still need verification. <a href="#p3">P3</a></p>
+<p>The 20-minute battery experiment used a one-minute conversation every five minutes. Including the 15-second silence period gives 75/300 seconds of scheduled activity, or 25%. <a href="#p1">P1</a>, <a href="#p7">P7</a></p>
+<table>
+<thead>
+<tr>
+<th>Activation comparison</th>
+<th style="text-align:right">Continuous</th>
+<th style="text-align:right">Temple touch + silence timeout</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Scheduled duty cycle</td>
+<td style="text-align:right">100%</td>
+<td style="text-align:right">25%</td>
+</tr>
+<tr>
+<td>Reported traffic count</td>
+<td style="text-align:right">705</td>
+<td style="text-align:right">170</td>
+</tr>
+<tr>
+<td>Battery-level drop</td>
+<td style="text-align:right">28 percentage points</td>
+<td style="text-align:right">9 percentage points</td>
+</tr>
+</tbody>
+</table>
+<p>Traffic fell by 75.9%; battery depletion fell by 19 percentage points, approximately 68% relative depletion. This measures battery-gauge change, not electrical power. <a href="#p1">P1</a>, <a href="#p7">P7</a></p>
+<h4 id="processing">4.2.2 Selective server processing</h4>
+<p>Local photo recognition alone averaged <strong>1,927.9 ms</strong>, almost twice <strong>DR1's one-second budget</strong> for the complete cue workflow. This delay prompted analysis of the capture pipeline's bottlenecks. SCRFD preparation/inference/postprocessing took <strong>1,268.7 ms</strong>, and alignment, ArcFace inference, and matching <strong>639.1 ms</strong>, versus <strong>20.1 ms</strong> for JPEG decoding. Recognition dominated even before camera and display costs were included, motivating selective offloading. <a href="#p5">P5</a></p>
+<p>Camera handling, tracking, crop preparation, and rendering remain local; the laptop handles InsightFace <code>buffalo_l</code> recognition and lookup. Planned extraction also belongs there. This targets <strong>DR1</strong>, keeping position updates responsive. A separate battery benefit remains unmeasured. <a href="#p3">P3</a></p>
+<figure>
+<a href="https://raw.githubusercontent.com/wongwh2002/CDE4301-Hotel-Hospitality/main/docs/interim/assets/capture-offload-pipeline.svg" rel="noopener noreferrer" target="_blank"><img alt="Capture responsibilities: glasses handle temple touch and video/audio sensing; the server handles heavier multimodal analysis, insight extraction, guest association, and database updates in the intended full pipeline." height="260" loading="lazy" src="https://raw.githubusercontent.com/wongwh2002/CDE4301-Hotel-Hospitality/main/docs/interim/assets/capture-offload-pipeline.svg" width="1200"/></a>
+<figcaption><strong>Figure 5.</strong> Selective server allocation. Recognition is implemented; automatic preference extraction and updates remain planned.</figcaption>
+</figure>
+<p>The comparison used 15 warm probes per mode, the same enrolled 800 × 800 photo, five gallery identities, CPU execution, and 0.50/0.10 score/margin settings. Offline testing disabled Wi-Fi and stopped the laptop server. <a href="#p5">P5</a></p>
+<table>
+<thead>
+<tr>
+<th>Warm photo-recognition path</th>
+<th style="text-align:right">Mean</th>
+<th style="text-align:right">Median</th>
+<th style="text-align:right">Observed range</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Glasses → Wi-Fi → laptop → parsed response</td>
+<td style="text-align:right">1,350.6 ms</td>
+<td style="text-align:right">1,311.6 ms</td>
+<td style="text-align:right">1,220.1–1,513.7 ms</td>
+</tr>
+<tr>
+<td>Entire recognition on glasses</td>
+<td style="text-align:right">1,927.9 ms</td>
+<td style="text-align:right">1,896.0 ms</td>
+<td style="text-align:right">1,848.6–2,379.7 ms</td>
+</tr>
+</tbody>
+</table>
+<figure class="chart">
+<div class="chart-title">Recognition offloading: approximately 30% lower elapsed time</div>
+<div class="chart-subtitle">15 warm photo probes per mode · camera, enrolment and display excluded</div>
+<div class="bar-row"><span>Laptop via Wi-Fi</span><div class="bar-track"><div class="bar-fill" style="width:56.275%"></div></div><span class="bar-value">1,350.6 ms</span></div>
+<div class="bar-row"><span>On glasses</span><div class="bar-track"><div class="bar-fill secondary" style="width:80.329%"></div></div><span class="bar-value">1,927.9 ms</span></div>
+<div class="chart-axis"><span>0</span><span>1,200</span><span>2,400 ms</span></div>
+<figcaption><strong>Figure 6.</strong> Elapsed time decreased 29.9%. Self-reference probes establish neither recognition accuracy nor complete touch-to-cue performance.</figcaption>
+</figure>
+<p>The offloaded mean of <strong>1,350.6 ms still exceeds one second</strong>. Only one CPU laptop was tested; a more powerful server or accelerated inference could help. Gains require measurement alongside image-preparation and scheduling optimisation, then complete-path retesting (Section 5.2). <a href="#p5">P5</a></p>
+<h4 id="preference-extraction">4.2.3 Independent preference-extraction testing</h4>
+<p>For <strong>DR4, preference continuity</strong>, independent feasibility and accuracy tests isolate interpretation errors before glasses integration. Input is currently text; Whisper/audio capture is not connected. <a href="#p13">P13</a></p>
+<p>Two synthetic, speaker-labelled conversations supply three expected guest facts. The text-only prompt requests category, value, and exact guest quote in schema-constrained JSON. Python checks quotations against guest turns and requires values to appear in them. Outputs remain pending, without guest-record writes. The exploratory M1 Mac comparison evaluates guest-fact matches and processing time. <a href="#p1">P1</a>, <a href="#p13">P13</a></p>
+<table>
+<thead>
+<tr>
+<th>Reported local model</th>
+<th style="text-align:right">Valid JSON calls</th>
+<th style="text-align:right">Guest facts matched</th>
+<th style="text-align:right">Mean time/transcript</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>llama3.2:3b</code></td>
+<td style="text-align:right">2/2</td>
+<td style="text-align:right">1/3</td>
+<td style="text-align:right">76.1 s</td>
+</tr>
+<tr>
+<td><code>qwen3:4b-instruct</code></td>
+<td style="text-align:right">2/2</td>
+<td style="text-align:right">2/3</td>
+<td style="text-align:right">67.2 s</td>
+</tr>
+<tr>
+<td><code>gemma4:e2b</code></td>
+<td style="text-align:right">2/2</td>
+<td style="text-align:right">2/3</td>
+<td style="text-align:right">86.4 s</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Qwen is the provisional best model:</strong> it tied Gemma at 2/3 guest facts and was fastest at 67.2 seconds. Three facts cannot establish general accuracy; timing excludes recognition. <a href="#p1">P1</a>, <a href="#p13">P13</a></p>
+<p>Valid JSON did not prevent semantic confusion: Gemma treated “too sweet” as a preference and a dessert-safety question as dietary information. These errors motivate improvements <strong>before integration</strong>, including distinguishing complaints from lasting preferences and questions from disclosures. Quote/role checks, category rules, and refusal handling have been added; reviewer-labelled, held-out cases should test negation, corrections, attribution, and repeatability. Evaluate transcription separately when adding audio. <a href="#p13">P13</a></p>
+<h3 id="display">4.3 Display</h3>
+<p>Display testing uses user feedback on placement, readability, and relevance (Section 5.1); implementation checks verify rendering and stale-cue suppression. The pipeline identifies the guest, retrieves their record, and returns cues.</p>
+<figure>
+<a href="https://raw.githubusercontent.com/wongwh2002/CDE4301-Hotel-Hospitality/main/docs/interim/assets/display-pipeline.svg" rel="noopener noreferrer" target="_blank"><img alt="Display pipeline: temple touch activates capture on the glasses, the server recognises the guest and retrieves preferences, then returns information for display." height="328" loading="lazy" src="https://raw.githubusercontent.com/wongwh2002/CDE4301-Hotel-Hospitality/main/docs/interim/assets/display-pipeline.svg" width="1200"/></a>
+<figcaption><strong>Figure 7.</strong> Identity-to-record-to-display flow; the placement iteration adds local position updates.</figcaption>
+</figure>
+<h4 id="display-position">4.3.1 Positioning information beside the guest</h4>
+<p>Initially, cues occupied a fixed display position. User feedback and prototype validation prompted face-relative placement and central guest selection, aiming to reduce looking away from the guest and competing details from several visible faces. These iterations address <strong>DR3, glanceability</strong>. <a href="#p1">P1</a>, <a href="#p7">P7</a></p>
+<p>Google <strong>ML Kit</strong>, an on-device machine-learning toolkit, detects faces and tracks positions locally; InsightFace identifies the guest. The central <strong>30% of both view axes</strong> defines the selection region, choosing the face nearest its centre. This aims to show preferences for the guest receiving the employee's eye contact, avoiding details for everyone visible. Technically, it uses head direction as a proxy, not measured gaze. Only the latest frame is kept; a padded selected-face crop is sent about every two seconds. Bystanders may remain inside that crop. <a href="#p3">P3</a>, <a href="#r11">R11</a></p>
+<p>Local tracking updates placement between server responses. Calibration checks boundaries and overlap, suppressing labels without suitable space. Wearer fit and distance still need evaluation.</p>
+<figure>
+<div class="comparison-grid">
+<div><p class="comparison-label">Before · fixed position</p><a href="https://raw.githubusercontent.com/wongwh2002/CDE4301-Hotel-Hospitality/main/docs/interim/assets/ui/01-position-before.png" rel="noopener noreferrer" target="_blank"><img alt="Generated UI before placement refinement: Ethan Tan's name is at the upper right, away from his face." height="1200" loading="lazy" src="https://raw.githubusercontent.com/wongwh2002/CDE4301-Hotel-Hospitality/main/docs/interim/assets/ui/01-position-before.png" width="1200"/></a></div>
+<div><p class="comparison-label">After · beside the face</p><a href="https://raw.githubusercontent.com/wongwh2002/CDE4301-Hotel-Hospitality/main/docs/interim/assets/ui/02-position-after.png" rel="noopener noreferrer" target="_blank"><img alt="Generated UI after placement refinement: Ethan Tan's name is beside his face." height="1200" loading="lazy" src="https://raw.githubusercontent.com/wongwh2002/CDE4301-Hotel-Hospitality/main/docs/interim/assets/ui/02-position-after.png" width="1200"/></a></div>
+</div>
+<figcaption><strong>Figure 8.</strong> Generated UI comparison: local tracking brings the cue beside the guest; eye contact is unmeasured. [P12](#p12)</figcaption>
+</figure>
+<p><strong>Current identity matters (DR5).</strong> Crossing, sudden movement, or ambiguity clears the association. Responses older than two seconds are rejected, identities expire four seconds after submission, and stalled tracking clears cues within 500 ms. Tests check these safeguards and coordinate mapping, not field error rates. <a href="#p11">P11</a></p>
+<p>For DR1, cropping before processing removed a 2.2–2.4-second full-frame preparation bottleneck. On 27 October, the earlier SFace configuration averaged 200 ms from analysis callback to parsed response across 14 uploads. This supports that image-path iteration, not current-model or optical-display performance. <a href="#p3">P3</a></p>
+<h4 id="display-content">4.3.2 Replacing descriptions with concise icons</h4>
+<p>For <strong>DR3</strong>, long descriptions become a name and two compact cues; DR6 requires preferences and safety warnings to remain distinct. <a href="#p1">P1</a></p>
+<figure>
+<div class="comparison-grid">
+<div><p class="comparison-label">Before · written description</p><a href="https://raw.githubusercontent.com/wongwh2002/CDE4301-Hotel-Hospitality/main/docs/interim/assets/ui/03-content-before.png" rel="noopener noreferrer" target="_blank"><img alt="Generated UI before content refinement: Ethan Tan's name and the words Shellfish allergy." height="1200" loading="lazy" src="https://raw.githubusercontent.com/wongwh2002/CDE4301-Hotel-Hospitality/main/docs/interim/assets/ui/03-content-before.png" width="1200"/></a></div>
+<div><p class="comparison-label">After · compact icon</p><a href="https://raw.githubusercontent.com/wongwh2002/CDE4301-Hotel-Hospitality/main/docs/interim/assets/ui/04-content-after.png" rel="noopener noreferrer" target="_blank"><img alt="Generated UI after content refinement: the written allergy description becomes a shellfish symbol with a warning marker." height="1200" loading="lazy" src="https://raw.githubusercontent.com/wongwh2002/CDE4301-Hotel-Hospitality/main/docs/interim/assets/ui/04-content-after.png" width="1200"/></a></div>
+</div>
+<figcaption><strong>Figure 9.</strong> Generated UI comparison: text becomes an item-and-warning icon. The allergy is a fictional demo cue. [P12](#p12)</figcaption>
+</figure>
+<p>Item symbols combine with heart, crossed-out-heart, and warning markers for preference, dislike, and fictional allergy, without relying on colour alone. Bundled icons appear beneath the name without extra downloads. <a href="#p3">P3</a></p>
+<figure>
+<a href="https://raw.githubusercontent.com/wongwh2002/CDE4301-Hotel-Hospitality/main/docs/interim/assets/icon-reference.svg" rel="noopener noreferrer" target="_blank"><img alt="Complete supported icon catalogue: king room, twin room, suite, smoking-allowed room, black coffee, green tea, still water, vegetarian food, shellfish, peanuts, milk, and eggs; separate prefer, dislike, and demo-allergy markers; three combined examples." height="1000" loading="lazy" src="https://raw.githubusercontent.com/wongwh2002/CDE4301-Hotel-Hospitality/main/docs/interim/assets/icon-reference.png" width="1600"/></a>
+<figcaption><strong>Figure 10.</strong> All 12 supported item icons and three independent markers, with combined examples. Allergy assignments are fictional. [P3](#p3)</figcaption>
+</figure>
+<p>Two-cue limits, warning priority, and Unknown suppression are implemented. Device/tracking tests verify cue placement and simultaneous name/icon clearing; unaided symbol comprehension needs user evaluation. <a href="#p11">P11</a></p>
+<p>Transient content follows platform guidance, while attention research cautions against assuming unobtrusiveness. Comprehension, glance duration, and conversational use need evaluation in Section 5.1. <a href="#r8">R8</a>, <a href="#r9">R9</a></p>
+<h4 id="contextual-retrieval">4.3.3 Retrieving contextually relevant preferences</h4>
+<p>In the proposed pipeline, face recognition determines <strong>whose record</strong> to retrieve; audio-derived conversation context determines <strong>which fields</strong> to show. The server combines them to return selected preferences.</p>
+<figure>
+<a href="https://raw.githubusercontent.com/wongwh2002/CDE4301-Hotel-Hospitality/main/docs/interim/assets/context-pipeline.svg" rel="noopener noreferrer" target="_blank"><img alt="Proposed server pipeline: audio determines conversation context, face recognition determines guest identity, and both guide retrieval of selected guest preferences for display." height="400" loading="lazy" src="https://raw.githubusercontent.com/wongwh2002/CDE4301-Hotel-Hospitality/main/docs/interim/assets/context-pipeline.svg" width="1200"/></a>
+<figcaption><strong>Figure 11.</strong> Proposed contextual retrieval, combining identity and conversation context.</figcaption>
+</figure>
+<p>A twin-room icon may be readable but irrelevant to a drinks order. Filtering targets <strong>DR3 and DR6</strong> by selecting a confirmed drink preference during dining, using checked records for DR4. Safety-related information needs explicit priority and hotel verification rules rather than disappearing when another topic is selected. <a href="#p1">P1</a></p>
+<figure>
+<div class="comparison-grid">
+<div><p class="comparison-label">Before · unrelated room preferences</p><a href="https://raw.githubusercontent.com/wongwh2002/CDE4301-Hotel-Hospitality/main/docs/interim/assets/ui/05-context-before-extra-room-icons.png" rel="noopener noreferrer" target="_blank"><img alt="Generated UI before contextual filtering: several room preference icons are displayed during a restaurant interaction." height="1254" loading="lazy" src="https://raw.githubusercontent.com/wongwh2002/CDE4301-Hotel-Hospitality/main/docs/interim/assets/ui/05-context-before-extra-room-icons.png" width="1254"/></a></div>
+<div><p class="comparison-label">Proposed after · relevant drink preference</p><a href="https://raw.githubusercontent.com/wongwh2002/CDE4301-Hotel-Hospitality/main/docs/interim/assets/ui/06-context-after.png" rel="noopener noreferrer" target="_blank"><img alt="Generated UI of the proposed context refinement: a coffee preference replaces unrelated room icons during dining." height="1200" loading="lazy" src="https://raw.githubusercontent.com/wongwh2002/CDE4301-Hotel-Hospitality/main/docs/interim/assets/ui/06-context-after.png" width="1200"/></a></div>
+</div>
+<figcaption><strong>Figure 12.</strong> Generated UI comparison illustrating the proposed relevance filter; it is not evidence of implemented conversation understanding. [P12](#p12)</figcaption>
+</figure>
+<p><strong>Implementation boundary.</strong> The prototype prioritises warnings and selects up to two prepared cues. Conversation-based ranking is not implemented; microphone activity only controls session duration. <a href="#p3">P3</a></p>
+<p>Participants' feedback motivates comparing filtering in identical scenarios, recording useful/omitted cues, interpretation, and interruption.</p>
+<h3 id="system-architecture">4.4 Complete system architecture</h3>
+<p>Figure 13 combines the iterations in the <strong>Rokid RV101 → Wi-Fi/HTTP → laptop → display</strong> architecture. Solid paths describe current functions; the dashed extension is planned. <a href="#p10">P10</a></p>
+<figure>
+<a aria-label="Open the full system architecture as a scalable diagram" href="https://raw.githubusercontent.com/wongwh2002/CDE4301-Hotel-Hospitality/main/docs/interim/assets/system-architecture.svg" rel="noopener noreferrer" target="_blank">
+<img alt="Full Rokid architecture: local session control, camera tracking, focus gate, speech activity, network client and display; laptop HTTP API, SCRFD and ArcFace recognition, gallery embeddings and guest-cue caches; dashed future audio-preference pipeline." height="1560" loading="lazy" src="https://raw.githubusercontent.com/wongwh2002/CDE4301-Hotel-Hospitality/main/docs/interim/assets/system-architecture.png" width="2400"/>
+</a>
+<figcaption><strong>Figure 13.</strong> Full implemented architecture and proposed audio-preference extension. <a href="https://raw.githubusercontent.com/wongwh2002/CDE4301-Hotel-Hospitality/main/docs/interim/assets/system-architecture.svg" rel="noopener noreferrer" target="_blank">Open the scalable diagram ↗</a> or <a href="https://raw.githubusercontent.com/wongwh2002/CDE4301-Hotel-Hospitality/main/docs/interim/assets/system-architecture.png" rel="noopener noreferrer" target="_blank">view the full-resolution PNG ↗</a>. Source: <a href="#p10">P10</a>.</figcaption>
+</figure>
+<p><strong>Communication.</strong> One request at a time prevents backlogs; expiry rejects late answers. A swipe checks connectivity. <a href="#p3">P3</a></p>
+<p><strong>Recognition.</strong> Cached-template matching uses a 0.45 similarity threshold and 0.10 margin over the next identity. Lowering the threshold from 0.50 after frequent Unknown results made acceptance more permissive; false matches need representative validation. Similarity is not a correctness probability. <a href="#p3">P3</a>, <a href="#p11">P11</a></p>
+<p><strong>Records.</strong> Cached profiles avoid repeated reads; Unknown/missing profiles receive no cues. Incoming camera images are not saved.</p>
+<p>For DR4, SQLite edits still require restart to refresh cues; opaque guest IDs must replace name-based lookup for same-name guests. Shared storage alone cannot establish live continuity.</p>
+<p>The dashed extension adds audio upload, local Whisper, hosted Gemini extraction, and reviewed SQLite updates; no cloud endpoint is connected yet. The separate card-entry scaffold's active cohort and temporal voting are not integrated here. <a href="#p6">P6</a>, <a href="#p10">P10</a></p>
+<h2 id="testing">5. User validation and system evaluation</h2>
+<h3 id="user-validation">5.1 User validation</h3>
+<p>The team conducted a walkthrough and product testing with <strong>10 non-hotel participants</strong>, examining activation, potential usefulness, and cue use. This formative work supports problem finding and prototyping, rather than proving improved hotel service. <a href="#p1">P1</a></p>
+<table>
+<thead>
+<tr>
+<th>Walkthrough question</th>
+<th>Reported finding</th>
+<th>Design implication</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Is starting capture/display easy?</td>
+<td>All 10 described activation as easy.</td>
+<td>Retain single-tap activation; test it during realistic staff tasks.</td>
+</tr>
+<tr>
+<td>Could cues help serve guests?</td>
+<td>70% saw potential usefulness, but some icons were unrelated to the conversation.</td>
+<td>Develop contextual retrieval and assess whether it enables a specific service action.</td>
+</tr>
+<tr>
+<td>Can cues be used naturally?</td>
+<td>Most described a quick glance as sufficient, but incorporating cues into conversation was challenging.</td>
+<td>Test timing, meaning, and conversational flow together; investigate design changes as well as training.</td>
+</tr>
+</tbody>
+</table>
+<p>The distinction between reading and using a cue is central. Recognising a coffee icon does not establish when or how to introduce a preference naturally. The findings connect the icon iteration in Section 4.3.2 to the relevance iteration in Section 4.3.3: shorter content can still interrupt service if it is poorly timed or unrelated to the task.</p>
+<p>Without a controlled baseline, archived individual responses, or objective glance/attention measurements, the non-staff study cannot establish hotel-employee usability. Its value is identifying problems for the next prototype, rather than proving reduced cognitive load, maintained eye contact, or satisfaction.</p>
+<h3 id="requirements-check">5.2 Design requirements and whole-system testing</h3>
+<p>The requirements check combines the walkthrough with the demonstrated <strong>tap → guest selection → recognition → prepared-profile retrieval → rendering</strong> path. Conversation → approved preference update → another employee's appropriate service action remains incomplete. The assessment below covers Chapter 2's service requirements and the safeguards needed for correct association and appropriate information.</p>
+<p>On 3 November, 13 live activations included rapid retaps. Five produced known-name-plus-icon drawing events; four also recorded Android frame commits. Those four successful warm retaps averaged <strong>1,180 ms</strong>, median <strong>1,198.5 ms</strong>, range <strong>974–1,349 ms</strong>. <a href="#p4">P4</a></p>
+<table>
+<thead>
+<tr>
+<th>Integrated stage, four recorded commits</th>
+<th style="text-align:right">Mean</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Handled tap → successful request sent: camera, detection, selection, encoding, scheduling</td>
+<td style="text-align:right">693 ms</td>
+</tr>
+<tr>
+<td>HTTP request → parsed response, including inference</td>
+<td style="text-align:right">302 ms</td>
+</tr>
+<tr>
+<td>Parsed response → name/icon drawing</td>
+<td style="text-align:right">101.3 ms</td>
+</tr>
+<tr>
+<td>Drawing → Android frame commit</td>
+<td style="text-align:right">83.8 ms</td>
+</tr>
+<tr>
+<td>Total</td>
+<td style="text-align:right"><strong>1,180 ms</strong></td>
+</tr>
+</tbody>
+</table>
+<p>Inference averaged 177.5 ms within HTTP time and must not be counted twice. The largest stage precedes sending the successful request, directing improvement toward capture/selection and scheduling as well as server inference. One additional draw took 4,412 ms without a commit recorded before the next activation; eight activations had no accepted information draw before another tap. Retaps interrupt work, so these counts do not establish accuracy or an independent success rate. Frame commit is a software endpoint, and clean cold-start performance remains unconfirmed.</p>
+<table>
+<thead>
+<tr>
+<th>Requirement</th>
+<th>Current evidence</th>
+<th>Assessment and next verification</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>DR1 · Timely support:</strong> cue within &lt;1 s</td>
+<td>Four successful warm commits averaged 1.18 s; slower/interrupted cases also occurred.</td>
+<td><strong>Target not met.</strong> Repeat independent cold/warm trials and count failures.</td>
+</tr>
+<tr>
+<td><strong>DR2 · Low effort:</strong> single tap and automatic silence expiry</td>
+<td>Activation was easy for all 10 participants; component checks support the deadline and resource release.</td>
+<td><strong>Supported formatively.</strong> Test staff task interference and expiry in realistic noise.</td>
+</tr>
+<tr>
+<td><strong>DR3 · Glanceability:</strong> concise cues during conversation</td>
+<td>Icons are implemented; 70% reported needing only a quick glance, but natural conversational use remained difficult.</td>
+<td><strong>Partially achieved.</strong> Compare comprehension, attention shifts, and conversational flow with a baseline.</td>
+</tr>
+<tr>
+<td><strong>DR4 · Preference continuity:</strong> approved update reaches another employee</td>
+<td>Prepared profiles are retrieved; extraction is inconsistent and profiles are cached at startup.</td>
+<td><strong>Incomplete.</strong> Test captured statement → review → refreshed record → next employee's action.</td>
+</tr>
+<tr>
+<td><strong>DR5 · Correct association:</strong> suppress uncertain/stale cues</td>
+<td>Tests exercise Unknown, reused/crossing tracks, expiry, and cancellation.</td>
+<td><strong>Safeguards implemented; field performance unknown.</strong> Count wrong-profile reveals and misses on held-out, crowded scenes.</td>
+</tr>
+<tr>
+<td><strong>DR6 · Appropriate information:</strong> relevant fields and distinct allergy handling</td>
+<td>Two-cue limit and fictional allergy markers exist; irrelevant content was reported.</td>
+<td><strong>Partially achieved in demo data.</strong> Validate contextual selection, interpretation, permissions, and fallback.</td>
+</tr>
+</tbody>
+</table>
+<p>The system demonstrates a working retrieval-and-display mechanism, while the service benefit and complete handover remain evaluation tasks. The component offloading experiment has different timing boundaries and cannot enlarge the four-commit sample.</p>
+<h3 id="guest-acceptance">5.3 Limitations and guest acceptance</h3>
+<p>A separate exploratory survey asked how comfortable respondents would be with hotels noting and storing preferences for better service. Ratings 4 and 5 account for 31.3% and 9.4%, giving <strong>40.7% rating 4 or 5</strong>. Responses therefore do not establish majority acceptance. The recruitment method and denominator are not supplied, so this is exploratory feedback rather than a representative guest estimate. <a href="#p1">P1</a></p>
+<p>Preference-storage comfort also does not establish acceptance of facial images, purchase-history processing, or recorded conversations. The next study should distinguish those activities, explain purpose and access, and allow guests to express different choices. A lounge access tap alone does not demonstrate permission for every proposed use. The PDPA and PDPC biometric guidance are reference points for review with the hotel and university; the latter concerns security applications rather than approving this hospitality workflow. <a href="#r10">R10</a></p>
+<p>The implemented microphone currently detects activity locally, whereas the planned extension would introduce audio/transcript handling and an external model service. That change needs its own participant and data protocol. Face thresholds and track guards reduce particular failure paths but have not been evaluated for representative error rates. Fictional allergy icons likewise test presentation, not food safety. These limits define the next-stage study boundary; they do not negate the present prototype's value for discovering usability and integration problems.</p>
+<h3 id="next-development">5.4 Next development and validation steps</h3>
+<p>The findings identify three priorities for the next phase, each with evidence needed to judge progress. Hotel-staff evaluation will determine whether the revised workflow is useful in practice. <a href="#p1">P1</a></p>
+<p><strong>Refine extraction and contextual retrieval.</strong> Create a human-labelled set covering explicit preferences, requests, complaints, negation, corrections, and multiple speakers. Compare transcript-only and multimodal processing on the same cases, retaining prompts, model versions, supporting excerpts, and timing. Add staff correction and approval before a write, reliable guest association, and cache refresh. Success requires a supported preference to reach a second employee, with irrelevant or superseded cues withheld; a shared database alone is insufficient.</p>
+<p><strong>Run a hotel-staff usability pilot.</strong> Compare glasses with ordinary profile lookup using equivalent guest information, counterbalanced scenarios, and equal practice. Measure correct interpretation, service action, time to the first useful cue, interruptions, and perceived conversational fit. Distinguish interface problems from training needs. Guiding-question cues may help staff elicit preferences, but should be tested for naturalness rather than installed as a mandatory script. Broader cold/warm latency, identity, network-failure, and battery trials should accompany the service tasks.</p>
+<p><strong>Develop evidence-linked LQA support.</strong> Begin with the selected 15-item F&amp;B subset and provisional, human-reviewed observations. Each output should identify the applicable criterion, timestamped supporting evidence, and missing context. Keep “not applicable,” “insufficient evidence,” and a supported service gap distinct. Compare outputs with trained reviewers before using them for coaching or service recovery; the prototype cannot yet justify an overall LQA grade or automatic employee ranking. <a href="#p8">P8</a></p>
+<p>Chapter 6 provides the phased work plan, while Appendix B specifies the comparison protocol. This progression turns the interim prototype into a more complete, testable service workflow without presenting planned validation as an accomplished result.</p>
+<h2 id="next-stage">6. Limitations, responsible use, and next-stage plan</h2>
+<p>The strongest interim outcome is a tangible recognition-and-display prototype supported by component measurements and formative feedback. The complete capture → approved update → another employee's relevant service action has not yet been validated. Several implementation and study boundaries determine the next phase.</p>
+<p><strong>Identity and data quality.</strong> A similarity threshold is not a calibrated guarantee. The current demo lacks a held-out, representative test of false identity matches, missed matches, and incorrect profile disclosure. New preference records need a confirmed guest, an exact supporting statement, a timestamp, and a distinction between current-stay and enduring information. Corrections must supersede outdated cues. Fictional allergy assignments demonstrate display behaviour only; an empty cue list does not mean a guest has no allergy. <a href="#p3">P3</a></p>
+<p><strong>Guest and employee control.</strong> The planned use links face images, service conversations, preferences, and potentially staff-performance assessments. Each needs a defined purpose, appropriate notification and consent or other reviewed basis, limited access, correction, and retention arrangements. The official PDPC biometric guide concerns security applications and is a reference point rather than approval for this hospitality use. A room-card access tap or a preference-storage survey response does not itself authorise face recognition or audio capture. Approval for the test setting must therefore be extended into an explicit study protocol before real-guest testing. <a href="#r10">R10</a>, <a href="#p2">P2</a></p>
+<p><strong>Allergy handling.</strong> A cue should prompt discreet reconfirmation and checking against the authorised allergen/menu source. Staff must follow the hotel's food-service procedure. Face matching must not infer an allergy, and the prototype does not certify that a meal is safe.</p>
+<p><strong>Service-standard analysis.</strong> Future LQA-related processing should return evidence-linked provisional observations for human review. Missing evidence, an inapplicable criterion, and a demonstrated service gap require separate labels. The selected 15-item F&amp;B subset cannot support an overall LQA grade or automatic staff ranking. Expert agreement and factual grounding need evaluation before such outputs affect employee assessment. <a href="#p8">P8</a></p>
+<p>The following is a proposed sequence for Semester 2, with weeks relative to its start; it is a work plan rather than a confirmed hotel booking.</p>
+<table>
+<thead>
+<tr>
+<th>Window</th>
+<th>Work package and deliverable</th>
+<th>Decision or evidence required</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Weeks 1–2</td>
+<td>Confirm one lounge service moment, staff roles, existing profile path, data permissions, and cue categories with the partner.</td>
+<td>Agreed workflow map, baseline task, and participant/data protocol.</td>
+</tr>
+<tr>
+<td>Weeks 2–4</td>
+<td>Build an extraction evaluation set with explicit preferences, questions, complaints, corrections, multiple speakers, and visual-only observations.</td>
+<td>Versioned prompts/models; human-labelled facts; precision, recall, unsupported claims, and attribution errors.</td>
+</tr>
+<tr>
+<td>Weeks 3–5</td>
+<td>Implement staff review/correction before profile writes and contextual retrieval for one F&amp;B task.</td>
+<td>Approved update reaches a second employee; irrelevant and superseded cues are withheld.</td>
+</tr>
+<tr>
+<td>Weeks 4–6</td>
+<td>Test recognition on held-out images, ambiguous guests, track changes, and network failure; repeat independent cold/warm timing and longer battery trials.</td>
+<td>Report every activation and failure, p50/p95 where supported, false reveals, starting charge, duration, and complete traces.</td>
+</tr>
+<tr>
+<td>Weeks 6–8</td>
+<td>Run an approved formative pilot with approximately 6–8 hotel staff, subject to access, using counterbalanced phone and glasses tasks.</td>
+<td>Correct guest/action, cue comprehension, task time, attention shifts, guest-perceived fit in staged encounters, and qualitative feedback.</td>
+</tr>
+<tr>
+<td>Weeks 9–10</td>
+<td>Refine the most consequential failures; demonstrate the complete same-stay handover and report the comparison.</td>
+<td>A traceable requirements check and a supported decision about continuing with the wearable.</td>
+</tr>
+</tbody>
+</table>
+<p>Proposed acceptance gates are zero observed wrong-profile reveals in the defined test set, source-supported approved preferences, reliable no-match fallback, and improved task performance without poorer comprehension or conversational flow. Zero observed errors would remain a bounded sample result. Final numerical targets and sample sizes should be agreed before testing. Deployment cost should subsequently include hardware, server/network resources, integration, charging, maintenance, and training; the current evidence is insufficient for a credible ROI estimate.</p>
+<h2 id="contributions">7. Team contributions</h2>
+<p>The team confirmed the following division, following the presentation split. This records the main areas of work without assigning undocumented individual ownership of particular experiments. <a href="#p7">P7</a></p>
+<table>
+<thead>
+<tr>
+<th>Team member</th>
+<th>Main area of contribution</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Neha Rajan</td>
+<td>Problem investigation and framing; hotel/business context, service quality, and the rationale for personalisation.</td>
+</tr>
+<tr>
+<td>Nigel Yeo Tong Wei</td>
+<td>Problem investigation and framing; current guest-information practices, first-time guest needs, and the design challenge.</td>
+</tr>
+<tr>
+<td>Wong Weng Hong</td>
+<td>Solution development; functional requirements, concept comparison, and the proposed staff/guest journey.</td>
+</tr>
+<tr>
+<td>Tan Ping Hui</td>
+<td>Solution development; technical implementation, prototype iterations, testing, and the next development steps.</td>
+</tr>
+</tbody>
+</table>
+<p>The interim contribution is an implemented service-support mechanism and a clearer account of what must be tested next. Whether the mechanism improves hotel service remains the central evaluation question for the next stage.</p>
+<h2 id="references">References and project evidence</h2>
+<div class="references">
+<p id="r1"><strong>R1.</strong> Lei, S. S. I., Wang, D., Fong, L. H. N., &amp; Ye, S. (2024). “Recipe for perceived personalization in hotels.” <em>Tourism Management, 100</em>, 104818. <a href="https://research.polyu.edu.hk/en/publications/recipe-for-perceived-personalization-in-hotels/">Institutional publication record and abstract</a> · <a href="https://doi.org/10.1016/j.tourman.2023.104818">DOI</a>.</p>
+<p id="r2"><strong>R2.</strong> Medallia Market Research (2024). <em>Understanding Personalization Efforts in the Hospitality and Retail Industries.</em> <a href="https://www.medallia.com/wp-content/uploads/pdf/resources/Medallia-Understanding-Personalization-Efforts-in-the-Hospitality-and-Retail-Industries-Report.pdf">Original report</a>. Vendor-produced U.S. guest survey.</p>
+<p id="r3"><strong>R3.</strong> Piccoli, G., Lui, T.-W., &amp; Grün, B. (2017). “The impact of IT-enabled customer service systems on service personalization, customer service perceptions, and hotel performance.” <em>Tourism Management, 59</em>, 349–362. <a href="https://dds.cct.lsu.edu/ddslab/pdf/piccoliLuiGruen.pdf">Author-hosted article</a> · <a href="https://doi.org/10.1016/j.tourman.2016.08.015">DOI</a>.</p>
+<p id="r4"><strong>R4.</strong> LQA. <a href="https://lqagroup.com/hotel-assessments/">Hotel assessments</a>. Public description of its quality-assessment framework; accessed 10 November 2026.</p>
+<p id="r5"><strong>R5.</strong> Oracle. <a href="https://docs.oracle.com/en/industries/hospitality/opera-cloud/25.4/ocsuh/ch_profiles_intro.htm">OPERA Cloud 25.4: Profiles</a>. Official product documentation; accessed 10 November 2026.</p>
+<p id="r6"><strong>R6.</strong> hotelkit. <a href="https://hotelkit.net/solutions/guest-services/">Guest services</a>. Vendor-described request assignment and complaint follow-up; accessed 10 November 2026.</p>
+<p id="r7"><strong>R7.</strong> SoftServe. <a href="https://www.softserveinc.com/en-us/resources/hands-free-face-id-demo">Hands-Free Face ID</a>. Public AR identification demonstration; accessed 10 November 2026.</p>
+<p id="r8"><strong>R8.</strong> Google. <a href="https://developer.android.com/design/ui/ai-glasses/guides/foundations/design-principles">AI Glasses design principles</a>. Official design guidance; accessed 10 November 2026.</p>
+<p id="r9"><strong>R9.</strong> Lewis, J. E., &amp; Neider, M. B. (2016). “Through the Google Glass: The impact of heads-up displays on visual attention.” <em>Cognitive Research: Principles and Implications, 1</em>, 13. <a href="https://doi.org/10.1186/s41235-016-0015-6">Open-access article</a>.</p>
+<p id="r10"><strong>R10.</strong> Personal Data Protection Commission Singapore (2022). <a href="https://www.pdpc.gov.sg/-/media/files/pdpc/pdf-files/other-guides/guide-to-biometric_17may2022.pdf">Guide on Responsible Use of Biometric Data in Security Applications</a>. Scope: security applications. See also <a href="https://sso.agc.gov.sg/Act/PDPA2012">Personal Data Protection Act 2012</a>, Singapore Statutes Online.</p>
+<p id="r11"><strong>R11.</strong> Google. <a href="https://developers.google.com/ml-kit/vision/face-detection">Face detection documentation</a>. On-device detection and tracking, distinct from identity recognition; accessed 10 November 2026.</p>
+<p id="p1"><strong>P1.</strong> Team IS-432 (5 November 2026). <a href="https://github.com/wongwh2002/CDE4301-Hotel-Hospitality/blob/main/docs/interim/Slides.pdf">Interim presentation, 37 slides</a>; <a href="https://github.com/wongwh2002/CDE4301-Hotel-Hospitality/blob/main/docs/interim/Recording.mp4">presentation recording, 29 min 18 s</a>; <a href="https://github.com/wongwh2002/CDE4301-Hotel-Hospitality/blob/main/docs/interim/transcript.html">timestamped transcript</a>. Slide numbers in this report refer to the supplied PDF.</p>
+<p id="p2"><strong>P2.</strong> Project field records: <a href="https://github.com/wongwh2002/CDE4301-Hotel-Hospitality/blob/main/hotel-visit/novotel-formatted.md">Novotel formatted visit notes</a>; <a href="https://github.com/wongwh2002/CDE4301-Hotel-Hospitality/blob/main/hotel-visit/parkroyal-main-points.md">PARKROYAL visit summary</a>; <a href="https://github.com/wongwh2002/CDE4301-Hotel-Hospitality/blob/main/hotel-visit/raw-notes/parkroyal-oct-visit-transcript.md">later PARKROYAL discussion transcript and source caveats</a>. These records have different evidence quality; formatted field notes are paraphrases.</p>
+<p id="p3"><strong>P3.</strong> <a href="https://github.com/wongwh2002/CDE4301-Hotel-Hospitality/blob/main/rokid/README.md">Rokid prototype implementation and validation notes</a>; <a href="https://github.com/wongwh2002/CDE4301-Hotel-Hospitality/tree/main/rokid/app/src/main/java/com/example/rokid_app">Android implementation</a>; <a href="https://github.com/wongwh2002/CDE4301-Hotel-Hospitality/blob/main/rokid/server/GUEST_PREFERENCES.md">demo guest cue schema and rendering</a>.</p>
+<p id="p4"><strong>P4.</strong> <a href="https://github.com/wongwh2002/CDE4301-Hotel-Hospitality/blob/main/rokid/DISPLAY_LATENCY_BENCHMARK.md">Temple touch to displayed information</a>, live RV101 series, 3 November 2026. This is the source for the four frame-commit observations and their timing boundaries.</p>
+<p id="p5"><strong>P5.</strong> <a href="https://github.com/wongwh2002/CDE4301-Hotel-Hospitality/blob/main/rokid/LATENCY_BENCHMARK.md">Server versus on-device photo-recognition benchmark</a> and <a href="https://github.com/wongwh2002/CDE4301-Hotel-Hospitality/blob/main/rokid/RETRIEVAL_MODE_BENCHMARK.md">retrieval-mode and battery replay comparisons</a>, 2 November 2026.</p>
+<p id="p6"><strong>P6.</strong> <a href="https://github.com/wongwh2002/CDE4301-Hotel-Hospitality/blob/main/README.md">Local POC scaffold</a>; <a href="https://github.com/wongwh2002/CDE4301-Hotel-Hospitality/blob/main/docs/architecture/hotel-lounge-smart-glasses-poc.html">interactive proposed architecture</a>; <a href="https://github.com/wongwh2002/CDE4301-Hotel-Hospitality/blob/main/docs/agents/hotel-smart-glasses-poc.md">project framing</a>. Architecture status remains proposed.</p>
+<p id="p7"><strong>P7.</strong> Team clarifications, 10–11 November 2026: the 20-minute battery test was verified; no local raw file is available. Neha/Nigel mainly addressed the problem; Weng Hong/Ping Hui the solution. Battery life motivated temple touch; user feedback/validation preceded face-relative placement and central selection.</p>
+<p id="p8"><strong>P8.</strong> <a href="https://github.com/wongwh2002/CDE4301-Hotel-Hospitality/blob/main/docs/research/source-materials/PARKROYAL-COLLECTION-2026-FB-LQA-15-Selected.csv">Current selected 15-item F&amp;B table</a> · <a href="https://github.com/wongwh2002/CDE4301-Hotel-Hospitality/blob/main/docs/research/source-materials/PARKROYAL-COLLECTION-2026-FB-LQA-15-Selected.pdf">PDF preview</a> · <a href="https://github.com/wongwh2002/CDE4301-Hotel-Hospitality/blob/main/docs/research/fb-conversation-checker-prototype-subset.md">checker evidence and evaluation guidance</a>. The current table supersedes earlier candidate-list numbering.</p>
+<p id="p9"><strong>P9.</strong> CDE4301 <a href="https://github.com/wongwh2002/CDE4301-Hotel-Hospitality/blob/main/docs/rubrics/CDE4301%20assessment%20brief%20and%20rubrics%20-%20AY2026%20-%20interim%20assessment.pdf">interim assessment brief and rubric</a>. Four-person group: 6,000-word limit excluding appendices; individual areas of work must be identified.</p>
+<p id="p10"><strong>P10.</strong> <a href="https://raw.githubusercontent.com/wongwh2002/CDE4301-Hotel-Hospitality/main/docs/interim/assets/system-architecture.png">Full Rokid system architecture</a> · <a href="https://raw.githubusercontent.com/wongwh2002/CDE4301-Hotel-Hospitality/main/docs/interim/assets/system-architecture.svg">scalable SVG</a>. Adapted from <code>rokid/output/architecture/rokid-system-architecture.svg</code>: local detector label generalised; architecture unchanged. The dashed audio-preference extension remains planned.</p>
+<p id="p11"><strong>P11.</strong> Implementation-level checks: <a href="https://github.com/wongwh2002/CDE4301-Hotel-Hospitality/tree/main/rokid/app/src/test/java/com/example/rokid_app">Android unit tests for session, focus, tracking, and image buffers</a>; <a href="https://github.com/wongwh2002/CDE4301-Hotel-Hospitality/tree/main/rokid/app/src/androidTest/java/com/example/rokid_app">device tests for microphone/VAD, request deadlines, and cue rendering</a>; <a href="https://github.com/wongwh2002/CDE4301-Hotel-Hospitality/tree/main/rokid/server">server recognition, API, and guest-cue tests</a>. Test presence describes verification coverage; recorded execution results are attributed to P3.</p>
+<p id="p12"><strong>P12.</strong> <a href="https://github.com/wongwh2002/CDE4301-Hotel-Hospitality/tree/main/rokid/output/slide-20-ui/screenshots">Generated prototype UI illustrations</a>, reproduced unchanged: position, content, and context before/after pairs. Pipeline diagrams redraw the supplied presentation's flows; contextual filtering remains proposed.</p>
+<p id="p13"><strong>P13.</strong> Team-supplied “Note worker testing” summary, provided 11 November 2026. <a href="https://github.com/wongwh2002/CDE4301-Hotel-Hospitality/blob/main/docs/interim/evidence/preference-extraction-test-summary.md">Transcribed method and reported findings</a>. Synthetic text-only evaluation; raw model runs are not supplied.</p>
+</div>
+<!-- APPENDICES -->
+<h2 id="evidence-notes">Appendix A. Evidence reconciliation</h2>
+<p>This appendix records differences between presentation summaries and the narrower evidence retained in the repository. It makes the report's interpretation reproducible without changing the supplied slides or recording.</p>
+<table>
+<thead>
+<tr>
+<th>Presentation statement</th>
+<th>Treatment in this report</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Slide 27: 67% “power reduction,” traffic 705 → 170, battery 28% → 9%</td>
+<td>Included as a team-confirmed 20-minute test. The directly reported quantity is battery-level depletion. The relative reduction calculated from the rounded values is 67.9%; electrical energy and average power were not measured.</td>
+</tr>
+<tr>
+<td>Slide 28: 30% faster, 1.69 → 1.18 s, average over 15 runs</td>
+<td>Kept separate from documented protocols. The reproducible 15-probe photo test measured 1.9279 → 1.3506 s, also approximately 30% faster. The 1.18 s figure is supported by four successful warm frame commits in a different live series; a paired 15-run touch-to-display comparison is not archived.</td>
+</tr>
+<tr>
+<td>Slide 28: three local extraction models</td>
+<td>Timing retained from the presentation; P13 adds the text-only protocol, JSON checks, six targeted staff labels, three guest facts, and reported errors. These are exploratory summaries, not broad accuracy estimates or a complete LQA score.</td>
+</tr>
+<tr>
+<td>Slides 33–34: 70% usefulness / quick glance</td>
+<td>Attributed to the team's 10-person non-staff walkthrough. The two questions are not treated as interchangeable objective performance measures.</td>
+</tr>
+<tr>
+<td>Slide 35: &gt;40% willingness, “rated &gt;4/5,” extended to facial images and purchase history</td>
+<td>The displayed preference-storage chart has 31.3% at 4 and 9.4% at 5: 40.7% rated <strong>4 or 5</strong>, while only 9.4% rated <strong>above 4</strong>. The displayed question does not establish willingness to share facial images, purchase histories, or recorded conversations. Recruitment and denominator are not given.</td>
+</tr>
+<tr>
+<td>Slide 19: first-time guests have “no information”</td>
+<td>Narrowed to limited prior-stay history. Pre-arrival and same-stay information can already exist.</td>
+</tr>
+<tr>
+<td>Slide 11 / speech: loyalty membership treated as returning-guest share</td>
+<td>No retention estimate is derived from membership. Membership and a completed repeat stay are different measures.</td>
+</tr>
+<tr>
+<td>Slides 7–8: LQA and classification</td>
+<td>Used as a quality/service framework. LQA assessment is not treated as the authority assigning hotel star classification.</td>
+</tr>
+<tr>
+<td>Demonstration describes “eye contact”</td>
+<td>Described technically as a centred face/head-direction proxy. The current prototype has no eye tracker.</td>
+</tr>
+</tbody>
+</table>
+<h2 id="evaluation-protocol">Appendix B. Reproducible next-stage evaluation</h2>
+<p><strong>Staged service comparison.</strong> Recruit an approved formative staff sample, record role and relevant experience, and use synthetic profiles with consenting role-play guests. Counterbalance phone and glasses conditions and scenario order. Give both conditions the same guest context and equal practice. Include a relevant drink preference, an unrelated room preference, a corrected preference, an unknown guest, two nearby enrolled guests, a fictional allergy alert, and a disconnected-server case.</p>
+<p>For each trial, record activation, first correctly rendered cue, correct interpretation, chosen service action, interruptions/attention shifts, assistance, and completion. Count all attempts, including no-result cases. Ask the role-play guest whether the action fitted the stated need. Use an observer and a fixed rubric; separate interpretation errors from wrong guest association and model extraction failures. Report participant-level results and uncertainty rather than treating repeated trials from one wearer as independent users.</p>
+<p><strong>Extraction evaluation.</strong> Define reference facts before comparing models. Two reviewers should identify the speaker, explicit statement, current-stay/enduring scope, and whether a preference is actually supported. Include negation, corrections, ambiguity, requests, complaints, and visual-only evidence. Report true supported facts, missed facts, unsupported facts, attribution errors, and processing time. Compare transcript-only and multimodal approaches on identical cases and retain model version, prompts, parameters, input hashes, and reviewed outputs.</p>
+<p><strong>Battery and latency evaluation.</strong> Repeat balanced conditions from comparable charge levels with the same brightness, network, gallery, capture policy, and workload. Include actual camera, microphone/VAD, inference, transfer, and display. Distinguish wall-clock duration, active time, traffic count/bytes, battery percentage points, and measured energy if instrumentation supports it. Begin independent latency trials from idle, then separately measure warm retaps. Record misses, cancellations, and frame commits; do not infer physical lens presentation from software timestamps.</p>
+<h2 id="supporting-material">Appendix C. Recording and supporting material</h2>
+<ul>
+<li><a href="https://github.com/wongwh2002/CDE4301-Hotel-Hospitality/blob/main/docs/interim/transcript.html">Read and search the timestamped transcript</a>.</li>
+<li><a href="https://github.com/wongwh2002/CDE4301-Hotel-Hospitality/blob/main/docs/interim/Recording.transcript.md">Download the transcript as Markdown</a>, <a href="https://github.com/wongwh2002/CDE4301-Hotel-Hospitality/blob/main/docs/interim/Recording.transcript.txt">plain text</a>, or <a href="https://github.com/wongwh2002/CDE4301-Hotel-Hospitality/blob/main/docs/interim/Recording.vtt">WebVTT captions</a>.</li>
+<li><a href="https://github.com/wongwh2002/CDE4301-Hotel-Hospitality/blob/main/docs/interim/Slides.pdf">View the original slide deck</a> and <a href="https://github.com/wongwh2002/CDE4301-Hotel-Hospitality/blob/main/docs/interim/Recording.mp4">recording</a>.</li>
+<li><a href="https://github.com/wongwh2002/CDE4301-Hotel-Hospitality/blob/main/docs/research/cde4301-interim-report-research-synthesis.md">Read the fuller project research synthesis</a>.</li>
+</ul>
+<p>The transcript is machine-generated with terminology checks and uncertainty notes; it is not a certified verbatim or speaker-diarised record. Spoken claims are preserved as speech and do not acquire verified status merely by appearing in the transcript. The recording ends just as Q&amp;A begins, so it does not contain a complete question-and-answer session.</p>
+<details>
+<summary>Play the supplied presentation recording</summary>
+<video aria-label="Interim presentation recording" controls="" preload="none">
+<source src="https://raw.githubusercontent.com/wongwh2002/CDE4301-Hotel-Hospitality/main/docs/interim/Recording.mp4" type="video/mp4"/>
+<track kind="captions" label="English — machine transcript" src="https://raw.githubusercontent.com/wongwh2002/CDE4301-Hotel-Hospitality/main/docs/interim/Recording.vtt" srclang="en"/>
+Your browser does not support embedded video. <a href="https://github.com/wongwh2002/CDE4301-Hotel-Hospitality/blob/main/docs/interim/Recording.mp4">Open the recording.</a>
+</video>
+</details>
+</article></div></main><footer class="footer">CDE4301 · Innovation & Design Capstone · Team IS-432 · Interim assessment 2026<br><a href="report.html#references">References</a> · <a href="report.html#evidence-notes">Appendices</a> · <a href="https://github.com/wongwh2002/CDE4301-Hotel-Hospitality">Project repository</a></footer><script src="script.js"></script></body></html>
