@@ -21,7 +21,14 @@ The broader case for personalised hotel service leads to an operational question
 
 ### 1.1 Current guest-information workflow
 
-The Accor Customer Digital Card case study maps a five-stage information cycle: a general manager retrieves guest details, briefs staff, provides hard-copy notes as a fallback, staff use the briefing or profile during service, and newly learned details are entered into the database afterwards. The accompanying account also describes WhatsApp as a possible fallback channel. [P1](#p1) This is a case-study workflow, not a measured description of every hotel or of PARKROYAL's daily operations.
+The Accor Customer Digital Card case study maps a five-stage information cycle. A general manager retrieves guest details from a database and communicates relevant points in a morning briefing. Hard-copy or WhatsApp notes can serve as a fallback when staff need to check a detail. During service, staff draw on the briefing or profile while learning new preferences or concerns through conversation. They enter newly learned details into the database afterwards, potentially making them available for later encounters. [P1](#p1) This sequence is a case-study mapping, not a measured description of every hotel or of PARKROYAL's daily operations.
+
+<figure>
+<a href="assets/guest-information-five-step-workflow.svg" target="_blank" rel="noopener" aria-label="Open the five-step guest-information workflow diagram">
+<img src="assets/guest-information-five-step-workflow.svg" alt="Five-step Accor case-study workflow: retrieve profile, morning brief, fallback notes, serve guest, update record." width="1200" height="315">
+</a>
+<figcaption><strong>Case-study workflow.</strong> The mapped Accor Customer Digital Card sequence. [P1](#p1)</figcaption>
+</figure>
 
 Information must cross several human and system handoffs in this cycle. Staff need to remember or find the right profile, select a detail relevant to the immediate interaction, and record new information accurately enough for another employee to use. A stored profile therefore has limited service value if access is slow, consultation interrupts conversation, or updates arrive after the next encounter.
 
