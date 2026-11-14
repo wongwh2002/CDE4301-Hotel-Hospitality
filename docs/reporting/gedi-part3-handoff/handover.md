@@ -22,9 +22,9 @@ The proposed system has two linked functions:
 - The smart-glasses direction is a prototyping choice. The current concept comparison has no weighted decision scores or comparative hotel-staff results that establish a winner.
 - Do not describe the full slide 25 flow as an integrated implementation or claim that it has improved LQA performance or guest outcomes.
 
-## Important item to reconcile
+## Timing choice and evidence boundary
 
-GEDI slide 23 prints a cue target of **less than one second**. The speaker script and current interim report use a provisional **1.5-second p95** engineering target. The report records four successful warm frame commits averaging 1.18 seconds; that small successful-only average does not establish p95 performance, include failures, or measure physical lens visibility. Keep the two figures labelled by source and resolve the slide before reusing it.
+The supplied GEDI slide 23 and revised speaker script use a proposed **less-than-one-second** cue target. Shiwa et al. (2009) motivates the number by analogy with communication-robot response timing; it is not a smart-glasses standard or an LQA requirement. The earlier script draft used 1.5 seconds. Four successful warm frame commits averaged 1.18 seconds; that small successful-only mean does not establish end-to-end target attainment, p95 performance, failures, or physical lens visibility.
 
 The one-minute acknowledgement and three-minute drinks-order windows are service-action targets from the project-selected PARKROYAL F&B LQA subset. They are separate from cue-processing latency.
 
