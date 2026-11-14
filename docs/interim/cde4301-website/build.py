@@ -4,6 +4,8 @@ Requires Markdown (also listed in ../requirements.txt).
 """
 
 from html import escape, unescape
+import hashlib
+import json
 from pathlib import Path
 import re
 
@@ -50,6 +52,12 @@ def section_links(tokens):
 def build_report():
     source = (HERE / 'interim-report.md').read_text(encoding='utf-8')
     template = (HERE / 'report.template.html').read_text(encoding='utf-8')
+    table_source = HERE / 'main-report-tables.md'
+    if table_source.exists():
+        manifest = json.loads((HERE / 'assets/tables/manifest.json').read_text(encoding='utf-8'))
+        digest = hashlib.sha256(table_source.read_text(encoding='utf-8').encode('utf-8')).hexdigest()
+        if manifest['source_sha256'] != digest:
+            raise ValueError('Table images need refreshing. Run render_tables.py, then build.py.')
     renderer = markdown.Markdown(extensions=['tables', 'attr_list', 'toc', 'fenced_code'])
     body = renderer.convert(source)
     for alias, target in ALIASES.items():
@@ -61,6 +69,8 @@ def build_report():
     page = template.replace('{{REPORT_TOC}}', ''.join(section_links(renderer.toc_tokens)))
     page = page.replace('{{REPORT_BODY}}', body)
     (HERE / 'report.html').write_text(page, encoding='utf-8')
+    if table_source.exists():
+        build_table_text_page(table_source.read_text(encoding='utf-8'), template)
     (HERE / 'report (1).html').write_text('''<!doctype html>
 <html lang="en">
 <head>
@@ -75,6 +85,21 @@ def build_report():
 </html>
 ''', encoding='utf-8')
     print('Built report.html and the redirect from report (1).html.')
+
+
+def build_table_text_page(source, template):
+    renderer = markdown.Markdown(extensions=['tables', 'attr_list', 'toc', 'fenced_code'])
+    body = renderer.convert(source)
+    body = re.sub(r'(<table>.*?</table>)', r'<div class="table-scroll">\1</div>', body, flags=re.S)
+    page = template.replace('{{REPORT_TOC}}', ''.join(section_links(renderer.toc_tokens)))
+    page = page.replace('{{REPORT_BODY}}', body)
+    page = page.replace('<title>Report |', '<title>Table text |')
+    page = re.sub(r'(<h1 class="page-title">).*?(</h1>)', r'\1Main Report Tables\2', page)
+    page = page.replace('Interim capstone report · Team IS-432 · References and Appendices A–L', 'Text versions of Tables 1–9 from the interim report')
+    page = page.replace('href="interim-report.md"', 'href="main-report-tables.md"')
+    page = page.replace('href="#references"', 'href="report.html#references"')
+    page = page.replace('href="#appendix-a"', 'href="report.html#appendix-a"')
+    (HERE / 'main-report-tables.html').write_text(page, encoding='utf-8')
 
 
 if __name__ == '__main__':

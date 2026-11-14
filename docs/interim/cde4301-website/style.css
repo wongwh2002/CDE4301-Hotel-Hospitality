@@ -620,4 +620,5 @@ main {
 }
 /* Report links and wide comparison tables. */
 .section-alias{display:block;position:relative;scroll-margin-top:100px}.toc .toc-level-3{padding-left:1rem;font-size:.82rem}.table-scroll{max-width:100%;overflow-x:auto;margin:1rem 0}.table-scroll table{width:100%}.report-content{min-width:0}
+.report-content figure.report-table img{width:100%;border:1px solid #dce5f2;background:#fff}.report-content figure.report-table figcaption a{white-space:nowrap}
 @media print{@page{size:A4;margin:16mm}header,.toc,.report-tools,.footer{display:none!important}.report-layout{display:block!important;max-width:none;margin:0;padding:0}.report-content{padding:0!important;border:0;box-shadow:none}.report-content table{font-size:9pt}.table-scroll{overflow:visible}.report-content h2,.report-content h3,.report-content h4{break-after:avoid}.report-content figure{break-inside:avoid}}

@@ -1,0 +1,357 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"/><meta content="width=device-width, initial-scale=1" name="viewport"/><meta content="CDE4301 Team IS-432 interim capstone: guest-context cues for personalised hotel service" name="description"/><title>Table text | CDE4301 Hospitality</title><link href="style.css" rel="stylesheet"/><style>.revpar-equation{text-align:center;margin:2rem auto;padding:1.4rem;border:1px solid #dce4e8;border-radius:12px;max-width:560px}.revpar-equation strong{font-size:1.6rem}.revpar-equation small{font-size:.85rem;color:#667}.report-content figure img{max-width:100%;height:auto}.report-content figcaption{font-size:.88rem;color:#586572;margin-top:.7rem}.report-content>p:has(+table){margin-bottom:.5rem}
+.report-content table caption{caption-side:bottom;text-align:left;font-size:.88rem;color:#586572;padding:.65rem .25rem 1.25rem;font-style:italic}.report-content figure{margin:2rem auto}.report-content figure img{display:block;margin:auto}.report-content .revpar-equation{text-align:center}
+.missing-report-image{padding:1.4rem;background:#f6f7fa;border:1px dashed #c8d1da;border-radius:10px;color:#576573;font-size:.9rem;overflow-wrap:anywhere}.report-content figure img{max-width:100%;height:auto}</style></head><body><header><nav class="nav"><a class="brand" href="index.html">CDE4301 / IS-432</a><button aria-label="Toggle navigation" class="menu">Menu ☰</button><div class="navlinks"><a class="" href="index.html">Home</a><a class="" href="about.html">About Us</a><a class="active" href="report.html">Report</a><a class="" href="prototype.html">Prototype</a></div></nav></header><main><section class="page-head"><div><span class="eyebrow">Interim assessment · Revised 15 November 2026</span><h1 class="page-title">Main Report Tables</h1><p>Text versions of Tables 1–9 from the interim report</p></div></section><div class="report-layout"><aside aria-label="Report table of contents" class="toc"><b>ON THIS PAGE</b><input aria-label="Filter sections" class="searchbar" id="toc-search" placeholder="Filter sections..."/><a class="toc-level-2" href="#table-1">Table 1. Functional Requirements</a><a class="toc-level-2" href="#table-2">Table 2. Design Requirements DR1–DR6</a><a class="toc-level-2" href="#table-3">Table 3. Concept Comparison</a><a class="toc-level-2" href="#table-4">Table 4. Literature-Based Comparison of Visual and Audio Cues</a><a class="toc-level-2" href="#table-5">Table 5. Activation and Battery Comparison</a><a class="toc-level-2" href="#table-6">Table 6. Formative Walkthrough Findings</a><a class="toc-level-2" href="#table-7">Table 7. Live Frame-Commit Timing</a><a class="toc-level-2" href="#table-8">Table 8. Design Requirements Evaluation</a><a class="toc-level-2" href="#table-9">Table 9. January–May Development Roadmap</a></aside><article class="report-content"><div class="report-tools"><a download="" href="main-report-tables.md">↓ Download Markdown</a><a href="report.html#references">↗ References</a><a href="report.html#appendix-a">↗ Appendices</a><button onclick="window.print()">Print / Save PDF</button></div><h1 id="main-report-tables">Main Report Tables</h1>
+<p>Editable source for Tables 1–9 in the <a href="report.html">interim report</a>. The report displays an image of each table in its original position; this file preserves the complete table text.</p>
+<h2 id="table-1">Table 1. Functional Requirements</h2>
+<div class="table-scroll"><table>
+<thead>
+<tr>
+<th>Function</th>
+<th>Required behaviour and boundary</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Capture and process</strong></td>
+<td>Record a guest-stated preference, request, or concern with its source and time. Keep explicit statements distinct from staff observations and model inferences; retain enough supporting wording for staff to check a draft.</td>
+</tr>
+<tr>
+<td><strong>Associate and prepare</strong></td>
+<td>Link the draft to a likely guest and current stay only when the association is sufficiently confident. Keep scope, source, timestamp, and review state with the draft. If identity or meaning is uncertain, ask staff to resolve it or leave it unlinked.</td>
+</tr>
+<tr>
+<td><strong>Review and carry forward</strong></td>
+<td>Let staff correct the draft, confirm the guest and stay, and approve the record before it becomes shared context. A confirmed detail should be available to the next employee; a single visit-specific request must not silently become a permanent preference.</td>
+</tr>
+<tr>
+<td><strong>Select and display</strong></td>
+<td>Choose the smallest task-relevant detail and show it as a brief, actionable cue. Do not surface a raw transcript or unrelated profile fields. An uncertain match suppresses personal cues and leaves normal greeting or manual profile lookup available.</td>
+</tr>
+</tbody>
+</table></div>
+<p><a href="report.html#table-1">Return to Table 1 in the report</a>.</p>
+<h2 id="table-2">Table 2. Design Requirements DR1–DR6</h2>
+<div class="table-scroll"><table>
+<thead>
+<tr>
+<th>Criterion</th>
+<th>Service behaviour</th>
+<th>Requirement and proposed measure</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>DR1 · On-time service support</strong></td>
+<td>Timely acknowledgement and offer of service.</td>
+<td>Show the first correct, readable cue within <strong>1.0 s</strong> of deliberate activation. Measure the complete trigger-to-visible-cue path and count late, missing, or incorrect cues as failures to meet the target. Assess unknown-guest suppression separately; time entry/seating to the staff action as a separate service measure.</td>
+</tr>
+<tr>
+<td><strong>DR2 · Low-effort capture</strong></td>
+<td>Active listening and natural engagement.</td>
+<td>Start capture with one deliberate action and avoid lengthy note-taking. Measure capture time, staff actions, correction effort, and disruption to conversation.</td>
+</tr>
+<tr>
+<td><strong>DR3 · Glanceable interaction</strong></td>
+<td>Natural, friendly engagement and discreet use of the guest's name.</td>
+<td>Keep the cue short and understandable during conversation. Measure correct comprehension, glance duration, attention shifts, and interruption.</td>
+</tr>
+<tr>
+<td><strong>DR4 · Preference continuity</strong></td>
+<td>Use confirmed context to personalise service.</td>
+<td>Preserve source, time, scope, and review status. Measure whether the correct approved preference reaches the next employee in time and whether that employee interprets it correctly.</td>
+</tr>
+<tr>
+<td><strong>DR5 · Correct guest association</strong></td>
+<td>No personal details for unknown, ambiguous, stale, or lost matches.</td>
+<td>Suppress cues on uncertain identity and provide manual lookup. Count false reveals, missed matches, stale results, and fallback use in multi-guest scenarios.</td>
+</tr>
+<tr>
+<td><strong>DR6 · Appropriate, safe information</strong></td>
+<td>Present task-relevant information while distinguishing allergy alerts from preferences.</td>
+<td>Limit displayed fields, test cue relevance and interpretation, and verify allergy details through authorised records and food-safety procedures.</td>
+</tr>
+</tbody>
+</table></div>
+<p><a href="report.html#table-2">Return to Table 2 in the report</a>.</p>
+<h2 id="table-3">Table 3. Concept Comparison</h2>
+<div class="table-scroll"><table>
+<thead>
+<tr>
+<th>Comparison row</th>
+<th>Phone/PMS baseline</th>
+<th>Audio badge + earpiece</th>
+<th>Camera-free glasses hybrid</th>
+<th>Vision-assisted smart glasses</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Capture</strong></td>
+<td>Staff enters a note in the existing profile after or during the interaction; familiar, but screen use and delayed entry may interrupt or lose detail.</td>
+<td>A deliberate push-to-talk action captures speech hands-free; noise, speaker attribution, and correction needs require testing.</td>
+<td>The microphone captures speech after a deliberate trigger; a companion interface selects or confirms the guest.</td>
+<td>Triggered microphone capture adds visual context from the camera, with greater collection and battery demands.</td>
+</tr>
+<tr>
+<td><strong>Guest and stay association</strong></td>
+<td>Staff selects the guest and stay in the profile; the step is visible and correctable but takes time.</td>
+<td>Staff still selects or confirms the guest and stay in a companion interface; speech does not identify its speaker by itself.</td>
+<td>The same explicit selection avoids face matching and helps isolate the display's value.</td>
+<td>Vision can suggest a guest match and reduce lookup when correct; ambiguous or unstable matches must not reveal profile details.</td>
+</tr>
+<tr>
+<td><strong>Processing and review</strong></td>
+<td>The existing profile workflow handles the note; the staff member checks what they entered.</td>
+<td>A transcript can become a structured draft, but staff checks the wording and confirms the guest and stay before saving.</td>
+<td>Use the same processing and staff-review path as the audio concept, so the display can be compared separately.</td>
+<td>Use the same draft and review path; recognition is an association aid, not approval to save or act on an inferred preference.</td>
+</tr>
+<tr>
+<td><strong>Cue delivery</strong></td>
+<td>The phone offers profile detail but requires staff to look down and navigate.</td>
+<td>A short earpiece cue can be private and hands-free; audibility, comfort, and comprehension in a noisy lounge need testing.</td>
+<td>A concise in-lens cue keeps information near the line of sight without a camera.</td>
+<td>A concise in-lens cue can follow a visual match, but may draw attention from the guest or affect eye contact.</td>
+</tr>
+<tr>
+<td><strong>Staff effort</strong></td>
+<td>Manual navigation and note entry add steps, though the workflow uses familiar equipment.</td>
+<td>Capture is hands-free, but guest selection and companion-interface review remain.</td>
+<td>Capture and glanceable display may reduce device switching; fitting, controls, and review still take effort.</td>
+<td>It may combine capture, association, and cue delivery, while confirmation and camera/display setup add work.</td>
+</tr>
+<tr>
+<td><strong>Privacy and comfort</strong></td>
+<td>No new wearable sensor is needed, but viewing a profile in front of the guest may feel intrusive.</td>
+<td>No camera is used; recorded speech still needs clear purpose, access, retention, and guest-notice decisions.</td>
+<td>A microphone and display still affect privacy and comfort; removing the camera reduces visual collection.</td>
+<td>Camera, microphone, and display create the greatest face-data, recording, comfort, and acceptance questions.</td>
+</tr>
+<tr>
+<td><strong>Integration and fallback</strong></td>
+<td>Uses the current profile and phone path, with manual lookup as the baseline.</td>
+<td>Needs a reliable mic, speech processing, and earpiece; use phone/PMS if capture fails.</td>
+<td>Also needs a working microphone, display, companion selection, and device link; fall back to phone/PMS.</td>
+<td>Needs a validated camera/display link and safe matching against the active guest set; on uncertainty or device failure, suppress cues and use phone/PMS.</td>
+</tr>
+</tbody>
+</table></div>
+<p><a href="report.html#table-3">Return to Table 3 in the report</a>.</p>
+<h2 id="table-4">Table 4. Literature-Based Comparison of Visual and Audio Cues</h2>
+<div class="table-scroll"><table>
+<thead>
+<tr>
+<th>Benchmark consideration</th>
+<th>Published evidence</th>
+<th>Implication for the lounge concept</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Listening during conversation</strong></td>
+<td>Competing spoken phrases interfered with target-speech recognition. <a href="report.html#r69">R69</a></td>
+<td>Prefer a short visual fact while the guest speaks; test spoken cues on request or between turns.</td>
+</tr>
+<tr>
+<td><strong>Attention and workload</strong></td>
+<td>HUD information disrupted visual search; both head-mounted and audible words interfered with tracking. <a href="report.html#r9">R9</a>, <a href="report.html#r72">R72</a></td>
+<td>Keep either cue brief and relevant. Measure missed guest information and service interruption alongside comprehension.</td>
+</tr>
+<tr>
+<td><strong>Placement during social interaction</strong></td>
+<td>Notification position and alignment affected perception during face-to-face communication. <a href="report.html#r70">R70</a></td>
+<td>Assess whether staff can consult a face-relative cue naturally while engaging the guest.</td>
+</tr>
+<tr>
+<td><strong>Visually demanding tasks</strong></td>
+<td>Visual icon alerts disrupted continuous visual tracking more than auditory tones. <a href="report.html#r71">R71</a></td>
+<td>Retain audio as a comparator when visual attention is occupied; distinguish a simple tone from a spoken factual message.</td>
+</tr>
+</tbody>
+</table></div>
+<p><a href="report.html#table-4">Return to Table 4 in the report</a>.</p>
+<h2 id="table-5">Table 5. Activation and Battery Comparison</h2>
+<div class="table-scroll"><table>
+<thead>
+<tr>
+<th>Activation comparison</th>
+<th style="text-align: right;">Continuous</th>
+<th style="text-align: right;">Temple touch + silence timeout</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Scheduled duty cycle</td>
+<td style="text-align: right;">100%</td>
+<td style="text-align: right;">25%</td>
+</tr>
+<tr>
+<td>Reported traffic count</td>
+<td style="text-align: right;">705</td>
+<td style="text-align: right;">170</td>
+</tr>
+<tr>
+<td>Battery-level drop</td>
+<td style="text-align: right;">28 percentage points</td>
+<td style="text-align: right;">9 percentage points</td>
+</tr>
+</tbody>
+</table></div>
+<p><a href="report.html#table-5">Return to Table 5 in the report</a>.</p>
+<h2 id="table-6">Table 6. Formative Walkthrough Findings</h2>
+<div class="table-scroll"><table>
+<thead>
+<tr>
+<th>Walkthrough question</th>
+<th>Reported finding</th>
+<th>Design implication</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Is starting capture/display easy?</td>
+<td>All 10 described activation as easy.</td>
+<td>Retain single-tap activation; test it during realistic staff tasks.</td>
+</tr>
+<tr>
+<td>Could cues help serve guests?</td>
+<td>70% saw potential usefulness, but some icons were unrelated to the conversation.</td>
+<td>Develop contextual retrieval and assess whether it enables a specific service action.</td>
+</tr>
+<tr>
+<td>Can cues be used naturally?</td>
+<td>Most described a quick glance as sufficient, but incorporating cues into conversation was challenging.</td>
+<td>Test timing, meaning, and conversational flow together; investigate design changes as well as training.</td>
+</tr>
+</tbody>
+</table></div>
+<p><a href="report.html#table-6">Return to Table 6 in the report</a>.</p>
+<h2 id="table-7">Table 7. Live Frame-Commit Timing</h2>
+<div class="table-scroll"><table>
+<thead>
+<tr>
+<th>Measured stage, four completed frames</th>
+<th style="text-align: right;">Mean</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Tap handled → selected image sent: camera, face selection, image preparation, scheduling</td>
+<td style="text-align: right;">693 ms</td>
+</tr>
+<tr>
+<td>Request sent → server response read, including recognition</td>
+<td style="text-align: right;">302 ms</td>
+</tr>
+<tr>
+<td>Response read → app draws name and icons</td>
+<td style="text-align: right;">101.3 ms</td>
+</tr>
+<tr>
+<td>Drawing → Android confirms frame submitted</td>
+<td style="text-align: right;">83.8 ms</td>
+</tr>
+<tr>
+<td>Total</td>
+<td style="text-align: right;"><strong>1,180 ms</strong></td>
+</tr>
+</tbody>
+</table></div>
+<p><a href="report.html#table-7">Return to Table 7 in the report</a>.</p>
+<h2 id="table-8">Table 8. Design Requirements Evaluation</h2>
+<div class="table-scroll"><table>
+<thead>
+<tr>
+<th>Requirement</th>
+<th>Current evidence</th>
+<th>Assessment and next verification</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>DR1 · On-time support:</strong> 1.0 s from activation to a correct, visible cue</td>
+<td>Four successful warm frame commits averaged 1.18 s, above the target; physical lens timing, cold starts, and all interrupted attempts are not established.</td>
+<td><strong>Requirement not met.</strong> Test a more powerful server and optimise capture/scheduling, then repeat independent complete-path trials, count failures, and report p50/p95 and the share meeting 1.0 s.</td>
+</tr>
+<tr>
+<td><strong>DR2 · Low effort:</strong> single tap and automatic silence expiry</td>
+<td>All 10 participants found activation easy; checks verify timeout and camera/microphone shutdown.</td>
+<td><strong>Early support.</strong> Test staff task interference and stopping behaviour in realistic noise.</td>
+</tr>
+<tr>
+<td><strong>DR3 · Glanceability:</strong> concise cues during conversation</td>
+<td>Icons are implemented; 70% reported needing only a quick glance, but natural conversational use remained difficult.</td>
+<td><strong>Partially achieved.</strong> Compare comprehension, attention shifts, and conversational flow with a baseline.</td>
+</tr>
+<tr>
+<td><strong>DR4 · Preference continuity:</strong> approved update reaches another employee</td>
+<td>Stored profiles are retrieved; new facts are not consistently extracted and profile changes require restart.</td>
+<td><strong>Incomplete.</strong> Test captured statement → review → updated record → next employee's action.</td>
+</tr>
+<tr>
+<td><strong>DR5 · Correct association:</strong> hide uncertain/outdated details</td>
+<td>Tests check unrecognised guests, tracking changes, expired results, and cancellation.</td>
+<td><strong>Safeguards implemented; real-world error rates unknown.</strong> Count wrong guest details and missed matches in new, crowded test scenes.</td>
+</tr>
+<tr>
+<td><strong>DR6 · Appropriate information:</strong> relevant fields and distinct allergy handling</td>
+<td>Two-cue limit and fictional allergy markers exist; irrelevant content was reported.</td>
+<td><strong>Partially achieved in demo data.</strong> Validate contextual selection, interpretation, permissions, and fallback.</td>
+</tr>
+</tbody>
+</table></div>
+<p><a href="report.html#table-8">Return to Table 8 in the report</a>.</p>
+<h2 id="table-9">Table 9. January–May Development Roadmap</h2>
+<div class="table-scroll"><table>
+<thead>
+<tr>
+<th>Workstream</th>
+<th>Planned Window</th>
+<th>Intended Deliverable</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Subsystem refinement</td>
+<td>January–February</td>
+<td>More reliable activation, display and recognition components.</td>
+</tr>
+<tr>
+<td>Real-time capture and processing</td>
+<td>January–February</td>
+<td>Integrated capture, transcription/extraction experiments and staff review of proposed facts.</td>
+</tr>
+<tr>
+<td>Retrieval and recognition integration</td>
+<td>February–March</td>
+<td>Correct guest/stay association and context-sensitive retrieval of approved information.</td>
+</tr>
+<tr>
+<td>End-to-end system integration</td>
+<td>March–April</td>
+<td>Guest statement → checked update → next employee's actionable cue.</td>
+</tr>
+<tr>
+<td>Internal functional testing</td>
+<td>March–April</td>
+<td>Repeatable checks for all six design requirements, including failure and privacy cases.</td>
+</tr>
+<tr>
+<td>Hotel-staff usability pilot</td>
+<td>April</td>
+<td>Approved comparative pilot against ordinary phone/PMS lookup; assess cue use and workflow fit.</td>
+</tr>
+<tr>
+<td>Iteration and reliability improvements</td>
+<td>April–May</td>
+<td>Resolve failures and refine response time, robustness, cue relevance and usability.</td>
+</tr>
+<tr>
+<td>Final evaluation and documentation</td>
+<td>May</td>
+<td>Requirements evidence, limitations, final demonstration and report.</td>
+</tr>
+</tbody>
+</table></div>
+<p><a href="report.html#table-9">Return to Table 9 in the report</a>.</p></article></div></main><footer class="footer">CDE4301 · Innovation &amp; Design Capstone · Team IS-432 · Interim assessment 2026<br/><a href="report.html#references">References</a> · <a href="report.html#appendix-a">Appendices</a> · <a href="https://github.com/wongwh2002/CDE4301-Hotel-Hospitality">Project repository</a></footer><script src="script.js"></script></body></html>

@@ -7,6 +7,8 @@ Static HTML/CSS/JavaScript website generated from the supplied `interim-report.m
 - `about.html` — Team and project framing
 - `report.html` — Full report with linked table of contents, references and appendices
 - `report (1).html` — Redirect preserving the previous report URL and section bookmarks
+- `main-report-tables.md` — Editable source for the nine main-body tables
+- `main-report-tables.html` — Readable table text, with working citations and return links
 - `presentation.html` — Supplied presentation PDF
 - `prototype.html` — Prototype overview and status
 
@@ -28,6 +30,22 @@ python docs/interim/cde4301-website/build.py
 ```
 
 The build produces `report.html`, its linked contents, and the redirect from the previous filename. It preserves older bookmarks such as `#prototype`, `#testing`, and `#contributions`. The homepage and prototype overview are shorter editorial summaries.
+
+### Main-body tables
+
+Tables 1–9 are maintained in `main-report-tables.md`. The report embeds their individual high-resolution PNGs from `assets/tables/` in their original positions, with captions and links to full-size images and readable text. Appendix tables remain in the report as Markdown tables.
+
+After editing table content, regenerate the images and rebuild the HTML:
+
+```text
+python -m pip install Markdown playwright
+python docs/interim/cde4301-website/render_tables.py
+python docs/interim/cde4301-website/build.py
+```
+
+The renderer uses locally installed Google Chrome. For Playwright's bundled Chromium, install it with `python -m playwright install chromium` and render with `--browser chromium`. The manifest records the source hash; the build rejects stale images after table edits. All images and text pages are static once generated.
+
+Image conversion reduces the machine-readable word count of the report file. It does not establish whether the assessment excludes the words inside table images; the supplied brief explicitly excludes appendices but does not specify an image-table exemption.
 
 The response-time requirement is **1.0 second** from activation to the first correct visible cue. The current prototype does not meet it; stronger server hardware is an optimisation to evaluate. Section 3.5 restores the visual/audio literature comparison and references R68–R72.
 

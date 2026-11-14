@@ -1,0 +1,70 @@
+{
+  "source": "main-report-tables.md",
+  "source_sha256": "8744f1fd1129d9d8d60d1191b665b2763ea8a19fad948c71eb0e2c0fda389ee3",
+  "scale": 2,
+  "tables": [
+    {
+      "number": 1,
+      "title": "Functional Requirements",
+      "file": "assets/tables/table-01.png",
+      "width": 1280,
+      "height": 621
+    },
+    {
+      "number": 2,
+      "title": "Design Requirements DR1–DR6",
+      "file": "assets/tables/table-02.png",
+      "width": 1440,
+      "height": 974
+    },
+    {
+      "number": 3,
+      "title": "Concept Comparison",
+      "file": "assets/tables/table-03.png",
+      "width": 1600,
+      "height": 1485
+    },
+    {
+      "number": 4,
+      "title": "Literature-Based Comparison of Visual and Audio Cues",
+      "file": "assets/tables/table-04.png",
+      "width": 1440,
+      "height": 589
+    },
+    {
+      "number": 5,
+      "title": "Activation and Battery Comparison",
+      "file": "assets/tables/table-05.png",
+      "width": 1000,
+      "height": 364
+    },
+    {
+      "number": 6,
+      "title": "Formative Walkthrough Findings",
+      "file": "assets/tables/table-06.png",
+      "width": 1440,
+      "height": 460
+    },
+    {
+      "number": 7,
+      "title": "Live Frame-Commit Timing",
+      "file": "assets/tables/table-07.png",
+      "width": 1100,
+      "height": 462
+    },
+    {
+      "number": 8,
+      "title": "Design Requirements Evaluation",
+      "file": "assets/tables/table-08.png",
+      "width": 1440,
+      "height": 910
+    },
+    {
+      "number": 9,
+      "title": "January–May Development Roadmap",
+      "file": "assets/tables/table-09.png",
+      "width": 1440,
+      "height": 816
+    }
+  ]
+}
