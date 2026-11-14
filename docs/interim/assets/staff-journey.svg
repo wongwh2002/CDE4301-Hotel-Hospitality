@@ -1,23 +1,23 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="1200" height="350" viewBox="0 0 1200 350" role="img" aria-labelledby="title description">
 <title id="title">Intended staff journey for personalised service</title>
 <desc id="description">The intended solution journey has five normal steps: approach the guest, see useful context, adapt the offer, confirm and listen, then Update Preference: Update database shared with all employees.</desc>
-<defs><marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0 0 10 5 0 10Z" fill="#779486"/></marker></defs>
-<rect x="1" y="1" width="1198" height="348" rx="14" fill="#fbfcf8" stroke="#d9dfd9"/>
-<g font-family="Segoe UI,Arial,sans-serif" fill="#192e35">
-<text x="28" y="34" font-size="12" font-weight="700" letter-spacing="2" fill="#176b5b">STAFF POINT OF VIEW · INTENDED SERVICE JOURNEY</text>
+<defs><marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0 0 10 5 0 10Z" fill="#5b6f93"/></marker></defs>
+<rect x="1" y="1" width="1198" height="348" rx="14" fill="#fbfcff" stroke="#d9e0eb"/>
+<g font-family="Segoe UI,Arial,sans-serif" fill="#111d36">
+<text x="28" y="34" font-size="12" font-weight="700" letter-spacing="2" fill="#173b73">STAFF POINT OF VIEW · INTENDED SERVICE JOURNEY</text>
 <text x="28" y="76" font-family="Georgia,serif" font-size="29">Useful context should lead to a fitting service action</text>
-<g fill="#ffffff" stroke="#bdcbbf"><rect x="28" y="109" width="210" height="185" rx="10"/><rect x="261" y="109" width="210" height="185" rx="10"/><rect x="494" y="109" width="210" height="185" rx="10"/><rect x="727" y="109" width="210" height="185" rx="10"/></g>
-<rect x="960" y="109" width="212" height="185" rx="10" fill="#ffffff" stroke="#bdcbbf"/>
-<g fill="none" stroke="#779486" stroke-width="2" marker-end="url(#arrow)"><path d="M241 200h16"/><path d="M474 200h16"/><path d="M707 200h16"/><path d="M940 200h16"/></g>
-<g fill="#e8efe7"><circle cx="56" cy="139" r="16"/><circle cx="289" cy="139" r="16"/><circle cx="522" cy="139" r="16"/><circle cx="755" cy="139" r="16"/></g><circle cx="988" cy="139" r="16" fill="#e8efe7"/>
-<g font-size="15" font-weight="700" text-anchor="middle" fill="#176b5b"><text x="56" y="144">1</text><text x="289" y="144">2</text><text x="522" y="144">3</text><text x="755" y="144">4</text><text x="988" y="144">5</text></g>
+<g fill="#ffffff" stroke="#c7d2e3"><rect x="28" y="109" width="210" height="185" rx="10"/><rect x="261" y="109" width="210" height="185" rx="10"/><rect x="494" y="109" width="210" height="185" rx="10"/><rect x="727" y="109" width="210" height="185" rx="10"/></g>
+<rect x="960" y="109" width="212" height="185" rx="10" fill="#ffffff" stroke="#c7d2e3"/>
+<g fill="none" stroke="#5b6f93" stroke-width="2" marker-end="url(#arrow)"><path d="M241 200h16"/><path d="M474 200h16"/><path d="M707 200h16"/><path d="M940 200h16"/></g>
+<g fill="#e8eef7"><circle cx="56" cy="139" r="16"/><circle cx="289" cy="139" r="16"/><circle cx="522" cy="139" r="16"/><circle cx="755" cy="139" r="16"/></g><circle cx="988" cy="139" r="16" fill="#e8eef7"/>
+<g font-size="15" font-weight="700" text-anchor="middle" fill="#173b73"><text x="56" y="144">1</text><text x="289" y="144">2</text><text x="522" y="144">3</text><text x="755" y="144">4</text><text x="988" y="144">5</text></g>
 <g font-size="19" font-weight="650"><text x="45" y="184">Approach the guest</text><text x="278" y="184">See useful context</text><text x="511" y="184">Adapt the offer</text><text x="744" y="184">Confirm and listen</text><text x="977" y="184">Update Preference</text></g>
-<g font-size="17" fill="#52646a">
+<g font-size="17" fill="#59677f">
 <text x="45" y="219"><tspan x="45">Begin a normal</tspan><tspan x="45" dy="25">service encounter.</tspan></text>
 <text x="278" y="219"><tspan x="278">Name and a known</tspan><tspan x="278" dy="25">preference appear.</tspan></text>
 <text x="511" y="219"><tspan x="511">“Would you like</tspan><tspan x="511" dy="25">oat milk again?”</tspan></text>
 <text x="744" y="219"><tspan x="744">Check today's choice;</tspan><tspan x="744" dy="25">hear new requests.</tspan></text>
 <text x="977" y="219"><tspan x="977">Update database</tspan><tspan x="977" dy="25">shared with all</tspan><tspan x="977" dy="25">employees</tspan></text>
 </g>
-<text x="28" y="328" font-size="13" fill="#52646a">Intended solution journey: use current guest context, confirm the need, and update shared knowledge for the next encounter.</text>
+<text x="28" y="328" font-size="13" fill="#59677f">Intended solution journey: use current guest context, confirm the need, and update shared knowledge for the next encounter.</text>
 </g></svg>
