@@ -1,0 +1,55 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="540" viewBox="0 0 1200 540" role="img" aria-labelledby="title desc">
+  <title id="title">Guest-information gaps and derived design needs</title>
+  <desc id="desc">Three left-to-right paths connect workflow gaps to likely service consequences and design needs.</desc>
+  <defs>
+    <style>
+      .head { font: 700 19px Arial, Helvetica, sans-serif; fill: #123f78; }
+      .label { font: 700 19px Arial, Helvetica, sans-serif; fill: #17304c; }
+      .body { font: 17px Arial, Helvetica, sans-serif; fill: #24384c; }
+      .arrow { stroke: #2b5c95; stroke-width: 3; fill: none; marker-end: url(#arrowhead); }
+    </style>
+    <marker id="arrowhead" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#2b5c95"/>
+    </marker>
+  </defs>
+  <rect width="1200" height="540" fill="#ffffff"/>
+  <text class="head" x="24" y="49">Observed workflow gap</text>
+  <text class="head" x="430" y="49">Likely service consequence</text>
+  <text class="head" x="836" y="49">Derived design need</text>
+
+  <rect x="24" y="74" width="340" height="128" rx="13" fill="#edf4fc" stroke="#a9c8e8"/>
+  <text class="label" x="43" y="107">Recognition and profile search</text>
+  <text class="body" x="43" y="139"><tspan x="43">Guest may be hard to identify;</tspan><tspan x="43" dy="24">relevant details take time to find.</tspan></text>
+  <path class="arrow" d="M 370 138 H 411"/>
+  <rect x="430" y="74" width="340" height="128" rx="13" fill="#fff5e9" stroke="#e9c797"/>
+  <text class="label" x="449" y="107">Preference may be missed</text>
+  <text class="body" x="449" y="139"><tspan x="449">Existing context may not inform</tspan><tspan x="449" dy="24">the interaction in time.</tspan></text>
+  <path class="arrow" d="M 776 138 H 817"/>
+  <rect x="836" y="74" width="340" height="128" rx="13" fill="#eaf7f4" stroke="#9acfc3"/>
+  <text class="label" x="855" y="107">Recognition and retrieval</text>
+  <text class="body" x="855" y="139"><tspan x="855">Identify the correct guest and</tspan><tspan x="855" dy="24">find task-relevant context quickly.</tspan></text>
+
+  <rect x="24" y="226" width="340" height="128" rx="13" fill="#edf4fc" stroke="#a9c8e8"/>
+  <text class="label" x="43" y="259">Notes during conversation</text>
+  <text class="body" x="43" y="291"><tspan x="43">Phone or paper lookup competes</tspan><tspan x="43" dy="24">with listening and eye contact.</tspan></text>
+  <path class="arrow" d="M 370 290 H 411"/>
+  <rect x="430" y="226" width="340" height="128" rx="13" fill="#fff5e9" stroke="#e9c797"/>
+  <text class="label" x="449" y="259">Interaction is interrupted</text>
+  <text class="body" x="449" y="291"><tspan x="449">Looking away can disrupt</tspan><tspan x="449" dy="24">attention and service flow.</tspan></text>
+  <path class="arrow" d="M 776 290 H 817"/>
+  <rect x="836" y="226" width="340" height="128" rx="13" fill="#eaf7f4" stroke="#9acfc3"/>
+  <text class="label" x="855" y="259">Discreet referencing</text>
+  <text class="body" x="855" y="291"><tspan x="855">Consult information while</tspan><tspan x="855" dy="24">maintaining guest engagement.</tspan></text>
+
+  <rect x="24" y="378" width="340" height="128" rx="13" fill="#edf4fc" stroke="#a9c8e8"/>
+  <text class="label" x="43" y="411">Delayed, variable updates</text>
+  <text class="body" x="43" y="443"><tspan x="43">Staff record details later and</tspan><tspan x="43" dy="24">may phrase them differently.</tspan></text>
+  <path class="arrow" d="M 370 442 H 411"/>
+  <rect x="430" y="378" width="340" height="128" rx="13" fill="#fff5e9" stroke="#e9c797"/>
+  <text class="label" x="449" y="411">Context loses reliability</text>
+  <text class="body" x="449" y="443"><tspan x="449">A new detail may be forgotten</tspan><tspan x="449" dy="24">or unclear to colleagues.</tspan></text>
+  <path class="arrow" d="M 776 442 H 817"/>
+  <rect x="836" y="378" width="340" height="128" rx="13" fill="#eaf7f4" stroke="#9acfc3"/>
+  <text class="label" x="855" y="411">Reliable capture and sharing</text>
+  <text class="body" x="855" y="443"><tspan x="855">Record confirmed details</tspan><tspan x="855" dy="24">promptly in a usable format.</tspan></text>
+</svg>

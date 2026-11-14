@@ -1,0 +1,75 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="315" viewBox="0 0 1200 315" role="img" aria-labelledby="title desc">
+  <title id="title">Five-step guest-information workflow</title>
+  <desc id="desc">Accor case-study workflow: retrieve profile, morning brief, fallback notes, serve guest, update record.</desc>
+  <defs>
+    <style>
+      .title { font: 700 26px Arial, Helvetica, sans-serif; fill: #0b4da8; }
+      .subtitle { font: 16px Arial, Helvetica, sans-serif; fill: #476b98; }
+      .num { font: 700 16px Arial, Helvetica, sans-serif; fill: #b9d8ff; }
+      .label { font: 700 18px Arial, Helvetica, sans-serif; fill: #ffffff; text-anchor: middle; }
+      .icon { fill: none; stroke: #ffffff; stroke-width: 3.5; stroke-linecap: round; stroke-linejoin: round; }
+      .arrow { fill: none; stroke: #0b4da8; stroke-width: 3; marker-end: url(#head); }
+    </style>
+    <marker id="head" markerWidth="9" markerHeight="9" refX="8" refY="4.5" orient="auto">
+      <path d="M0 0 L9 4.5 L0 9 Z" fill="#0b4da8"/>
+    </marker>
+  </defs>
+  <rect width="1200" height="315" fill="#ffffff"/>
+  <text class="title" x="20" y="38">Guest-information workflow</text>
+  <text class="subtitle" x="20" y="63">Accor Customer Digital Card case-study mapping</text>
+
+  <g transform="translate(20 0)">
+    <rect x="0" y="88" width="200" height="190" rx="17" fill="#0b4da8"/>
+    <text class="num" x="18" y="116">01</text>
+    <ellipse class="icon" cx="100" cy="145" rx="35" ry="11"/>
+    <path class="icon" d="M65 145 V190 C65 196 81 202 100 202 C119 202 135 196 135 190 V145"/>
+    <path class="icon" d="M65 168 C65 174 81 180 100 180 C119 180 135 174 135 168"/>
+    <text class="label" x="100" y="248">Retrieve profile</text>
+  </g>
+
+  <path class="arrow" d="M226 183 H251"/>
+  <g transform="translate(260 0)">
+    <rect x="0" y="88" width="200" height="190" rx="17" fill="#0b4da8"/>
+    <text class="num" x="18" y="116">02</text>
+    <rect class="icon" x="74" y="127" width="53" height="29" rx="7"/>
+    <path class="icon" d="M90 156 L84 166 V156"/>
+    <path class="icon" d="M90 141 H110"/>
+    <circle class="icon" cx="69" cy="178" r="10"/>
+    <circle class="icon" cx="131" cy="178" r="10"/>
+    <path class="icon" d="M49 202 C51 188 61 185 69 185 C77 185 87 188 89 202"/>
+    <path class="icon" d="M111 202 C113 188 123 185 131 185 C139 185 149 188 151 202"/>
+    <text class="label" x="100" y="248">Morning brief</text>
+  </g>
+
+  <path class="arrow" d="M466 183 H491"/>
+  <g transform="translate(500 0)">
+    <rect x="0" y="88" width="200" height="190" rx="17" fill="#0b4da8"/>
+    <text class="num" x="18" y="116">03</text>
+    <path class="icon" d="M66 133 H119 L132 146 V202 H66 Z"/>
+    <path class="icon" d="M119 133 V146 H132"/>
+    <path class="icon" d="M79 161 H118 M79 174 H118 M79 187 H108"/>
+    <path class="icon" d="M76 126 H140 V194"/>
+    <text class="label" x="100" y="248">Fallback notes</text>
+  </g>
+
+  <path class="arrow" d="M706 183 H731"/>
+  <g transform="translate(740 0)">
+    <rect x="0" y="88" width="200" height="190" rx="17" fill="#0b4da8"/>
+    <text class="num" x="18" y="116">04</text>
+    <path class="icon" d="M61 191 H139"/>
+    <path class="icon" d="M71 185 C72 155 88 140 100 140 C112 140 128 155 129 185"/>
+    <circle class="icon" cx="100" cy="136" r="5"/>
+    <path class="icon" d="M84 200 H116"/>
+    <text class="label" x="100" y="248">Serve guest</text>
+  </g>
+
+  <path class="arrow" d="M946 183 H971"/>
+  <g transform="translate(980 0)">
+    <rect x="0" y="88" width="200" height="190" rx="17" fill="#0b4da8"/>
+    <text class="num" x="18" y="116">05</text>
+    <rect class="icon" x="63" y="137" width="74" height="52" rx="4"/>
+    <path class="icon" d="M54 199 H146 L137 189 H63 Z"/>
+    <path class="icon" d="M100 149 V177 M86 163 H114"/>
+    <text class="label" x="100" y="248">Update record</text>
+  </g>
+</svg>
