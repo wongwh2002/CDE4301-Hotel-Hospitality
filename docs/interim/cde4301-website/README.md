@@ -31,6 +31,8 @@ python docs/interim/cde4301-website/build.py
 
 The build produces `report.html`, its linked contents, and the redirect from the previous filename. It preserves older bookmarks such as `#prototype`, `#testing`, and `#contributions`. The homepage and prototype overview are shorter editorial summaries.
 
+The shared navigation items are defined once in `build.py` (`NAV_PAGES`). Every build synchronises the header on all six pages, including the table text page, and sets the active page and mobile-menu accessibility attributes. Update that list when adding or renaming a top-level page.
+
 ### Main-body tables
 
 Tables 1–9 are maintained in `main-report-tables.md`. The report embeds their individual high-resolution PNGs from `assets/tables/` in their original positions, with captions and links to full-size images and readable text. Appendix tables remain in the report as Markdown tables.

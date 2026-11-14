@@ -13,6 +13,38 @@ import markdown
 
 
 HERE = Path(__file__).resolve().parent
+NAV_PAGES = (
+    ('index.html', 'Home'),
+    ('about.html', 'About Us'),
+    ('report.html', 'Report'),
+    ('presentation.html', 'Presentation'),
+    ('prototype.html', 'Prototype'),
+)
+
+
+def navigation(page_name):
+    active_page = 'report.html' if page_name == 'main-report-tables.html' else page_name
+    links = []
+    for href, label in NAV_PAGES:
+        current = ''
+        if href == active_page:
+            state = 'page' if page_name == href else 'location'
+            current = f' class="active" aria-current="{state}"'
+        links.append(f'<a href="{href}"{current}>{label}</a>')
+    return ('<nav class="nav" aria-label="Main navigation">'
+            '<a class="brand" href="index.html">CDE4301 / IS-432</a>'
+            '<button class="menu" type="button" aria-label="Toggle navigation" '
+            'aria-controls="site-navigation" aria-expanded="false">Menu &#9776;</button>'
+            '<div class="navlinks" id="site-navigation">' + ''.join(links) + '</div></nav>')
+
+
+def with_navigation(page, page_name):
+    if '{{SITE_NAVIGATION}}' in page:
+        return page.replace('{{SITE_NAVIGATION}}', navigation(page_name))
+    page, count = re.subn(r'<nav\b[^>]*class="nav"[^>]*>.*?</nav>', navigation(page_name), page, count=1, flags=re.S)
+    if count != 1:
+        raise ValueError(f'Expected one main navigation in {page_name}.')
+    return page
 
 # Keep links from the other website pages and older report bookmarks usable.
 ALIASES = {
@@ -68,6 +100,7 @@ def build_report():
     body = re.sub(r'(<table>.*?</table>)', r'<div class="table-scroll">\1</div>', body, flags=re.S)
     page = template.replace('{{REPORT_TOC}}', ''.join(section_links(renderer.toc_tokens)))
     page = page.replace('{{REPORT_BODY}}', body)
+    page = with_navigation(page, 'report.html')
     (HERE / 'report.html').write_text(page, encoding='utf-8')
     if table_source.exists():
         build_table_text_page(table_source.read_text(encoding='utf-8'), template)
@@ -84,6 +117,10 @@ def build_report():
 <body><p>The report is available at <a href="report.html">CDE4301 Hospitality: interim report</a>.</p></body>
 </html>
 ''', encoding='utf-8')
+    for filename, _ in NAV_PAGES:
+        if filename != 'report.html':
+            path = HERE / filename
+            path.write_text(with_navigation(path.read_text(encoding='utf-8'), filename), encoding='utf-8')
     print('Built report.html and the redirect from report (1).html.')
 
 
@@ -99,6 +136,7 @@ def build_table_text_page(source, template):
     page = page.replace('href="interim-report.md"', 'href="main-report-tables.md"')
     page = page.replace('href="#references"', 'href="report.html#references"')
     page = page.replace('href="#appendix-a"', 'href="report.html#appendix-a"')
+    page = with_navigation(page, 'main-report-tables.html')
     (HERE / 'main-report-tables.html').write_text(page, encoding='utf-8')
 
 
