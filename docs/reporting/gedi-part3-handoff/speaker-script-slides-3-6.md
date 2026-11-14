@@ -16,7 +16,7 @@ Capture and processing would collect guest-stated preferences or requests, assoc
 
 On-time service support and glanceable interaction address the need to find information quickly without disrupting the conversation. Low-effort capture addresses the difficulty of gathering information while serving guests. Preference continuity addresses delayed or inconsistent notes that can be lost before another staff member uses them.
 
-We linked the criteria to LQA service behaviours such as timely service, natural engagement, active listening and personalisation. The one-and-a-half-second cue target is our proposed engineering target; it isn’t an LQA timing requirement. We can measure whether the cue arrives in time, whether staff can glance at it comfortably, how long capture takes, and whether a confirmed preference reaches the next staff member.”
+We linked the criteria to LQA service behaviours such as timely service, natural engagement, active listening and personalisation. The less-than-one-second cue target is our proposed engineering target; it isn’t an LQA timing requirement. We can measure whether the cue arrives in time, whether staff can glance at it comfortably, how long capture takes, and whether a confirmed preference reaches the next staff member.”
 
 **Transition:** “With the criteria in place, we compared different ways to support the same functions.”
 
@@ -40,4 +40,4 @@ The interaction can then become a draft for staff review and saving, so useful i
 
 ## Reconciliation note
 
-The script describes the cue target as 1.5 seconds. GEDI slide 23 prints less than one second. The current interim report treats 1.5 seconds p95 as the proposed engineering target and records the mismatch explicitly. Confirm the intended timing before changing or rehearsing a revised slide.
+The supplied GEDI slide 23 and revised speaker script use a proposed less-than-one-second cue target. This is an engineering target, not an LQA requirement; [Shiwa et al. (2009)](https://doi.org/10.1007/s12369-009-0012-8) is an analogy from communication-robot timing, not direct smart-glasses evidence. The earlier script draft used 1.5 seconds. Four successful warm frame commits averaged 1.18 seconds and do not establish end-to-end target attainment, p95, failure rate, or physical lens visibility. Do not present the target as demonstrated.
