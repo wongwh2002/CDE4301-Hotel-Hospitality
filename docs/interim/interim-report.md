@@ -116,7 +116,7 @@ The preceding problem analysis identifies three needs: recognise and retrieve gu
 | **Capture and process** | In the proposed complete workflow, one tap starts guest recognition and conversation recording together. Extract explicit guest preferences, requests, or concerns with supporting wording, source, timestamp, guest association, and current-stay context. Prepare a draft for staff review, correction, and approval before saving. | Time-stamped interaction draft associated with the guest and stay; shared only after staff approval. |
 | **Select and display** | Retrieve the guest's context, select the smallest detail relevant to the current location, task, and urgency, and present it as a concise cue. Suppress personal cues for unknown, ambiguous, stale, or lost guest associations. | A short, actionable prompt for the employee serving the guest. |
 
-**Service criteria and proposed measures.** The selected PARKROYAL F&B LQA items connect the functions to timely acknowledgement, active listening, natural engagement, and personalisation. The one-minute acknowledgement and three-minute drinks-order windows describe staff actions, not system latency; the selected 15-item extract is a project subset, not a complete LQA audit or score. Cue-processing time is measured separately. [P8](#p8), [R4](#r4)
+**Service criteria and proposed measures.** The selected PARKROYAL F&B LQA items connect the functions to timely acknowledgement, active listening, natural engagement, and personalisation. [P8](#p8), [R4](#r4)
 
 | Criterion | Service behaviour | Design requirement and measure |
 |---|---|---|
