@@ -1,35 +1,36 @@
 <!DOCTYPE html>
-<html lang="en"><head><meta charset="utf-8"/><meta content="width=device-width, initial-scale=1" name="viewport"/><meta content="CDE4301 Team IS-432 interim capstone: guest-context cues for personalised hotel service" name="description"/><title>Report | CDE4301 Hospitality</title><link href="style.css" rel="stylesheet"/></head><body><header><nav class="nav"><a class="brand" href="index.html">CDE4301 / IS-432</a><button aria-label="Toggle navigation" class="menu">Menu ☰</button><div class="navlinks"><a class="" href="index.html">Home</a><a class="" href="about.html">About Us</a><a class="active" href="report.html">Report</a><a class="" href="prototype.html">Prototype</a></div></nav></header><main><section class="page-head"><div><span class="eyebrow">Interim assessment · Revised 14 November 2026</span><h1 class="page-title">Interim report</h1><p>Guest-context cues for personalised hotel service · Complete source report, figures, evaluation, references and appendices.</p></div></section><div class="report-layout"><aside aria-label="Report table of contents" class="toc"><b>ON THIS PAGE</b><input aria-label="Filter sections" class="searchbar" id="toc-search" placeholder="Filter sections..."/><a href="#executive-summary">Executive summary</a><a href="#1-introduction">1 · Introduction</a><a href="#2-problem-identification">2 · Problem identification</a><a href="#3-aim-scope-and-requirements">3 · Aim &amp; requirements</a><a href="#concepts">3 · Concept selection</a><a href="#prototype">4 · Development</a><a href="#testing">5 · Evaluation</a><a href="#next-stage">6 · Next-stage plan</a><a href="#contributions">7 · Team contributions</a><a href="#references">References</a><a href="#appendix-a">A · Problem iterations</a><a href="#appendix-b">B · Guest survey</a><a href="#appendix-c">C · Industry meeting 1</a><a href="#appendix-d">D · Industry meeting 2</a><a href="#appendix-e">E · Industry meeting 3</a><a href="#appendix-f">F · Novotel / Mercure</a><a href="#appendix-g">G · The Ridge</a><a href="#appendix-h">H · Competitive analysis</a><a href="#appendix-i">I · LQA standards</a><a href="#appendix-j">J · Club lounge &amp; personalization</a><a href="#appendix-k">K · Prototype data</a><a href="#evidence-notes">L · Evidence reconciliation</a><a href="#evaluation-protocol">M · Evaluation protocol</a><a href="#supporting-material">N · Supporting materials</a><a href="#technical-detail">O · Technical detail</a></aside><article class="report-content"><div class="report-tools"><a download="" href="interim-report.md">↓ Download Markdown</a><a href="#references">↗ References</a><a href="#appendix-a">↗ Appendices</a><button onclick="window.print()">Print / Save PDF</button></div><h1>Guest-context cues for personalised hotel service</h1>
+
+<html lang="en"><head><meta charset="utf-8"/><meta content="width=device-width, initial-scale=1" name="viewport"/><meta content="CDE4301 Team IS-432 interim capstone: guest-context cues for personalised hotel service" name="description"/><title>Report | CDE4301 Hospitality</title><link href="style.css" rel="stylesheet"/></head><body><header><nav class="nav"><a class="brand" href="index.html">CDE4301 / IS-432</a><button aria-label="Toggle navigation" class="menu">Menu ☰</button><div class="navlinks"><a class="" href="index.html">Home</a><a class="" href="about.html">About Us</a><a class="active" href="report.html">Report</a><a class="" href="prototype.html">Prototype</a></div></nav></header><main><section class="page-head"><div><span class="eyebrow">Interim assessment · Revised 14 November 2026</span><h1 class="page-title">Interim report</h1><p>Guest-context cues for personalised hotel service · Complete source report, figures, evaluation, references and appendices.</p></div></section><div class="report-layout"><aside aria-label="Report table of contents" class="toc"><b>ON THIS PAGE</b><input aria-label="Filter sections" class="searchbar" id="toc-search" placeholder="Filter sections..."/><a href="#executive-summary">Executive summary</a><a href="#1-introduction">1 · Introduction</a><a href="#2-problem-identification">2 · Problem identification</a><a href="#3-aim-scope-and-requirements">3 · Aim &amp; requirements</a><a href="#3-concept-generation-and-selection">3 · Concept selection</a><a href="#4-system-architecture-and-prototype-development">4 · Development</a><a href="#5-user-validation--system-evaluation">5 · Evaluation</a><a href="#6-limitations--next-steps">6 · Next steps</a><a href="#7-team-contributions">7 · Team contributions</a><a href="#references">References</a><a href="#appendix-a">Appendix A. Problem Iterations</a><a href="#appendix-b">Appendix B. Guest Survey: Dream Hotel Experience</a><a href="#appendix-c">Appendix C. Industry Meeting 1: PARKROYAL Collection</a><a href="#appendix-d">Appendix D. Industry Meeting 2: PARKROYAL Collection</a><a href="#appendix-e">Appendix E. Novotel / Mercure Site Visit</a><a href="#appendix-f">Appendix F. The Ridge Site Visit</a><a href="#appendix-g">Appendix G. Competitive Landscape Analysis</a><a href="#appendix-h">Appendix H. Sample LQA Standards</a><a href="#appendix-i">Appendix I. What to Personalise + Club Lounge Use Case</a><a href="#appendix-j">Appendix J. Prototyping Data &amp; Results</a><a href="#appendix-k">Appendix K. Reproducible Next-Stage Evaluation</a><a href="#appendix-l">Appendix L. Prototype Recognition &amp; Extraction Detail</a></aside><article class="report-content"><div class="report-tools"><a download="" href="interim-report.md">↓ Download Markdown</a><a href="#references">↗ References</a><a href="#appendix-a">↗ Appendices</a><button onclick="window.print()">Print / Save PDF</button></div><h1>Guest-context cues for personalised hotel service</h1>
 <p><strong>CDE4301 Innovation &amp; Design Capstone · Interim assessment · Team IS-432</strong><br/>
 <strong>Team:</strong> Neha Rajan · Tan Ping Hui · Wong Weng Hong · Nigel Yeo Tong Wei<br/>
 <strong>Presentation:</strong> 5 November 2026 · <strong>Report prepared:</strong> 10 November 2026 · <strong>Revised:</strong> 14 November 2026<br/>
 <strong>Case setting:</strong> PARKROYAL club lounge · <strong>Stage:</strong> Semester 1 proof of concept</p>
 <!-- REPORT_BODY -->
-<h2 id="executive-summary">Executive summary</h2>
+<h2 id="executive-summary">Executive Summary</h2>
 <p>Hotels may collect guest preferences without making them available at the next service moment. This project investigates same-stay guest-context capture and reuse in a lounge, including for first-time guests with limited service history.</p>
 <p>Semester 1 produced a working smart-glasses recognition-and-display prototype, a separate lounge-services scaffold, early preference-extraction experiments, and formative testing. The glasses app recognises against a loaded gallery and displays a name with fictional preference or allergy cues. Automatic conversation-to-profile updating and task-based cue selection are not integrated. <a href="#p1">P1</a>, <a href="#p3">P3</a></p>
 <p>Four successful warm frame commits averaged <strong>1.18 seconds</strong> from handled temple tap to Android submission; this cannot establish p95 or physical lens visibility, and the supplied slide's <strong>&lt;1 s</strong> target conflicts with the script's proposed <strong>1.5 s</strong>. A 20-minute comparison reported battery-gauge drops of <strong>28 versus 9 percentage points</strong> for continuous and triggered operation. In a walkthrough with <strong>10 non-hotel participants</strong>, all found activation easy and 70% saw potential usefulness, while natural cue use remained difficult. These findings guide further prototyping; they do not establish recognition accuracy, improved guest satisfaction, or hotel performance. Next, the team should test extraction, cue relevance, and the complete handover against ordinary profile lookup with hotel staff. <a href="#p1">P1</a>, <a href="#p4">P4</a>, <a href="#p7">P7</a></p>
 <h2 id="1-introduction">1. Introduction</h2>
-<p>How do hotel guests decide where to stay? Various factors influence these decisions, including price, reviews, and ratings. Singapore is home to 400+ hotels [e]. Yet, in the luxury hotel industry, only 5 players have captured nearly 50% of the market [f]. A discussion with the partner hotel (Appendix E) revealed that the hotel’s revenue is decreasing significantly due to increasing manpower and operational costs. Hence, this project aims to explore how luxury hotels generate revenue to become key players.</p>
+<p>How do hotel guests decide where to stay? Various factors influence these decisions, including price, reviews, and ratings. Singapore is home to 400+ hotels <a href="#r16">R16</a>. Yet, in the luxury hotel industry, only 5 players have captured nearly 50% of the market <a href="#r17">R17</a>. A discussion with the partner hotel (Appendix E) revealed that the hotel’s revenue is decreasing significantly due to increasing manpower and operational costs. Hence, this project aims to explore how luxury hotels generate revenue to become key players.</p>
 <h2 id="2-problem-identification">2. Problem Identification</h2>
 <h3>2.1 Iterations: Manpower and Satisfaction Stagnation</h3>
 <p>Based on interviews across various hotels in Singapore, manpower shortages and retention was identified as a common issue (Appendix). The shortage often leads to cognitive overload among staff, preventing them from meeting certain service standards (Appendix). In recent years, this has led to a stagnation in guest satisfaction, driven by rising customer expectations (Appendix). Iterating through these problems led to the conclusion that all these issues contribute to the overarching problem faced by the industry partner: revenue generation.</p>
 <h3>2.2 The Revenue Problem</h3>
-<p>While revenue can be increased by decreasing costs, this can compromise the quality of luxury services in an industry already struggling with external factors driving up cost. Hence, profit generation will be the aim of this project. Revenue in hotels is measured by Revenue Per Available Room (RevPAR) [source]. It is represented by</p>
+<p>While revenue can be increased by decreasing costs, this can compromise the quality of luxury services in an industry already struggling with external factors driving up cost. Hence, profit generation will be the aim of this project. Revenue in hotels is measured by Revenue Per Available Room (RevPAR) <a href="#r22">R22</a>. It is represented by</p>
 <p>RevPAR = ADR OR</p>
-<p>Where ADR represents Average Daily Rate of the hotel [source] and OR represents Occupancy Rate [source]. While there are common factors affecting both, such as location, season, economic conditions, and competitor landscape, the classification (star rating) of a hotel significantly affects ADR while reputation and reviews affect OR [source].</p>
+<p>Where ADR represents Average Daily Rate of the hotel <a href="#r22">R22</a> and OR represents Occupancy Rate <a href="#r23">R23</a>. While there are common factors affecting both, such as location, season, economic conditions, and competitor landscape, the classification (star rating) of a hotel significantly affects ADR while reputation and reviews affect OR [source].</p>
 <h4>2.2.1 ADR and Service Quality</h4>
 <p>Ratings of hotels depend on their quality, and are assessed by the Leading Quality Assurance (LQA) framework [source]. While these criteria span across emotional intelligence, service quality, efficiency, and more, a large number of standards strongly link to personalized service. Currently, there is a gap in delivering human-centered service, with the partner claiming that staff fail to notice emotional cues like sick guests in the lobby (Appendix).</p>
 <h4>2.2.2 OR and Customer Satisfaction</h4>
 <p>Hotel reputation and reviews depend on customer satisfaction. Satisfaction drives increased retention rate and guest acquisition–measured by an increase in Net Promoter Scores (NPS) [source]. This subsequently increases hotel occupancy rate. Satisfaction significantly increases loyalty, as shown by a guest survey (Appendix) in consensus with Marriot’s occupancy analysis (Figure). However, the industry partner is facing “single-digit retention rates” (Appendix).</p>
-<p>Guest satisfaction has stagnated over the past few years (Figure) [source], due to rising guest expectations. Different guest demographics expect different services and amenities [a]. Scaling automations to increase overall satisfaction leads to standardization, failing to address the unique expectations of the individual [b].</p>
+<p>Guest satisfaction has stagnated over the past few years (Figure) [source], due to rising guest expectations. Different guest demographics expect different services and amenities <a href="#r12">R12</a>. Scaling automations to increase overall satisfaction leads to standardization, failing to address the unique expectations of the individual <a href="#r13">R13</a>.</p>
 <h4>2.2.3 The Need for Personalization</h4>
-<p>Hence, it is established that revenue depends on both service quality (driving ADR), which demands interpersonal service and customer satisfaction [Medallia] (driving OR) which requires addressing individual expectations. Synthesizing these needs leads to the demand for personalization in the luxury hotel industry.</p>
+<p>Hence, it is established that revenue depends on both service quality (driving ADR), which demands interpersonal service and customer satisfaction <a href="#r2">R2</a> (driving OR) which requires addressing individual expectations. Synthesizing these needs leads to the demand for personalization in the luxury hotel industry.</p>
 <p>This is further supported by the following:</p>
 <blockquote>
-<p><strong>86% of travelers sought at least 1 aspect of their experience to be personalized [c]</strong>
-<strong>61% of consumers are willing to spend more for personalized experiences [d]</strong>
-<strong>87% of guests are more likely to recommend a hotel if they receive a personalized experience (Appendix)</strong></p>
+<p><strong>86% of travelers sought at least 1 aspect of their experience to be personalized <a href="#r14">R14</a></strong></p>
+<p><strong>61% of consumers are willing to spend more for personalized experiences <a href="#r15">R15</a></strong></p>
+<p><strong>87% of guests are more likely to recommend a hotel if they receive a personalized experience (Appendix)</strong></p>
 </blockquote>
 <p>The broader case for personalised hotel service leads to an operational question: can staff obtain and use relevant guest information at the moment it is needed? In a Medallia survey of 1,749 hotel guests, 23% rated their recent stay 9 or 10 for personalisation, while recall of the surveyed in-stay elements averaged 46%. Perceived personalisation was associated with satisfaction, although the survey does not establish that access to guest data caused either outcome. The finding directs attention to service encounters, where recorded information must become a useful staff action. <a href="#r2">R2</a></p>
 <h3>2.3 Current guest-information workflow</h3>
@@ -37,7 +38,7 @@
 <p>The Accor Customer Digital Card case study maps a five-stage information cycle. A general manager retrieves guest details from a database and communicates relevant points in a morning briefing. Hard-copy or WhatsApp notes can serve as a fallback when staff need to check a detail. During service, staff draw on the briefing or profile while learning new preferences or concerns through conversation. They enter newly learned details into the database afterwards, potentially making them available for later encounters. <a href="#p1">P1</a> This sequence is a case-study mapping, not a measured description of every hotel or of PARKROYAL's daily operations.</p>
 <figure>
 <a aria-label="Open the five-step guest-information workflow diagram" href="https://raw.githubusercontent.com/wongwh2002/CDE4301-Hotel-Hospitality/main/docs/interim/assets/guest-information-five-step-workflow.svg" rel="noopener" target="_blank">
-<img alt="Five-step Accor case-study workflow: retrieve profile, morning brief, fallback notes, serve guest, update record." height="315" loading="lazy" src="https://raw.githubusercontent.com/wongwh2002/CDE4301-Hotel-Hospitality/main/docs/interim/assets/guest-information-five-step-workflow.svg" style="max-width:100%;height:auto" width="1200"/>
+<img alt="Five-step Accor case-study workflow: retrieve profile, morning brief, fallback notes, serve guest, update record." height="315" src="https://raw.githubusercontent.com/wongwh2002/CDE4301-Hotel-Hospitality/main/docs/interim/assets/guest-information-five-step-workflow.svg" width="1200"/>
 </a>
 <figcaption><strong>Case-study workflow.</strong> The mapped Accor Customer Digital Card sequence. [P1](#p1)</figcaption>
 </figure>
@@ -48,7 +49,7 @@
 <p>Guest identification and information relevance are distinct problems. Finding a profile quickly is insufficient if it belongs to the wrong person; finding the correct profile is also insufficient if staff must search through unrelated details while serving the guest. A preference about a drink may matter at the lounge, whereas a room-setting preference may not. The design need is therefore timely access to the <em>right</em> information for the <em>right</em> guest and task. This is a design inference from the mapped journey, not evidence that a particular retrieval method will improve service.</p>
 <figure>
 <a aria-label="Open the guest-information cause-to-need diagram" href="https://raw.githubusercontent.com/wongwh2002/CDE4301-Hotel-Hospitality/main/docs/interim/assets/guest-information-need-derivation.svg" rel="noopener" target="_blank">
-<img alt="Three pathways connect guest recognition and search difficulties to missed preferences and a need for rapid retrieval; intrusive note lookup to interrupted conversation and discreet referencing; and delayed, inconsistent updates to lost or unclear details and reliable capture." height="500" loading="lazy" src="https://raw.githubusercontent.com/wongwh2002/CDE4301-Hotel-Hospitality/main/docs/interim/assets/guest-information-need-derivation.svg" style="max-width:100%;height:auto" width="1200"/>
+<img alt="Three pathways connect guest recognition and search difficulties to missed preferences and a need for rapid retrieval; intrusive note lookup to interrupted conversation and discreet referencing; and delayed, inconsistent updates to lost or unclear details and reliable capture." height="500" src="https://raw.githubusercontent.com/wongwh2002/CDE4301-Hotel-Hospitality/main/docs/interim/assets/guest-information-need-derivation.svg" width="1200"/>
 </a>
 <figcaption><strong>Problem-analysis diagram.</strong> Workflow gaps, likely service consequences, and derived needs. The arrows represent the team's design reasoning, not measured causal effects.</figcaption>
 </figure>
@@ -63,14 +64,13 @@
 <blockquote>
 <p><strong>How might we enable luxury hotel staff to capture, share, and access relevant guest information seamlessly so that they can deliver consistent, personalised, high-quality service?</strong></p>
 </blockquote>
-<p>Section 2 translates this problem into functions, criteria, and boundaries for the proposed solution.</p>
 <div aria-label="Proposed service continuity loop" class="flow" role="group">
 <div><b>01 · Capture</b>A guest states a preference.<small>Emerging capability</small></div>
 <div><b>02 · Check &amp; share</b>Staff confirm the guest and meaning.<small>Planned approval workflow</small></div>
 <div><b>03 · Retrieve</b>The next employee sees relevant context.<small>Demo profiles implemented</small></div>
 <div><b>04 · Adapt</b>Staff make a suitable offer and confirm it.<small>Service benefit to evaluate</small></div>
 </div>
-<h2 id="3-aim-scope-and-requirements">3. Aim, scope, and requirements</h2>
+<h2 id="3-aim-scope-and-requirements">3. Aim, Scope, and Requirements</h2>
 <p>The design question is:</p>
 <blockquote>
 <p>How might we enable luxury-hotel staff to capture, share, and access relevant guest information seamlessly, so they can deliver consistently personalised, high-quality service?</p>
@@ -138,7 +138,7 @@
 </table>
 <p><strong>Cross-cutting safeguards.</strong> DR5 suppresses personal cues for unknown, ambiguous, lost, or stale tracks. DR6 minimises displayed fields, distinguishes preferences from allergies, and retains a manual fallback. An allergy cue can prompt a check; staff must verify the authorised guest record and the relevant menu or kitchen source before advising the guest.</p>
 <p><strong>Timing note.</strong> The speaker script gives a <strong>1.5-second</strong> engineering target, specified here as a provisional p95 from a defined trigger to first visible output. The supplied slide still prints <strong>&lt;1 s</strong> and should be reconciled before reuse. Four successful warm Android frame commits averaged <strong>1.18 s</strong>; they exclude failed or interrupted attempts and do not establish p95 latency or physical lens visibility. <a href="#p1">P1</a>, <a href="#p3">P3</a>, <a href="#p4">P4</a></p>
-<h2 id="concepts">3. Concept generation and selection</h2>
+<h2 id="3-concept-generation-and-selection">3. Concept generation and selection</h2>
 <p>The concepts address the same first-stay scenario: a guest shares a preference early in the stay, and another employee needs it during a later service interaction. We compare complete workflows while keeping guest information, task, and staff review support as consistent as possible. <a href="#p1">P1</a></p>
 <table>
 <thead>
@@ -206,35 +206,35 @@
 <p>For a fair evaluation, give each concept the same guest information, service task, and staff-review support. Measure capture time, correct guest/stay association and errors, unsupported notes, time to a usable cue, staff interruption, comprehension, privacy and comfort, and effort. Treat privacy and safe association as pass/fail constraints; score other criteria only after weights are justified with staff or partner input. For each comparison row, record capture time/correction effort; correct and false associations; evidence-supported notes/edit time; cue latency/comprehension; interaction steps/interruption; privacy/comfort; and integration failures/recovery. A morphological chart should generate combinations of capture, association, processing, and output methods; a separate decision matrix should assess the complete workflows.</p>
 <p>Smart glasses remain the concept selected for further prototyping because they could combine hands-free interaction, contextual association, and a concise cue in the service moment. The current comparison does not establish a winner: there are no weighted scores or comparative hotel-staff results yet. The glasses direction remains subject to the camera/display integration gate and the requirements in Chapter 2.</p>
 <p>Existing products establish substantial prior capability. Oracle OPERA Cloud documents profiles containing preferences and images; hotelkit supports guest-request assignment, escalation, and follow-up; SoftServe has demonstrated wearable AR face identification, including VIP recognition. Face recognition on glasses and shared guest records are therefore not themselves novel. The project's contribution is to investigate a same-stay service workflow linking low-effort context capture, checked association, and timely presentation of a relevant cue. The lounge proposal additionally explores an <strong>active lounge cohort</strong> bounded by entry and exit; the implemented glasses demo recognises against its loaded gallery, not that card-derived cohort. <a href="#r5">R5</a>, <a href="#r6">R6</a>, <a href="#r7">R7</a>, <a href="#p3">P3</a>, <a href="#p6">P6</a></p>
-<h2 id="prototype">4. System architecture and prototype development</h2>
-<h3 id="initial-concept">4.1 Solution overview and staff journey</h3>
+<h2 id="4-system-architecture-and-prototype-development">4. System architecture and prototype development</h2>
+<h3>4.1 Solution overview and staff journey</h3>
 <p>Chapter 3 takes smart glasses forward as a prototyping direction for combining guest recognition with information available during face-to-face service. From the employee's perspective, the concept is simple: look towards a guest, see their name and useful context, and use it to make an appropriate offer without searching a separate profile.</p>
 <p>Figure 1 identifies the core technology. SQLite stores guest profiles and preferences; reference photos are stored separately. At startup, InsightFace <code>buffalo_l</code> detects and aligns reference faces, then ArcFace converts them into normalised 512-number vectors cached in RAM. A live face vector is compared with these references without reprocessing every photo. Initially, the camera would stay on continuously, capturing and analysing every frame. <a href="#p3">P3</a></p>
 <figure>
 <a aria-label="Open the initial smart-glasses concept diagram" href="https://raw.githubusercontent.com/wongwh2002/CDE4301-Hotel-Hospitality/main/docs/interim/assets/initial-concept.svg" rel="noopener" target="_blank">
-<img alt="The wearer interface sends faces for recognition against cached ArcFace reference vectors. A recognised identity selects the SQLite guest record, which returns name and preference cues directly to the wearer interface." height="505" loading="lazy" src="https://raw.githubusercontent.com/wongwh2002/CDE4301-Hotel-Hospitality/main/docs/interim/assets/initial-concept.svg" style="max-width:100%;height:auto" width="1200"/>
+<img alt="The wearer interface sends faces for recognition against cached ArcFace reference vectors. A recognised identity selects the SQLite guest record, which returns name and preference cues directly to the wearer interface." height="505" src="https://raw.githubusercontent.com/wongwh2002/CDE4301-Hotel-Hospitality/main/docs/interim/assets/initial-concept.svg" width="1200"/>
 </a>
 <figcaption><strong>Figure 1.</strong> Core functions, models, and guest-data setup, before examining the design iterations.</figcaption>
 </figure>
 <p><strong>Proposed staff journey.</strong> The first staff member taps the glasses to start. A stable, unique match can surface a relevant preference or allergy cue; without one, the system shows no personal details and staff greet normally, ask the guest, or use the phone/PMS. Staff confirms today's preference in conversation. An allergy cue prompts a check against the authorised guest record and menu or kitchen source before staff explains a risk or suggests an alternative. Afterward, the system can prepare a time-stamped draft grounded in the guest's words; staff edits it, confirms the guest/current stay, and approves it. The next employee can retrieve the approved detail when relevant. This end-to-end handover remains proposed.</p>
 <figure>
 <a aria-label="Open the intended staff service journey" href="https://raw.githubusercontent.com/wongwh2002/CDE4301-Hotel-Hospitality/main/docs/interim/assets/staff-journey.svg" rel="noopener" target="_blank">
-<img alt="Intended service journey: approach the guest, see context, adapt the offer and confirm today's need; a proposed, reviewed preference update may inform later staff." height="350" loading="lazy" src="https://raw.githubusercontent.com/wongwh2002/CDE4301-Hotel-Hospitality/main/docs/interim/assets/staff-journey.svg" style="max-width:100%;height:auto" width="1200"/>
+<img alt="Intended service journey: approach the guest, see context, adapt the offer and confirm today's need; a proposed, reviewed preference update may inform later staff." height="350" src="https://raw.githubusercontent.com/wongwh2002/CDE4301-Hotel-Hospitality/main/docs/interim/assets/staff-journey.svg" width="1200"/>
 </a>
 <figcaption><strong>Figure 2.</strong> Intended staff journey. The figure shows the normal service path; the text above adds no-match fallback, allergy verification, and the proposed reviewed handover.</figcaption>
 </figure>
 <p>The present glasses demo covers manual activation, recognition against a loaded gallery, prepared-profile retrieval, and cue rendering. Audio capture, confirmed guest/stay association, staff-approved profile writes, next-shift retrieval, and task-ranked cue selection remain to be integrated; Chapter 5 assesses the demonstrated path.</p>
-<h3 id="capture">4.2 Capture</h3>
+<h3>4.2 Capture</h3>
 <p>Capture iterations use measurable tests: battery depletion, traffic, silence-timeout duration, latency, and guest facts matched against expected answers. The intended path stores an explicit, time-stamped statement as a sourced draft, associates it with a likely guest/stay, and tracks scope and review status. Staff approval is required before the shared record is updated. Display ranks checked context by location, task, urgency, and validity. Text extraction is explored separately; audio capture and reviewed updates are not integrated.</p>
 <figure>
-<a href="https://raw.githubusercontent.com/wongwh2002/CDE4301-Hotel-Hospitality/main/docs/interim/assets/capture-pipeline.svg" rel="noopener" target="_blank"><img alt="Intended capture pipeline: video/audio clip, multimodal processing, relevant insight extraction, guest association through face recognition, then recording preferences in the database." height="245" loading="lazy" src="https://raw.githubusercontent.com/wongwh2002/CDE4301-Hotel-Hospitality/main/docs/interim/assets/capture-pipeline.svg" style="max-width:100%;height:auto" width="1200"/></a>
+<a href="https://raw.githubusercontent.com/wongwh2002/CDE4301-Hotel-Hospitality/main/docs/interim/assets/capture-pipeline.svg" rel="noopener" target="_blank"><img alt="Intended capture pipeline: video/audio clip, multimodal processing, relevant insight extraction, guest association through face recognition, then recording preferences in the database." height="245" loading="lazy" src="https://raw.githubusercontent.com/wongwh2002/CDE4301-Hotel-Hospitality/main/docs/interim/assets/capture-pipeline.svg" width="1200"/></a>
 <figcaption><strong>Figure 3.</strong> Intended capture workflow, before refining activation and processing allocation.</figcaption>
 </figure>
-<h4 id="activation">4.2.1 Temple-touch activation</h4>
+<h4>4.2.1 Temple-touch activation</h4>
 <p>Continuous capture requires less staff input but keeps processing active between encounters. Reported battery life was only slightly over an hour, insufficient for a hotel shift. Temple-touch activation trades a single tap for longer battery life. <a href="#p1">P1</a></p>
 <p>The timeout balances battery use with <strong>DR2, low effort</strong>: one tap starts capture, speech sustains it, and 15 seconds without speech ends it automatically, without repeated taps or a separate stop action. Expiry stops camera/microphone activity, cancels requests, and clears cues. Speech cannot activate idle capture. <a href="#p3">P3</a></p>
 <figure>
-<a href="https://raw.githubusercontent.com/wongwh2002/CDE4301-Hotel-Hospitality/main/docs/interim/assets/activation-iteration.svg" rel="noopener" target="_blank"><img alt="Continuous activity is replaced by idle, tap-activated interaction, and automatic stopping after 15 seconds without speech; speech extends the active session." height="415" loading="lazy" src="https://raw.githubusercontent.com/wongwh2002/CDE4301-Hotel-Hospitality/main/docs/interim/assets/activation-iteration.svg" style="max-width:100%;height:auto" width="1200"/></a>
+<a href="https://raw.githubusercontent.com/wongwh2002/CDE4301-Hotel-Hospitality/main/docs/interim/assets/activation-iteration.svg" rel="noopener" target="_blank"><img alt="Continuous activity is replaced by idle, tap-activated interaction, and automatic stopping after 15 seconds without speech; speech extends the active session." height="415" loading="lazy" src="https://raw.githubusercontent.com/wongwh2002/CDE4301-Hotel-Hospitality/main/docs/interim/assets/activation-iteration.svg" width="1200"/></a>
 <figcaption><strong>Figure 4.</strong> Encounter activation and speech-controlled session expiry.</figcaption>
 </figure>
 <p>Local WebRTC voice activity detection distinguishes speech-like activity from silence. The timeout was tested and verified at approximately <strong>15.4 seconds in a quiet-room setting</strong>; restaurant and front-desk conditions still need verification. <a href="#p3">P3</a></p>
@@ -266,10 +266,10 @@
 </tbody>
 </table>
 <p>Traffic fell by 75.9%; battery depletion fell by 19 percentage points, approximately 68% relative depletion. This measures battery-gauge change, not electrical power. <a href="#p1">P1</a>, <a href="#p7">P7</a></p>
-<h4 id="processing">4.2.2 Selective server processing</h4>
+<h4>4.2.2 Selective server processing</h4>
 <p>On-device photo recognition averaged <strong>1,927.9 ms</strong>, longer than the proposed <strong>1.5 s</strong> end-to-end cue target. SCRFD and ArcFace recognition dominated the component path, motivating selective offloading. Camera handling, tracking, crop preparation, and rendering remain local; the laptop handles recognition and lookup. This targets <strong>DR1</strong> by keeping position updates responsive; a separate battery benefit remains unmeasured. <a href="#p3">P3</a>, <a href="#p5">P5</a></p>
 <figure>
-<a href="https://raw.githubusercontent.com/wongwh2002/CDE4301-Hotel-Hospitality/main/docs/interim/assets/capture-offload-pipeline.svg" rel="noopener" target="_blank"><img alt="Capture responsibilities: glasses handle temple touch and video/audio sensing; the server handles heavier multimodal analysis, insight extraction, guest association, and database updates in the intended full pipeline." height="260" loading="lazy" src="https://raw.githubusercontent.com/wongwh2002/CDE4301-Hotel-Hospitality/main/docs/interim/assets/capture-offload-pipeline.svg" style="max-width:100%;height:auto" width="1200"/></a>
+<a href="https://raw.githubusercontent.com/wongwh2002/CDE4301-Hotel-Hospitality/main/docs/interim/assets/capture-offload-pipeline.svg" rel="noopener" target="_blank"><img alt="Capture responsibilities: glasses handle temple touch and video/audio sensing; the server handles heavier multimodal analysis, insight extraction, guest association, and database updates in the intended full pipeline." height="260" loading="lazy" src="https://raw.githubusercontent.com/wongwh2002/CDE4301-Hotel-Hospitality/main/docs/interim/assets/capture-offload-pipeline.svg" width="1200"/></a>
 <figcaption><strong>Figure 5.</strong> Selective server allocation. Recognition is implemented; automatic preference extraction and updates remain planned.</figcaption>
 </figure>
 <p>In a 15-probe warm photo test, Wi-Fi offloading averaged <strong>1,350.6 ms</strong>, about 30% below on-device recognition at <strong>1,927.9 ms</strong>. The chart compares this isolated component, not full cue latency or p95 performance. Its protocol, observed ranges, and component timings are in Appendix O. <a href="#p5">P5</a></p>
@@ -282,63 +282,63 @@
 <figcaption><strong>Figure 6.</strong> Elapsed time decreased 29.9%. Self-reference probes establish neither recognition accuracy nor complete touch-to-cue performance.</figcaption>
 </figure>
 <p>The offloaded mean is close to the 1.5-second objective, but the benchmark excludes camera, image preparation, and display. Only one CPU laptop was tested; a faster server or accelerated inference may help, but any gain needs complete-path testing (Section 5.2).</p>
-<h4 id="preference-extraction">4.2.3 Independent preference-extraction testing</h4>
+<h4>4.2.3 Independent preference-extraction testing</h4>
 <p>Text extraction is tested separately for <strong>DR4, preference continuity</strong>; written transcripts are not connected to glasses audio. Two synthetic conversations contained three expected guest facts. Qwen and Gemma each matched two facts, with Qwen fastest at <strong>67.2 seconds per transcript</strong>. All models produced valid JSON, but Gemma misclassified a complaint and a safety question. These small tests provide examples for refinement, not general accuracy estimates. No result is written to a guest record; the full model comparison and checks are in Appendix O. <a href="#p1">P1</a>, <a href="#p13">P13</a></p>
 <p>Next, improve text-only extraction, then compare it with video from the same interactions to test whether visual context adds useful, supported detail. Evaluate audio transcription separately.</p>
-<h3 id="display">4.3 Display</h3>
+<h3>4.3 Display</h3>
 <p>Display testing uses user feedback on placement, readability, and relevance. The pipeline identifies the guest, retrieves their record, and returns cues.</p>
 <figure>
-<a href="https://raw.githubusercontent.com/wongwh2002/CDE4301-Hotel-Hospitality/main/docs/interim/assets/display-pipeline.svg" rel="noopener" target="_blank"><img alt="Display pipeline: temple touch activates capture on the glasses, the server recognises the guest and retrieves preferences, then returns information for display." height="328" loading="lazy" src="https://raw.githubusercontent.com/wongwh2002/CDE4301-Hotel-Hospitality/main/docs/interim/assets/display-pipeline.svg" style="max-width:100%;height:auto" width="1200"/></a>
+<a href="https://raw.githubusercontent.com/wongwh2002/CDE4301-Hotel-Hospitality/main/docs/interim/assets/display-pipeline.svg" rel="noopener" target="_blank"><img alt="Display pipeline: temple touch activates capture on the glasses, the server recognises the guest and retrieves preferences, then returns information for display." height="328" loading="lazy" src="https://raw.githubusercontent.com/wongwh2002/CDE4301-Hotel-Hospitality/main/docs/interim/assets/display-pipeline.svg" width="1200"/></a>
 <figcaption><strong>Figure 7.</strong> Identity-to-record-to-display flow; the placement iteration adds local position updates.</figcaption>
 </figure>
-<h4 id="display-position">4.3.1 Positioning information beside the guest</h4>
+<h4>4.3.1 Positioning information beside the guest</h4>
 <p>Initially, cues occupied a fixed display position. User feedback and prototype validation prompted face-relative placement and central guest selection, aiming to reduce looking away from the guest and competing details from several visible faces. These iterations address <strong>DR3, glanceability</strong>. <a href="#p1">P1</a>, <a href="#p7">P7</a></p>
 <p>Google <strong>ML Kit</strong>, an on-device machine-learning toolkit, detects faces and tracks positions locally; InsightFace identifies the guest. The central <strong>30% of both view axes</strong> defines the selection region, choosing the face nearest its centre. This aims to show preferences for the guest receiving the employee's attention, avoiding details for everyone visible. Selection uses where the glasses point; it does not measure eye contact. <a href="#p3">P3</a>, <a href="#r11">R11</a></p>
 <p>Face coordinates also allow cropping before image preparation, removing a 2.2–2.4-second full-frame preparation delay. In an earlier SFace-model test, 14 uploads averaged 200 ms from image-analysis callback to server response. This supports the cropping change for <strong>DR1</strong>; the timing excludes tap handling and display and is separate from the current-model benchmark. <a href="#p3">P3</a></p>
 <figure>
 <div class="comparison-grid">
-<div><p class="comparison-label">Before · fixed position</p><a href="https://raw.githubusercontent.com/wongwh2002/CDE4301-Hotel-Hospitality/main/docs/interim/assets/ui/01-position-before.png" rel="noopener" target="_blank"><img alt="Generated UI before placement refinement: Ethan Tan's name is at the upper right, away from his face." height="1200" loading="lazy" src="https://raw.githubusercontent.com/wongwh2002/CDE4301-Hotel-Hospitality/main/docs/interim/assets/ui/01-position-before.png" style="max-width:100%;height:auto" width="1200"/></a></div>
-<div><p class="comparison-label">After · beside the face</p><a href="https://raw.githubusercontent.com/wongwh2002/CDE4301-Hotel-Hospitality/main/docs/interim/assets/ui/02-position-after.png" rel="noopener" target="_blank"><img alt="Generated UI after placement refinement: Ethan Tan's name is beside his face." height="1200" loading="lazy" src="https://raw.githubusercontent.com/wongwh2002/CDE4301-Hotel-Hospitality/main/docs/interim/assets/ui/02-position-after.png" style="max-width:100%;height:auto" width="1200"/></a></div>
+<div><p class="comparison-label">Before · fixed position</p><a href="https://raw.githubusercontent.com/wongwh2002/CDE4301-Hotel-Hospitality/main/docs/interim/assets/ui/01-position-before.png" rel="noopener" target="_blank"><img alt="Generated UI before placement refinement: Ethan Tan's name is at the upper right, away from his face." height="1200" loading="lazy" src="https://raw.githubusercontent.com/wongwh2002/CDE4301-Hotel-Hospitality/main/docs/interim/assets/ui/01-position-before.png" width="1200"/></a></div>
+<div><p class="comparison-label">After · beside the face</p><a href="https://raw.githubusercontent.com/wongwh2002/CDE4301-Hotel-Hospitality/main/docs/interim/assets/ui/02-position-after.png" rel="noopener" target="_blank"><img alt="Generated UI after placement refinement: Ethan Tan's name is beside his face." height="1200" loading="lazy" src="https://raw.githubusercontent.com/wongwh2002/CDE4301-Hotel-Hospitality/main/docs/interim/assets/ui/02-position-after.png" width="1200"/></a></div>
 </div>
 <figcaption><strong>Figure 8.</strong> Generated UI comparison: local tracking brings the cue beside the guest; eye contact is unmeasured. <a href="#p12">P12</a></figcaption>
 </figure>
-<h4 id="display-content">4.3.2 Replacing descriptions with concise icons</h4>
+<h4>4.3.2 Replacing descriptions with concise icons</h4>
 <p>Even beside the guest's face, long descriptions require staff to read while listening. To support <strong>DR3</strong>, the display instead shows a name and up to two icons. <strong>DR6</strong> requires preferences and allergy alerts to remain distinguishable. <a href="#p1">P1</a></p>
 <figure>
 <div class="comparison-grid">
-<div><p class="comparison-label">Before · written description</p><a href="https://raw.githubusercontent.com/wongwh2002/CDE4301-Hotel-Hospitality/main/docs/interim/assets/ui/03-content-before.png" rel="noopener" target="_blank"><img alt="Generated UI before content refinement: Ethan Tan's name and the words Shellfish allergy." height="1200" loading="lazy" src="https://raw.githubusercontent.com/wongwh2002/CDE4301-Hotel-Hospitality/main/docs/interim/assets/ui/03-content-before.png" style="max-width:100%;height:auto" width="1200"/></a></div>
-<div><p class="comparison-label">After · compact icon</p><a href="https://raw.githubusercontent.com/wongwh2002/CDE4301-Hotel-Hospitality/main/docs/interim/assets/ui/04-content-after.png" rel="noopener" target="_blank"><img alt="Generated UI after content refinement: the written allergy description becomes a shellfish symbol with a warning marker." height="1200" loading="lazy" src="https://raw.githubusercontent.com/wongwh2002/CDE4301-Hotel-Hospitality/main/docs/interim/assets/ui/04-content-after.png" style="max-width:100%;height:auto" width="1200"/></a></div>
+<div><p class="comparison-label">Before · written description</p><a href="https://raw.githubusercontent.com/wongwh2002/CDE4301-Hotel-Hospitality/main/docs/interim/assets/ui/03-content-before.png" rel="noopener" target="_blank"><img alt="Generated UI before content refinement: Ethan Tan's name and the words Shellfish allergy." height="1200" loading="lazy" src="https://raw.githubusercontent.com/wongwh2002/CDE4301-Hotel-Hospitality/main/docs/interim/assets/ui/03-content-before.png" width="1200"/></a></div>
+<div><p class="comparison-label">After · compact icon</p><a href="https://raw.githubusercontent.com/wongwh2002/CDE4301-Hotel-Hospitality/main/docs/interim/assets/ui/04-content-after.png" rel="noopener" target="_blank"><img alt="Generated UI after content refinement: the written allergy description becomes a shellfish symbol with a warning marker." height="1200" loading="lazy" src="https://raw.githubusercontent.com/wongwh2002/CDE4301-Hotel-Hospitality/main/docs/interim/assets/ui/04-content-after.png" width="1200"/></a></div>
 </div>
 <figcaption><strong>Figure 9.</strong> Generated UI comparison: text becomes an item-and-warning icon. The allergy is a fictional demo cue. <a href="#p12">P12</a></figcaption>
 </figure>
 <p>The main icon shows an item, such as coffee; its corner marker means preference (heart), dislike (crossed-out heart), or allergy alert (warning triangle). Icons appear beneath the name and are stored on the glasses, avoiding extra downloads. <a href="#p3">P3</a></p>
 <figure>
-<a href="https://raw.githubusercontent.com/wongwh2002/CDE4301-Hotel-Hospitality/main/docs/interim/assets/icon-reference.svg" rel="noopener" target="_blank"><img alt="Complete supported icon catalogue: king room, twin room, suite, smoking-allowed room, black coffee, green tea, still water, vegetarian food, shellfish, peanuts, milk, and eggs; separate prefer, dislike, and demo-allergy markers; three combined examples." height="1000" loading="lazy" src="https://raw.githubusercontent.com/wongwh2002/CDE4301-Hotel-Hospitality/main/docs/interim/assets/icon-reference.png" style="max-width:100%;height:auto" width="1600"/></a>
+<a href="https://raw.githubusercontent.com/wongwh2002/CDE4301-Hotel-Hospitality/main/docs/interim/assets/icon-reference.svg" rel="noopener" target="_blank"><img alt="Complete supported icon catalogue: king room, twin room, suite, smoking-allowed room, black coffee, green tea, still water, vegetarian food, shellfish, peanuts, milk, and eggs; separate prefer, dislike, and demo-allergy markers; three combined examples." height="1000" loading="lazy" src="https://raw.githubusercontent.com/wongwh2002/CDE4301-Hotel-Hospitality/main/docs/interim/assets/icon-reference.png" width="1600"/></a>
 <figcaption><strong>Figure 10.</strong> All 12 supported item icons and three independent markers, with combined examples. Allergy assignments are fictional. <a href="#p3">P3</a></figcaption>
 </figure>
 <p>The prototype shows at most two icons, puts allergy alerts first, and hides personal details when a guest is unrecognised or the face association is lost. Automated checks verify placement and that names and icons disappear together. <a href="#p11">P11</a></p>
 <p>Concise information follows display guidance, but short symbols can still distract. User testing must check whether people understand the icons without coaching and use them without interrupting conversation. <a href="#r8">R8</a>, <a href="#r9">R9</a></p>
-<h4 id="contextual-retrieval">4.3.3 Retrieving contextually relevant preferences</h4>
+<h4>4.3.3 Retrieving contextually relevant preferences</h4>
 <p>The next proposed iteration selects information to fit the moment. Face recognition determines <strong>whose record</strong> to retrieve; conversation and service context determine <strong>which details</strong> to show. Location, task, urgency, and validity could rank the candidates: during breakfast, for example, a checked drink preference should take precedence over an unrelated room arrangement.</p>
 <figure>
-<a href="https://raw.githubusercontent.com/wongwh2002/CDE4301-Hotel-Hospitality/main/docs/interim/assets/context-pipeline.svg" rel="noopener" target="_blank"><img alt="Proposed server pipeline: audio determines conversation context, face recognition determines guest identity, and both guide retrieval of selected guest preferences for display." height="400" loading="lazy" src="https://raw.githubusercontent.com/wongwh2002/CDE4301-Hotel-Hospitality/main/docs/interim/assets/context-pipeline.svg" style="max-width:100%;height:auto" width="1200"/></a>
+<a href="https://raw.githubusercontent.com/wongwh2002/CDE4301-Hotel-Hospitality/main/docs/interim/assets/context-pipeline.svg" rel="noopener" target="_blank"><img alt="Proposed server pipeline: audio determines conversation context, face recognition determines guest identity, and both guide retrieval of selected guest preferences for display." height="400" loading="lazy" src="https://raw.githubusercontent.com/wongwh2002/CDE4301-Hotel-Hospitality/main/docs/interim/assets/context-pipeline.svg" width="1200"/></a>
 <figcaption><strong>Figure 11.</strong> Proposed contextual retrieval, combining identity and conversation context.</figcaption>
 </figure>
 <p>This addresses <strong>DR3 and DR6</strong>: an easily understood room icon can still be unhelpful during a drinks order. The proposed filter would select relevant, checked preferences from the shared record (DR4), while retaining priority for allergy alerts under the hotel's verification rules. <a href="#p1">P1</a></p>
 <figure>
 <div class="comparison-grid">
-<div><p class="comparison-label">Before · unrelated room preferences</p><a href="https://raw.githubusercontent.com/wongwh2002/CDE4301-Hotel-Hospitality/main/docs/interim/assets/ui/05-context-before-extra-room-icons.png" rel="noopener" target="_blank"><img alt="Generated UI before contextual filtering: several room preference icons are displayed during a restaurant interaction." height="1254" loading="lazy" src="https://raw.githubusercontent.com/wongwh2002/CDE4301-Hotel-Hospitality/main/docs/interim/assets/ui/05-context-before-extra-room-icons.png" style="max-width:100%;height:auto" width="1254"/></a></div>
-<div><p class="comparison-label">Proposed after · relevant drink preference</p><a href="https://raw.githubusercontent.com/wongwh2002/CDE4301-Hotel-Hospitality/main/docs/interim/assets/ui/06-context-after.png" rel="noopener" target="_blank"><img alt="Generated UI of the proposed context refinement: a coffee preference replaces unrelated room icons during dining." height="1200" loading="lazy" src="https://raw.githubusercontent.com/wongwh2002/CDE4301-Hotel-Hospitality/main/docs/interim/assets/ui/06-context-after.png" style="max-width:100%;height:auto" width="1200"/></a></div>
+<div><p class="comparison-label">Before · unrelated room preferences</p><a href="https://raw.githubusercontent.com/wongwh2002/CDE4301-Hotel-Hospitality/main/docs/interim/assets/ui/05-context-before-extra-room-icons.png" rel="noopener" target="_blank"><img alt="Generated UI before contextual filtering: several room preference icons are displayed during a restaurant interaction." height="1254" loading="lazy" src="https://raw.githubusercontent.com/wongwh2002/CDE4301-Hotel-Hospitality/main/docs/interim/assets/ui/05-context-before-extra-room-icons.png" width="1254"/></a></div>
+<div><p class="comparison-label">Proposed after · relevant drink preference</p><a href="https://raw.githubusercontent.com/wongwh2002/CDE4301-Hotel-Hospitality/main/docs/interim/assets/ui/06-context-after.png" rel="noopener" target="_blank"><img alt="Generated UI of the proposed context refinement: a coffee preference replaces unrelated room icons during dining." height="1200" loading="lazy" src="https://raw.githubusercontent.com/wongwh2002/CDE4301-Hotel-Hospitality/main/docs/interim/assets/ui/06-context-after.png" width="1200"/></a></div>
 </div>
 <figcaption><strong>Figure 12.</strong> Generated UI comparison illustrating the proposed relevance filter; it is not evidence of implemented conversation understanding. <a href="#p12">P12</a></figcaption>
 </figure>
 <p><strong>Current status.</strong> The prototype shows up to two stored reminders, with allergy alerts first. It does not yet interpret conversations to select preferences; microphone activity only controls how long the session runs. <a href="#p3">P3</a></p>
 <p>Testing should compare the same scenarios with and without filtering: does the system identify the topic correctly, show useful information, or hide something staff need? This tests relevance as well as readability.</p>
-<h3 id="system-architecture">4.4 Complete system architecture</h3>
+<h3>4.4 Complete system architecture</h3>
 <p>Figure 13 combines the iterations in the <strong>Rokid RV101 → Wi-Fi/HTTP → laptop → display</strong> architecture. Solid paths describe current functions; the dashed extension is planned. <a href="#p10">P10</a></p>
 <figure>
 <a aria-label="Open the full system architecture as a scalable diagram" href="https://raw.githubusercontent.com/wongwh2002/CDE4301-Hotel-Hospitality/main/docs/interim/assets/system-architecture.svg" rel="noopener" target="_blank">
-<img alt="Full Rokid architecture: local session control, camera tracking, focus gate, speech activity, network client and display; laptop HTTP API, SCRFD and ArcFace recognition, gallery embeddings and guest-cue caches; dashed future audio-preference pipeline." height="1560" loading="lazy" src="https://raw.githubusercontent.com/wongwh2002/CDE4301-Hotel-Hospitality/main/docs/interim/assets/system-architecture.png" style="max-width:100%;height:auto" width="2400"/>
+<img alt="Full Rokid architecture: local session control, camera tracking, focus gate, speech activity, network client and display; laptop HTTP API, SCRFD and ArcFace recognition, gallery embeddings and guest-cue caches; dashed future audio-preference pipeline." height="1560" loading="lazy" src="https://raw.githubusercontent.com/wongwh2002/CDE4301-Hotel-Hospitality/main/docs/interim/assets/system-architecture.png" width="2400"/>
 </a>
 <figcaption><strong>Figure 13.</strong> Full implemented architecture and proposed audio-preference extension. <a href="https://raw.githubusercontent.com/wongwh2002/CDE4301-Hotel-Hospitality/main/docs/interim/assets/system-architecture.svg" rel="noopener" target="_blank">Open the scalable diagram ↗</a> or <a href="https://raw.githubusercontent.com/wongwh2002/CDE4301-Hotel-Hospitality/main/docs/interim/assets/system-architecture.png" rel="noopener" target="_blank">view the full-resolution PNG ↗</a>. Source: <a href="#p10">P10</a>.</figcaption>
 </figure>
@@ -346,8 +346,8 @@
 <p><strong>Recognition.</strong> The server compares faces with stored references. A match needs at least 0.45 similarity and must beat the next candidate by 0.10. Lowering the minimum from 0.50 reduced unrecognised results but may admit wrong matches. These scores measure similarity, not confidence percentages. <a href="#p3">P3</a>, <a href="#p11">P11</a></p>
 <p><strong>Shared records.</strong> The server loads guest profiles into memory at startup. This speeds lookup, but database edits require a restart before displayed information changes. DR4 therefore still needs reliable updates reaching another employee. Unique guest IDs should replace name-based lookup to distinguish guests with the same name. Incoming camera images are not saved; unrecognised guests receive no personal details.</p>
 <p>The dashed extension would add audio upload, local Whisper transcription, Gemini extraction, and staff-reviewed database updates. These are not connected to the glasses workflow yet. The separate card-entry prototype is also not integrated. <a href="#p6">P6</a>, <a href="#p10">P10</a></p>
-<h2 id="testing">5. User validation and system evaluation</h2>
-<h3 id="user-validation">5.1 User validation</h3>
+<h2 id="5-user-validation--system-evaluation">5. User Validation &amp; System Evaluation</h2>
+<h3>5.1 User validation</h3>
 <p>A formative walkthrough with <strong>10 non-hotel participants</strong> examined activation, usefulness, and cue use. It supports problem finding, not proof of improved hotel service. <a href="#p1">P1</a></p>
 <table>
 <thead>
@@ -377,7 +377,7 @@
 </table>
 <p>Understanding an icon and using it in conversation are different tasks. A participant may recognise a coffee preference but be unsure when to mention it. The feedback connects shorter icons (Section 4.3.2) with relevant selection (Section 4.3.3): staff need information that fits the current interaction.</p>
 <p>This non-staff study did not compare profile lookup or measure gaze and attention, so it cannot establish improved service or reduced distraction.</p>
-<h3 id="requirements-check">5.2 Design requirements and whole-system testing</h3>
+<h3>5.2 Design requirements and whole-system testing</h3>
 <p>Testing covers <strong>tap → guest selection → recognition → profile retrieval → display</strong>. Conversation-to-approved-update and next-employee use remain incomplete. Findings map to Chapter 2's requirements.</p>
 <p>On 3 November, 13 live activations included quick repeat taps while capture was already running. Five produced a recognised name and icons in the app's drawing process; four also recorded an Android frame commit, confirming a completed frame was submitted for display. These four averaged <strong>1,180 ms</strong>, median <strong>1,198.5 ms</strong>, range <strong>974–1,349 ms</strong>. <a href="#p4">P4</a></p>
 <table>
@@ -453,12 +453,12 @@
 </tbody>
 </table>
 <p>Retrieval and display work; the service benefit and complete handover still need evaluation. The photo benchmark and four live frame measurements cover different stages and must be reported separately.</p>
-<h3 id="guest-acceptance">5.3 Limitations and guest acceptance</h3>
+<h3>5.3 Limitations and guest acceptance</h3>
 <p>In an earlier exploratory survey summary, <strong>40.7%</strong> rated hotel preference storage 4 or 5. The separately supplied <em>Dream Hotel Experience</em> survey (Appendix B) reports <strong>15 of 37 (40.5%)</strong> rating 4 or 5 on a broader question explicitly including facial images, restaurant orders, and service-use records. The denominator and recruitment method are unavailable, so this is not a representative acceptance estimate. Comfort with storing preferences does not establish acceptance of facial images or recorded conversations; a lounge entry tap is not permission for every proposed use. Real-person studies need an approved purpose, notice, access, and retention protocol with the hotel and university. The PDPC biometric guide is a reference for review, not approval for this hospitality use. <a href="#p1">P1</a>, <a href="#r10">R10</a></p>
 <p>The current microphone uses local activity detection only. Audio transcription and an external model would require separate review. Recognition safeguards and fictional allergy icons have not been evaluated for representative error rates or food safety. These limits define the next study; the present prototype remains useful for finding usability and integration problems.</p>
-<h3 id="next-development">5.4 Next development and validation steps</h3>
+<h3>5.4 Next development and validation steps</h3>
 <p>Chapter 6 sets out the next-stage work plan; Appendix M gives a comparative evaluation protocol.</p>
-<h2 id="next-stage">6. Limitations, responsible use, and next-stage plan</h2>
+<h2 id="6-limitations--next-steps">6. Limitations &amp; Next Steps</h2>
 <p>The recognition-and-display prototype is the strongest interim outcome; the full handover from a guest statement to another employee's service action remains unvalidated.</p>
 <p><strong>Next-stage controls.</strong> Suppress personal cues for uncertain matches. Save only source-supported preferences after staff confirms the guest, stay, and scope. Verify allergy details against an authorised record and food-safety source. Obtain hotel and university approval for guest and employee data collection; a lounge tap does not authorise face or audio capture. Keep LQA output evidence-linked and human-reviewed, not a staff ranking. <a href="#p2">P2</a>, <a href="#p8">P8</a>, <a href="#r10">R10</a></p>
 <table>
@@ -472,7 +472,7 @@
 <tbody>
 <tr>
 <td><strong>Weeks 1–2</strong></td>
-<td>Agree one lounge task, staff roles, profile path, permissions, and study protocol.</td>
+<td>Define one lounge task, staff roles, profile path, permissions, and study protocol.</td>
 <td>Approved workflow and baseline task.</td>
 </tr>
 <tr>
@@ -503,8 +503,7 @@
 </tbody>
 </table>
 <p><strong>Proposed acceptance gates:</strong> no wrong-profile reveals in the defined test set; source-supported approved preferences; reliable no-match fallback; and improved task performance without poorer comprehension or conversation flow. A zero-error result remains limited to the tested sample. Cost and return on investment need later evidence on hardware, infrastructure, integration, maintenance, and training.</p>
-<h2 id="contributions">7. Team contributions</h2>
-<p>The team confirmed the following division, following the presentation split. This records the main areas of work without assigning undocumented individual ownership of particular experiments. <a href="#p7">P7</a></p>
+<h2 id="7-team-contributions">7. Team Contributions</h2>
 <table>
 <thead>
 <tr>
@@ -515,7 +514,7 @@
 <tbody>
 <tr>
 <td>Neha Rajan</td>
-<td>Problem investigation and framing; hotel/business context, service quality, and the rationale for personalisation.</td>
+<td>Problem investigation and framing; interviews and surveys, hotel/business context, service quality, and the rationale for personalisation.</td>
 </tr>
 <tr>
 <td>Nigel Yeo Tong Wei</td>
@@ -532,7 +531,7 @@
 </tbody>
 </table>
 <p>The interim contribution is an implemented service-support mechanism and a clearer account of what must be tested next. Whether the mechanism improves hotel service remains the central evaluation question for the next stage.</p>
-<h2 id="references">References and project evidence</h2>
+<h2 id="references">References</h2>
 <div class="references">
 <p id="r1"><strong>R1.</strong> Lei, S. S. I., Wang, D., Fong, L. H. N., &amp; Ye, S. (2024). “Recipe for perceived personalization in hotels.” <em>Tourism Management, 100</em>, 104818. <a href="https://research.polyu.edu.hk/en/publications/recipe-for-perceived-personalization-in-hotels/">Institutional publication record and abstract</a> · <a href="https://doi.org/10.1016/j.tourman.2023.104818">DOI</a>.</p>
 <p id="r2"><strong>R2.</strong> Medallia Market Research (2024). <em>Understanding Personalization Efforts in the Hospitality and Retail Industries.</em> <a href="https://www.medallia.com/wp-content/uploads/pdf/resources/Medallia-Understanding-Personalization-Efforts-in-the-Hospitality-and-Retail-Industries-Report.pdf">Original report</a>. Vendor-produced U.S. guest survey.</p>
@@ -550,17 +549,59 @@
 <p id="p3"><strong>P3.</strong> <a href="https://github.com/wongwh2002/CDE4301-Hotel-Hospitality/blob/main/rokid/README.md">Rokid prototype implementation and validation notes</a>; <a href="https://github.com/wongwh2002/CDE4301-Hotel-Hospitality/tree/main/rokid/app/src/main/java/com/example/rokid_app">Android implementation</a>; <a href="https://github.com/wongwh2002/CDE4301-Hotel-Hospitality/blob/main/rokid/server/GUEST_PREFERENCES.md">demo guest cue schema and rendering</a>.</p>
 <p id="p4"><strong>P4.</strong> <a href="https://github.com/wongwh2002/CDE4301-Hotel-Hospitality/blob/main/rokid/DISPLAY_LATENCY_BENCHMARK.md">Temple touch to displayed information</a>, live RV101 series, 3 November 2026. This is the source for the four frame-commit observations and their timing boundaries.</p>
 <p id="p5"><strong>P5.</strong> <a href="https://github.com/wongwh2002/CDE4301-Hotel-Hospitality/blob/main/rokid/LATENCY_BENCHMARK.md">Server versus on-device photo-recognition benchmark</a> and <a href="https://github.com/wongwh2002/CDE4301-Hotel-Hospitality/blob/main/rokid/RETRIEVAL_MODE_BENCHMARK.md">retrieval-mode and battery replay comparisons</a>, 2 November 2026.</p>
-<p id="p6"><strong>P6.</strong> <a href="https://github.com/wongwh2002/CDE4301-Hotel-Hospitality/blob/main/README.md">Local POC scaffold</a>; <a href="https://github.com/wongwh2002/CDE4301-Hotel-Hospitality/blob/main/docs/architecture/hotel-lounge-smart-glasses-poc.html">interactive proposed architecture</a>; <a href="https://github.com/wongwh2002/CDE4301-Hotel-Hospitality/blob/main/docs/agents/hotel-smart-glasses-poc.md">project framing</a>. Architecture status remains proposed.</p>
+<p id="p6"><strong>P6.</strong> <a href="https://github.com/wongwh2002/CDE4301-Hotel-Hospitality/blob/main/README.md">Local POC scaffold</a>; <a href="../architecture/hotel-lounge-smart-glasses-poc.html">interactive proposed architecture</a>; <a href="https://github.com/wongwh2002/CDE4301-Hotel-Hospitality/blob/main/docs/agents/hotel-smart-glasses-poc.md">project framing</a>. Architecture status remains proposed.</p>
 <p id="p7"><strong>P7.</strong> Team clarifications, 10–11 November 2026: the 20-minute battery test was verified; no local raw file is available. Neha/Nigel mainly addressed the problem; Weng Hong/Ping Hui the solution. Battery life motivated temple touch; user feedback/validation preceded face-relative placement and central selection.</p>
-<p id="p8"><strong>P8.</strong> <a href="https://github.com/wongwh2002/CDE4301-Hotel-Hospitality/blob/main/docs/research/source-materials/PARKROYAL-COLLECTION-2026-FB-LQA-15-Selected.csv">Current selected 15-item F&amp;B table</a> · <a href="https://github.com/wongwh2002/CDE4301-Hotel-Hospitality/blob/main/docs/research/source-materials/PARKROYAL-COLLECTION-2026-FB-LQA-15-Selected.pdf">PDF preview</a> · <a href="https://github.com/wongwh2002/CDE4301-Hotel-Hospitality/blob/main/docs/research/fb-conversation-checker-prototype-subset.md">checker evidence and evaluation guidance</a>. The current table supersedes earlier candidate-list numbering.</p>
-<p id="p9"><strong>P9.</strong> CDE4301 <a href="https://github.com/wongwh2002/CDE4301-Hotel-Hospitality/blob/main/docs/rubrics/CDE4301%20assessment%20brief%20and%20rubrics%20-%20AY2026%20-%20interim%20assessment.pdf">interim assessment brief and rubric</a>. Four-person group: 6,000-word limit excluding appendices; individual areas of work must be identified.</p>
-<p id="p10"><strong>P10.</strong> <a href="https://raw.githubusercontent.com/wongwh2002/CDE4301-Hotel-Hospitality/main/docs/interim/assets/system-architecture.png">Full Rokid system architecture</a> · <a href="https://raw.githubusercontent.com/wongwh2002/CDE4301-Hotel-Hospitality/main/docs/interim/assets/system-architecture.svg">scalable SVG</a>. Adapted from <code>rokid/output/architecture/rokid-system-architecture.svg</code>: local detector label generalised; architecture unchanged. The dashed audio-preference extension remains planned.</p>
+<p id="p8"><strong>P8.</strong> <a href="../research/source-materials/PARKROYAL-COLLECTION-2026-FB-LQA-15-Selected.csv">Current selected 15-item F&amp;B table</a> · <a href="../research/source-materials/PARKROYAL-COLLECTION-2026-FB-LQA-15-Selected.pdf">PDF preview</a> · <a href="https://github.com/wongwh2002/CDE4301-Hotel-Hospitality/blob/main/docs/research/fb-conversation-checker-prototype-subset.md">checker evidence and evaluation guidance</a>. The current table supersedes earlier candidate-list numbering.</p>
+<p id="p9"><strong>P9.</strong> CDE4301 <a href="../rubrics/CDE4301%20assessment%20brief%20and%20rubrics%20-%20AY2026%20-%20interim%20assessment.pdf">interim assessment brief and rubric</a>. Four-person group: 6,000-word limit excluding appendices; individual areas of work must be identified.</p>
+<p id="p10"><strong>P10.</strong> <a href="assets/system-architecture.png">Full Rokid system architecture</a> · <a href="assets/system-architecture.svg">scalable SVG</a>. Adapted from <code>rokid/output/architecture/rokid-system-architecture.svg</code>: local detector label generalised; architecture unchanged. The dashed audio-preference extension remains planned.</p>
 <p id="p11"><strong>P11.</strong> Implementation-level checks: <a href="https://github.com/wongwh2002/CDE4301-Hotel-Hospitality/tree/main/rokid/app/src/test/java/com/example/rokid_app">Android unit tests for session, focus, tracking, and image buffers</a>; <a href="https://github.com/wongwh2002/CDE4301-Hotel-Hospitality/tree/main/rokid/app/src/androidTest/java/com/example/rokid_app">device tests for microphone/VAD, request deadlines, and cue rendering</a>; <a href="https://github.com/wongwh2002/CDE4301-Hotel-Hospitality/tree/main/rokid/server">server recognition, API, and guest-cue tests</a>. Test presence describes verification coverage; recorded execution results are attributed to P3.</p>
 <p id="p12"><strong>P12.</strong> <a href="https://github.com/wongwh2002/CDE4301-Hotel-Hospitality/tree/main/rokid/output/slide-20-ui/screenshots">Generated prototype UI illustrations</a>, reproduced unchanged: position, content, and context before/after pairs. Pipeline diagrams redraw the supplied presentation's flows; contextual filtering remains proposed.</p>
 <p id="p13"><strong>P13.</strong> Team-supplied “Note worker testing” summary, provided 11 November 2026. <a href="evidence/preference-extraction-test-summary.md">Transcribed method and reported findings</a>. Synthetic text-only evaluation; raw model runs are not supplied.</p>
+<p id="r12"><strong>R12.</strong> P&amp;C Global. <a href="https://www.pandcglobal.com/research-insights/hyper-personalization-in-luxury-hospitality-the-new-standard/">Hyper-Personalization in Luxury Hospitality: The New Standard</a>. User-supplied research source; publication details and claim-level applicability should be checked.</p>
+<p id="r13"><strong>R13.</strong> Hospitality Upgrade. <a href="https://mag.hospitalityupgrade.com/publication/frame.php?i=865829&amp;p=&amp;pn=&amp;ver=html5&amp;view=articleBrowser&amp;article_id=5165880">Article 5165880: hospitality memory and technology-supported service</a>. User-supplied research source; publication details and claim-level applicability should be checked.</p>
+<p id="r14"><strong>R14.</strong> Hilton. <a href="https://stories.hilton.com/releases/2023-travel-trends">2023 Travel Trends</a>. User-supplied research source; publication details and claim-level applicability should be checked.</p>
+<p id="r15"><strong>R15.</strong> Medallia. <a href="https://www.medallia.com/press-release/medallia-research-finds-61-percent-of-consumers-are-willing-to-spend-more-for-personalized-experiences/">61 Percent of Consumers Are Willing to Spend More for Personalized Experiences</a>. User-supplied research source; publication details and claim-level applicability should be checked.</p>
+<p id="r16"><strong>R16.</strong> Singapore Tourism Board. <a href="https://stan.stb.gov.sg/public/sense/app/4285bed1-c7e1-445d-90b3-ce637640e290/sheet/66340b8f-c9dc-4f10-a1d3-c0f69bee1cde/state/analysis">STAN tourism analytics dashboard</a>. User-supplied research source; publication details and claim-level applicability should be checked.</p>
+<p id="r17"><strong>R17.</strong> Ken Research. <a href="https://www.kenresearch.com/singapore-luxury-hotels-resorts-market">Singapore Luxury Hotels &amp; Resorts Market</a>. User-supplied research source; publication details and claim-level applicability should be checked.</p>
+<p id="r18"><strong>R18.</strong> Hospitality Net. <a href="https://www.hospitalitynet.org/opinion/4130626/2025-guest-experience-how-hotels-are-winning-satisfaction-in-a-year-of-record-demand">2025 Guest Experience: How Hotels Are Winning Satisfaction in a Year of Record Demand</a>. User-supplied research source; publication details and claim-level applicability should be checked.</p>
+<p id="r19"><strong>R19.</strong> BookingWhizz. <a href="https://bookingwhizz.com/en/blog/repeat-guest-revenue-multiplier">Repeat Guest Revenue Multiplier</a>. User-supplied research source; publication details and claim-level applicability should be checked.</p>
+<p id="r20"><strong>R20.</strong> CoStay Solutions. <a href="https://www.costaysolutions.com/post/why-repeat-guests-are-more-valuable-than-new-bookings">Why Repeat Guests Are More Valuable Than New Bookings</a>. User-supplied research source; publication details and claim-level applicability should be checked.</p>
+<p id="r21"><strong>R21.</strong> TOPHOTEL. <a href="https://tophotel.news/marriott-reports-2025-results/">Marriott Reports 2025 Results</a>. User-supplied research source; publication details and claim-level applicability should be checked.</p>
+<p id="r22"><strong>R22.</strong> Mews. <a href="https://www.mews.com/en/blog/adr-average-daily-rate">ADR: Average Daily Rate</a>. User-supplied research source; publication details and claim-level applicability should be checked.</p>
+<p id="r23"><strong>R23.</strong> RateGain. <a href="https://rategain.com/blog/hotel-occupancy-rate/">Hotel Occupancy Rate</a>. User-supplied research source; publication details and claim-level applicability should be checked.</p>
+<p id="r24"><strong>R24.</strong> Singapore Tourism Board. <a href="https://www.stb.gov.sg/industries-experience-development/hotels/">Hotels: Industry and Experience Development</a>. User-supplied research source; publication details and claim-level applicability should be checked.</p>
+<p id="r25"><strong>R25.</strong> Mordor Intelligence. <a href="https://www.mordorintelligence.com/industry-reports/hospitality-industry-in-singapore">Hospitality Industry in Singapore</a>. User-supplied research source; publication details and claim-level applicability should be checked.</p>
+<p id="r26"><strong>R26.</strong> ResearchGate. <a href="https://www.researchgate.net/publication/220397444_How_Quickly_Should_a_Communication_Robot_Respond_Delaying_Strategies_and_Habituation_Effects">How Quickly Should a Communication Robot Respond? Delaying Strategies and Habituation Effects</a>. User-supplied research source; publication details and claim-level applicability should be checked.</p>
+<p id="r27"><strong>R27.</strong> McKinsey &amp; Company. <a href="https://www.mckinsey.com/capabilities/growth-marketing-and-sales/our-insights/the-value-of-getting-personalization-right-or-wrong-is-multiplying">The Value of Getting Personalization Right—or Wrong—is Multiplying</a>. User-supplied research source; publication details and claim-level applicability should be checked.</p>
+<p id="r28"><strong>R28.</strong> The Hotels Network. <a href="https://info.thehotelsnetwork.com/case-study/thethief">THE THIEF: Case Study</a>. User-supplied research source; publication details and claim-level applicability should be checked.</p>
+<p id="r29"><strong>R29.</strong> Hotel Tech Report. <a href="https://hoteltechreport.com/de/success-stories/operations/rms-hospitality-cloud/the-nare">The Nare: RMS Hospitality Cloud Success Story</a>. User-supplied research source; publication details and claim-level applicability should be checked.</p>
+<p id="r30"><strong>R30.</strong> Mews. <a href="https://www.mews.com/en/blog/personalization-in-hospitality">Personalization in Hospitality</a>. User-supplied research source; publication details and claim-level applicability should be checked.</p>
+<p id="r31"><strong>R31.</strong> Hotel Dive. <a href="https://hoteldive.com/news/hyper-personalization-technology-hospitality/814218/">Hyper-personalization Technology in Hospitality</a>. User-supplied research source; publication details and claim-level applicability should be checked.</p>
+<p id="r32"><strong>R32.</strong> ResearchGate. <a href="https://www.researchgate.net/publication/394590455_A_Framework_for_Measuring_Personalization_in_the_Luxury_Hotel_Industry">A Framework for Measuring Personalization in the Luxury Hotel Industry</a>. User-supplied research source; publication details and claim-level applicability should be checked.</p>
+<p id="r33"><strong>R33.</strong> Luware. <a href="https://luware.com/blog/hyperpersonalisation-vs-personalisation-in-cx">Hyperpersonalisation vs Personalisation in CX</a>. User-supplied research source; publication details and claim-level applicability should be checked.</p>
+<p id="r34"><strong>R34.</strong> Hospitality &amp; Catering News. <a href="https://www.hospitalityandcateringnews.com/2025/12/why-cognitive-intelligence-is-the-new-core-competency-for-hospitality-managers/">Why Cognitive Intelligence Is the New Core Competency for Hospitality Managers</a>. User-supplied research source; publication details and claim-level applicability should be checked.</p>
+<p id="r35"><strong>R35.</strong> Hospitality Net. <a href="https://www.hospitalitynet.org/news/4131559/under-pressure-how-hotel-stressors-shape-employees-mental-health">Under Pressure: How Hotel Stressors Shape Employees’ Mental Health</a>. User-supplied research source; publication details and claim-level applicability should be checked.</p>
+<p id="r36"><strong>R36.</strong> ResearchGate. <a href="https://www.researchgate.net/publication/309439868_Perceived_Value_and_Customers_Satisfaction_in_Hotel_Industry_A_Systematic_Conceptual_Model">Perceived Value and Customers Satisfaction in Hotel Industry: A Systematic Conceptual Model</a>. User-supplied research source; publication details and claim-level applicability should be checked.</p>
+<p id="r37"><strong>R37.</strong> Dorelia Hospitality. <a href="https://doreliahospitality.com/perceived-value-and-signal-interpretation-in-hospitality-systems/">Perceived Value and Signal Interpretation in Hospitality Systems</a>. User-supplied research source; publication details and claim-level applicability should be checked.</p>
+<p id="r38"><strong>R38.</strong> Hotel Management. <a href="https://www.hotelmanagement.net/operate/global-consultant-why-some-luxury-hotels-hold-their-lqa-forbes-scores">Why Some Luxury Hotels Hold Their LQA / Forbes Scores</a>. User-supplied research source; publication details and claim-level applicability should be checked.</p>
+<p id="r39"><strong>R39.</strong> ISHC. <a href="https://ishc.com/why-some-luxury-hotels-hold-their-lqa-forbes-scores/">Why Some Luxury Hotels Hold Their LQA / Forbes Scores</a>. User-supplied research source; publication details and claim-level applicability should be checked.</p>
+<p id="r40"><strong>R40.</strong> PurchasePlus. <a href="https://www.purchaseplus.com/blog-posts/understanding-the-economics-of-hotels">Understanding the Economics of Hotels</a>. User-supplied research source; publication details and claim-level applicability should be checked.</p>
+<p id="r41"><strong>R41.</strong> International Management &amp; Business Review. <a href="https://ojs.amhinternational.com/index.php/imbr/article/view/4438">Research article, record 4438</a>. User-supplied research source; publication details and claim-level applicability should be checked.</p>
+<p id="r42"><strong>R42.</strong> Emerald. <a href="https://www.emerald.com/ihr/article/38/2/334/1236465/Understanding-perceived-value-as-important-factors">Understanding Perceived Value as Important Factors</a>. User-supplied research source; publication details and claim-level applicability should be checked.</p>
+<p id="r43"><strong>R43.</strong> UMass ScholarWorks. <a href="https://scholarworks.umass.edu/server/api/core/bitstreams/e2d4d346-d00a-4960-bc8e-b243fb7b8f4f/content">Hospitality research full-text repository item</a>. User-supplied research source; publication details and claim-level applicability should be checked.</p>
+<p id="r44"><strong>R44.</strong> MDPI Sustainability. <a href="https://www.mdpi.com/2071-1050/14/15/9153">Research article 14(15), 9153</a>. User-supplied research source; publication details and claim-level applicability should be checked.</p>
+<p id="r45"><strong>R45.</strong> Atiom. <a href="https://atiom.ai/newsroom/hotel-service-index-2025-apac">Hotel Service Index 2025 APAC</a>. User-supplied research source; publication details and claim-level applicability should be checked.</p>
+<p id="r46"><strong>R46.</strong> Swiss Hotel Management School. <a href="https://www.shms.com/en/what-is-hospitality/">What Is Hospitality?</a>. User-supplied research source; publication details and claim-level applicability should be checked.</p>
+<p id="r47"><strong>R47.</strong> Upper Delaware Inn. <a href="https://upperdelawareinn.com/the-importance-of-guest-recognition-in-hospitality/">The Importance of Guest Recognition in Hospitality</a>. User-supplied research source; publication details and claim-level applicability should be checked.</p>
+<p id="r48"><strong>R48.</strong> Adyen. <a href="https://www.adyen.com/en_SG/index-reports/hospitality">Hospitality Index Report</a>. User-supplied research source; publication details and claim-level applicability should be checked.</p>
+<p id="r49"><strong>R49.</strong> WNS. <a href="https://resources.wns.com/smarter-operations-for-experience-operators">Smarter Operations for Experience Operators</a>. User-supplied research source; publication details and claim-level applicability should be checked.</p>
+<p id="r50"><strong>R50.</strong> IEEE Xplore. <a href="https://ieeexplore.ieee.org/document/6680342">Document 6680342</a>. User-supplied research source; publication details and claim-level applicability should be checked.</p>
+<p id="r51"><strong>R51.</strong> Singapore Business Review. <a href="https://sbr.com.sg/hotels-tourism/news/hotel-growth-faces-14-hit-labour-shortage">Hotel Growth Faces 1.4% Hit from Labour Shortage</a>. User-supplied research source; publication details and claim-level applicability should be checked.</p>
+<p id="r52"><strong>R52.</strong> ResearchGate. <a href="https://www.researchgate.net/publication/390330641_Perceived_Value_Dimensions_and_Guest_Satisfaction_An_Analysis_of_Functional_Social_and_Emotional_Values_in_Five-Star_Hotel_Organizations">Perceived Value Dimensions and Guest Satisfaction in Five-Star Hotel Organizations</a>. User-supplied research source; publication details and claim-level applicability should be checked.</p>
+<p id="r53"><strong>R53.</strong> Scribd. <a href="https://www.scribd.com/document/1073223356/AY2023-Sem1-H323-L04-05-6P">AY2023 Sem1 H323 L04–05 6P (user-supplied supplementary source)</a>. User-supplied research source; publication details and claim-level applicability should be checked.</p>
 </div>
 <!-- APPENDICES -->
-<h2 id="appendix-a">Appendix A. Problem iterations</h2>
+<h2 id="appendix-a">Appendix A. Problem Iterations</h2>
 <p>The problem framing progressed from manpower shortages and staff cognitive load, through guest-satisfaction stagnation and rising expectations, to the partner's commercial concern about revenue and the narrower design opportunity of reliable same-stay guest-context handovers. This is the team's problem-framing rationale, not a measured causal chain. See Sections 2.1–2.4 of the report for the underlying argument.</p>
 <table>
 <thead>
@@ -598,11 +639,11 @@
 </tr>
 </tbody>
 </table>
-<h2 id="appendix-b">Appendix B. Guest survey: Dream Hotel Experience</h2>
+<h2 id="appendix-b">Appendix B. Guest Survey: Dream Hotel Experience</h2>
 <p><strong>Source:</strong> Exploratory Google Forms summary, 39 total respondents. Individual questions have 37–39 responses; results should not be generalised to all hotel guests. <a href="assets/appendices/dream-hotel-experience.pdf">Open the complete 16-page response summary</a>.</p>
 <h3>B.1 Respondent profile and experiences</h3>
 <p>The survey asked about age, hotel-stay frequency, reason for travel and nightly budget, followed by open responses about return-worthy experiences and desired improvements. Respondents frequently mentioned cleanliness, service, food, comfort, amenities and location. Requested improvements included faster service, flexible check-in/out, dietary options and remembering preferences. The original response PDF preserves individual free-text answers.</p>
-<h3>B.2 Preferred areas of personalisation</h3>
+<h3>B.2 Preferred areas of personalization</h3>
 <table>
 <thead>
 <tr>
@@ -664,10 +705,7 @@
 </tbody>
 </table>
 <p>The open responses also describe personalisation as feeling recognised, having dietary or room preferences respected, and receiving attentive, thoughtful service. These are qualitative examples, not coded prevalence estimates.</p>
-<h2 id="appendix-c">Appendix C. Industry meeting 1 — notes</h2>
-<p><strong>Source pending.</strong> The original notes for the first industry meeting have not yet been supplied. This entry is reserved to preserve the requested appendix numbering; no meeting conclusions have been invented.</p>
-<h2 id="appendix-d">Appendix D. Industry meeting 2 — PARKROYAL</h2>
-<p><strong>Source:</strong> Handwritten notes labelled “Parkroyal Meeting 2”, 17 September 2026. <a href="assets/appendices/parkroyal-meeting-2.pdf">View original notes</a>.</p>
+<h2 id="appendix-c">Appendix C. Industry Meeting 1: PARKROYAL Collection</h2>
 <h3>Discussion themes</h3>
 <ul>
 <li>Operational challenges and service consistency in a luxury-hotel environment.</li>
@@ -675,8 +713,7 @@
 <li>Opportunities and constraints for capturing or retrieving guest context in practice.</li>
 </ul>
 <p><strong>Research implication:</strong> Use stakeholder discussion to identify hypotheses and interview prompts; confirm any ambiguous handwritten statements and quantitative claims before treating them as requirements or established hotel performance data. The original scanned notes are the primary record.</p>
-<h2 id="appendix-e">Appendix E. Industry meeting 3 — PARKROYAL</h2>
-<p><strong>Source:</strong> Handwritten notes labelled “Parkroyal Meeting 3”, 29 October 2026. <a href="assets/appendices/parkroyal-meeting-3.pdf">View original notes</a>.</p>
+<h2 id="appendix-d">Appendix D. Industry Meeting 2: PARKROYAL Collection</h2>
 <h3>Discussion themes</h3>
 <ul>
 <li>Guest recognition, service information and the challenge of responding to individual needs.</li>
@@ -684,8 +721,7 @@
 <li>The possible role of a club-lounge setting and service standards in a bounded proof of concept.</li>
 </ul>
 <p><strong>Research implication:</strong> Investigate the specific gap between available guest records and staff action during an encounter. The discussion is qualitative field evidence; details of system names, retention figures, permissions and implementation commitments need independent confirmation.</p>
-<h2 id="appendix-f">Appendix F. Novotel / Mercure site visit</h2>
-<p><strong>Source:</strong> Handwritten notes labelled “Novotel Mercure Sep. 14”, 14 September 2026. <a href="assets/appendices/novotel-mercure.pdf">View original notes</a>.</p>
+<h2 id="appendix-e">Appendix E. Novotel / Mercure Site Visit</h2>
 <h3>Organized findings</h3>
 <ul>
 <li>Guest-profile information and pre-arrival review can inform service planning.</li>
@@ -693,8 +729,7 @@
 <li>Information may be communicated in briefings or checked through manual notes, depending on the task and staff role.</li>
 </ul>
 <p><strong>Design implication:</strong> A new interface should be evaluated against existing profile lookup and briefing practices, not against an assumption that hotels have no guest data. These observations concern the Accor property and should not be attributed to PARKROYAL.</p>
-<h2 id="appendix-g">Appendix G. The Ridge site visit</h2>
-<p><strong>Source:</strong> Handwritten notes labelled “The Ridge”, 25 September 2026. <a href="assets/appendices/the-ridge.pdf">View original notes</a>.</p>
+<h2 id="appendix-f">Appendix F. The Ridge Site Visit</h2>
 <h3>Discussion themes</h3>
 <ul>
 <li>Guest-facing service processes and information-sharing practices.</li>
@@ -702,7 +737,7 @@
 <li>Potential differences between service touchpoints that affect the value of personalisation.</li>
 </ul>
 <p><strong>Design implication:</strong> Validate the relevant service task and employee workflow before selecting an interface. Handwritten details that cannot be confidently read should be checked against the original notes or the visit participants.</p>
-<h2 id="appendix-h">Appendix H. Competitive landscape analysis</h2>
+<h2 id="appendix-g">Appendix G. Competitive Landscape Analysis</h2>
 <p>The following comparison is based on the team-supplied competitor-landscape slide. Product descriptions should be rechecked before external publication, particularly claims about integration or device limitations.</p>
 <table>
 <thead>
@@ -740,8 +775,7 @@
 </tr>
 </tbody>
 </table>
-<p><a href="assets/appendices/competitive-analysis.png">View original comparison slide</a>.</p>
-<h2 id="appendix-i">Appendix I. Sample LQA standards</h2>
+<h2 id="appendix-h">Appendix H. Sample LQA Standards</h2>
 <p>The screenshot contains six selected standards from multiple service areas; they are examples, not a complete LQA audit or official project score.</p>
 <table>
 <thead>
@@ -784,9 +818,8 @@
 </tr>
 </tbody>
 </table>
-<p><a href="assets/appendices/lqa-standards.png">View original sample standards</a>.</p>
-<h2 id="appendix-j">Appendix J. What to personalise and club lounge use case</h2>
-<h3>J.1 What to personalise</h3>
+<h2 id="appendix-i">Appendix I. What to Personalise + Club Lounge Use Case</h2>
+<h3>I.1 What to personalize</h3>
 <p>Start with information that changes a specific service action during the current stay.</p>
 <table>
 <thead>
@@ -815,8 +848,7 @@
 </tbody>
 </table>
 <p><strong>Example:</strong> A guest says, “I prefer oat milk.” Later, F&amp;B staff offers a suitable drink and checks that the preference still applies. <strong>Allergy is a safety alert, not a preference:</strong> verify against the authorised record and food-safety process; never rely on a face match alone.</p>
-<p><a href="assets/appendices/what-to-personalise.png">View original personalisation slide</a>.</p>
-<h3>J.2 Why test in the club lounge?</h3>
+<h3>I.2 Why test in the club lounge?</h3>
 <table>
 <thead>
 <tr>
@@ -859,8 +891,7 @@
 </tbody>
 </table>
 <p>The lounge combines F&amp;B personalisation with staff-to-staff information handoff. It is the selected initial test setting, not an empirically proven optimal site.</p>
-<p><a href="assets/appendices/club-lounge.png">View original deployment comparison</a>.</p>
-<h2 id="appendix-k">Appendix K. Prototyping data and results</h2>
+<h2 id="appendix-j">Appendix J. Prototyping Data &amp; Results</h2>
 <p>The revised report provides recorded measurements and source links. This appendix indexes the principal results without changing their timing boundaries.</p>
 <table>
 <thead>
@@ -898,81 +929,13 @@
 </tr>
 </tbody>
 </table>
-<p>For protocols, distributions and caveats, see <a href="#technical-detail">Appendix O</a>, <a href="#p4">P4</a>, <a href="#p5">P5</a> and <a href="#p13">P13</a>. No additional raw measurement logs were provided with this appendix package.</p>
-<h2 id="evidence-notes">Appendix L. Evidence reconciliation</h2>
-<p>This appendix records differences between presentation summaries and the narrower evidence retained in the repository. It makes the report's interpretation reproducible without changing the supplied slides or recording.</p>
-<table>
-<thead>
-<tr>
-<th>Presentation statement</th>
-<th>Treatment in this report</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>Slide 23 shows a <strong>&lt;1 s</strong> cue target; the speaker script says <strong>1.5 s</strong></td>
-<td>Treat the scripted value as a proposed engineering ceiling and specify p95 for evaluation; it is not an LQA rule. Reconcile the slide before reusing it. Four successful warm frame commits averaging 1.18 s do not establish p95, include cold starts, or measure physical lens visibility.</td>
-</tr>
-<tr>
-<td>Slide 27: 67% “power reduction,” traffic 705 → 170, battery 28% → 9%</td>
-<td>Included as a team-confirmed 20-minute test. The directly reported quantity is battery-level depletion. The relative reduction calculated from the rounded values is 67.9%; electrical energy and average power were not measured.</td>
-</tr>
-<tr>
-<td>Slide 28: 30% faster, 1.69 → 1.18 s, average over 15 runs</td>
-<td>Kept separate from documented protocols. The reproducible 15-probe photo test measured 1.9279 → 1.3506 s, also approximately 30% faster. The 1.18 s figure is supported by four successful warm frame commits in a different live series; a paired 15-run touch-to-display comparison is not archived.</td>
-</tr>
-<tr>
-<td>Slide 28: three local extraction models</td>
-<td>Timing retained from the presentation; P13 adds the text-only protocol, JSON checks, six targeted staff labels, three guest facts, and reported errors. These are exploratory summaries, not broad accuracy estimates or a complete LQA score.</td>
-</tr>
-<tr>
-<td>Slides 33–34: 70% usefulness / quick glance</td>
-<td>Attributed to the team's 10-person non-staff walkthrough. The two questions are not treated as interchangeable objective performance measures.</td>
-</tr>
-<tr>
-<td>Slide 35: &gt;40% willingness, “rated &gt;4/5,” extended to facial images and purchase history</td>
-<td>The displayed preference-storage chart has 31.3% at 4 and 9.4% at 5: 40.7% rated <strong>4 or 5</strong>, while only 9.4% rated <strong>above 4</strong>. The displayed question does not establish willingness to share facial images, purchase histories, or recorded conversations. Recruitment and denominator are not given.</td>
-</tr>
-<tr>
-<td>Slide 19: first-time guests have “no information”</td>
-<td>Narrowed to limited prior-stay history. Pre-arrival and same-stay information can already exist.</td>
-</tr>
-<tr>
-<td>Slide 11 / speech: loyalty membership treated as returning-guest share</td>
-<td>No retention estimate is derived from membership. Membership and a completed repeat stay are different measures.</td>
-</tr>
-<tr>
-<td>Slides 7–8: LQA and classification</td>
-<td>Used as a quality/service framework. LQA assessment is not treated as the authority assigning hotel star classification.</td>
-</tr>
-<tr>
-<td>Demonstration describes “eye contact”</td>
-<td>Described technically as a centred face/head-direction proxy. The current prototype has no eye tracker.</td>
-</tr>
-</tbody>
-</table>
-<h2 id="evaluation-protocol">Appendix M. Reproducible next-stage evaluation</h2>
+<p>For protocols, distributions and caveats, see <a href="#technical-detail">Appendix L</a>, <a href="#p4">P4</a>, <a href="#p5">P5</a> and <a href="#p13">P13</a>. No additional raw measurement logs were provided with this appendix package.</p>
+<h2 id="appendix-k">Appendix K. Reproducible Next-Stage Evaluation</h2>
 <p><strong>Staged service comparison.</strong> Recruit an approved formative staff sample, record role and relevant experience, and use synthetic profiles with consenting role-play guests. Counterbalance phone and glasses conditions and scenario order. Give both conditions the same guest context and equal practice. Include a relevant drink preference, an unrelated room preference, a corrected preference, an unknown guest, two nearby enrolled guests, a fictional allergy alert, and a disconnected-server case.</p>
 <p>For each trial, record activation, first correctly rendered cue, correct interpretation, chosen service action, interruptions/attention shifts, assistance, and completion. Count all attempts, including no-result cases. Ask the role-play guest whether the action fitted the stated need. Use an observer and a fixed rubric; separate interpretation errors from wrong guest association and model extraction failures. Report participant-level results and uncertainty rather than treating repeated trials from one wearer as independent users.</p>
 <p><strong>Extraction evaluation.</strong> Define reference facts before comparing models. Two reviewers should identify the speaker, explicit statement, current-stay/enduring scope, and whether a preference is actually supported. Include negation, corrections, ambiguity, requests, complaints, and visual-only evidence. Report true supported facts, missed facts, unsupported facts, attribution errors, and processing time. Compare transcript-only and multimodal approaches on identical cases and retain model version, prompts, parameters, input hashes, and reviewed outputs.</p>
 <p><strong>Battery and latency evaluation.</strong> Repeat balanced conditions from comparable charge levels with the same brightness, network, gallery, capture policy, and workload. Include camera, microphone/VAD, inference, transfer, and display. Measure trigger-to-first-visible-cue latency across all attempts; report p50 and p95 only with enough independent observations, separate cold starts from warm retaps, and count misses, cancellations, and interruptions. Distinguish wall-clock duration, active time, traffic, battery percentage points, and measured energy. Software frame submission does not prove physical lens presentation.</p>
-<h2 id="supporting-material">Appendix N. Recording and supporting material</h2>
-<ul>
-<li><a href="transcript.html">Read and search the timestamped transcript</a>.</li>
-<li><a href="Recording.transcript.md">Download the transcript as Markdown</a>, <a href="Recording.transcript.txt">plain text</a>, or <a href="Recording.vtt">WebVTT captions</a>.</li>
-<li><a href="Slides.pdf">View the original slide deck</a> and <a href="Recording.mp4">recording</a>.</li>
-<li><a href="https://github.com/wongwh2002/CDE4301-Hotel-Hospitality/blob/main/docs/research/cde4301-interim-report-research-synthesis.md">Read the fuller project research synthesis</a>.</li>
-</ul>
-<p>The transcript is machine-generated with terminology checks and uncertainty notes; it is not a certified verbatim or speaker-diarised record. Spoken claims are preserved as speech and do not acquire verified status merely by appearing in the transcript. The recording ends just as Q&amp;A begins, so it does not contain a complete question-and-answer session.</p>
-<details>
-<summary>Play the supplied presentation recording</summary>
-<video aria-label="Interim presentation recording" controls="" preload="none">
-<source src="Recording.mp4" type="video/mp4"/>
-<track kind="captions" label="English — machine transcript" src="Recording.vtt" srclang="en"/>
-Your browser does not support embedded video. <a href="Recording.mp4">Open the recording.</a>
-</video>
-</details>
-<h2 id="technical-detail">Appendix O. Prototype recognition and extraction detail</h2>
+<h2 id="appendix-l">Appendix L. Prototype Recognition &amp; Extraction Detail</h2>
 <p><strong>Selective photo-recognition benchmark.</strong> Fifteen warm probes per mode used the same enrolled 800 × 800 image, five gallery identities, CPU execution, and 0.50/0.10 score and margin settings. Offline testing disabled Wi-Fi and stopped the laptop server. <a href="#p5">P5</a></p>
 <table>
 <thead>
