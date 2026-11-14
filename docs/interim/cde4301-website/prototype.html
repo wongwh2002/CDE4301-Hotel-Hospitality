@@ -1,1 +1,92 @@
-<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="description" content="CDE4301 Team IS-432 interim capstone: guest-context cues for personalised hotel service"><title>Prototype | CDE4301 Hospitality</title><link rel="stylesheet" href="style.css"></head><body><header><nav class="nav"><a class="brand" href="index.html">CDE4301 / IS-432</a><button class="menu" aria-label="Toggle navigation">Menu ☰</button><div class="navlinks"><a class="" href="index.html">Home</a><a class="" href="about.html">About Us</a><a class="" href="report.html">Report</a><a class="active" href="prototype.html">Prototype</a></div></nav></header><main><section class="page-head"><div><span class="eyebrow">Semester 1 proof of concept</span><h1 class="page-title">Prototype & development</h1><p>A Rokid smart-glasses recognition-and-display prototype, alongside a separate lounge-services scaffold and exploratory preference-extraction experiments.</p></div></section><section class="container"><h2 class="section-title">The service journey</h2><div class="cards"><div class="card"><span class="eyebrow">01</span><h3>Activate</h3><p>A temple tap starts the session; 15 seconds without detected speech ends it.</p></div><div class="card"><span class="eyebrow">02</span><h3>Recognise & retrieve</h3><p>Local tracking selects a face; laptop-based recognition retrieves a prepared demo profile.</p></div><div class="card"><span class="eyebrow">03</span><h3>Display</h3><p>A name and up to two concise fictional preference/allergy cues appear beside the selected face.</p></div></div><div class="prototype-section"><h2>System architecture</h2><p>Implemented path: Rokid RV101 → Wi-Fi/HTTP → laptop recognition → display. The audio-to-preference extension is planned, not yet connected.</p><a href="https://raw.githubusercontent.com/wongwh2002/CDE4301-Hotel-Hospitality/main/docs/interim/assets/system-architecture.svg" target="_blank" rel="noopener"><img src="https://raw.githubusercontent.com/wongwh2002/CDE4301-Hotel-Hospitality/main/docs/interim/assets/system-architecture.png" alt="Rokid system architecture" loading="lazy"></a><p class="small">Source: original interim report, Figure 13.</p></div><div class="prototype-section"><h2>Interface iterations</h2><p>Placement moved from fixed to face-relative; verbose cues were replaced by icons. Contextual filtering is illustrated as a proposal, not a completed feature.</p><div class="comparison-grid"><div><h3>Before: fixed placement</h3><img src="https://raw.githubusercontent.com/wongwh2002/CDE4301-Hotel-Hospitality/main/docs/interim/assets/ui/01-position-before.png" alt="Before placement" loading="lazy"></div><div><h3>After: face-relative placement</h3><img src="https://raw.githubusercontent.com/wongwh2002/CDE4301-Hotel-Hospitality/main/docs/interim/assets/ui/02-position-after.png" alt="After placement" loading="lazy"></div></div></div><div class="prototype-section"><h2>Implementation status</h2><p><span class="pill">Implemented: temple activation</span><span class="pill">Implemented: face tracking</span><span class="pill">Implemented: recognition & demo cues</span><span class="pill">Planned: approved profile updates</span><span class="pill">Planned: conversation-based cue ranking</span></p><p>The complete guest statement → approved preference update → next employee's service action has not been validated. Real-world recognition error rates and hotel-staff usability remain unmeasured.</p></div><a class="button" href="report.html#prototype">Read full technical development →</a><a class="button outline" style="color:#23413b;border-color:#b5c4b9" href="report.html#testing">View evaluation results →</a></section></main><footer class="footer">CDE4301 · Innovation & Design Capstone · Team IS-432 · Interim assessment 2026<br><a href="report.html#references">References</a> · <a href="report.html#evidence-notes">Appendices</a> · <a href="https://github.com/wongwh2002/CDE4301-Hotel-Hospitality">Project repository</a></footer><script src="script.js"></script></body></html>
+<!doctype html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description"
+        content="CDE4301 Team IS-432 interim capstone: guest-context cues for personalised hotel service">
+    <title>Prototype | CDE4301 Hospitality</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+    <header>
+        <nav class="nav"><a class="brand" href="index.html">CDE4301 / IS-432</a><button class="menu"
+                aria-label="Toggle navigation">Menu ☰</button>
+            <div class="navlinks"><a class="" href="index.html">Home</a><a class="" href="about.html">About Us</a><a
+                    class="" href="report.html">Report</a><a class="active" href="prototype.html">Prototype</a></div>
+        </nav>
+    </header>
+    <main>
+        <section class="page-head">
+            <div><span class="eyebrow">Semester 1 proof of concept</span>
+                <h1 class="page-title">Prototype & development</h1>
+                <p>A Rokid smart-glasses recognition-and-display prototype, alongside a separate lounge-services
+                    scaffold and exploratory preference-extraction experiments.</p>
+            </div>
+        </section>
+        <section class="container">
+            <h2 class="section-title">The service journey</h2>
+            <div class="cards">
+                <div class="card"><span class="eyebrow">01</span>
+                    <h3>Activate</h3>
+                    <p>A temple tap starts the session; 15 seconds without detected speech ends it.</p>
+                </div>
+                <div class="card"><span class="eyebrow">02</span>
+                    <h3>Recognise & retrieve</h3>
+                    <p>Local tracking selects a face; laptop-based recognition retrieves a prepared demo profile.</p>
+                </div>
+                <div class="card"><span class="eyebrow">03</span>
+                    <h3>Display</h3>
+                    <p>A name and up to two concise fictional preference/allergy cues appear beside the selected face.
+                    </p>
+                </div>
+            </div>
+            <div class="prototype-section">
+                <h2>System architecture</h2>
+                <p>Implemented path: Rokid RV101 → Wi-Fi/HTTP → laptop recognition → display. The audio-to-preference
+                    extension is planned, not yet connected.</p><a
+                    href="https://raw.githubusercontent.com/wongwh2002/CDE4301-Hotel-Hospitality/main/docs/interim/assets/system-architecture.svg"
+                    target="_blank" rel="noopener"><img
+                        src="https://raw.githubusercontent.com/wongwh2002/CDE4301-Hotel-Hospitality/main/docs/interim/assets/system-architecture.png"
+                        alt="Rokid system architecture" loading="lazy"></a>
+                <p class="small">Source: original interim report, Figure 13.</p>
+            </div>
+            <div class="prototype-section">
+                <h2>Interface iterations</h2>
+                <p>Placement moved from fixed to face-relative; verbose cues were replaced by icons. Contextual
+                    filtering is illustrated as a proposal, not a completed feature.</p>
+                <div class="comparison-grid">
+                    <div>
+                        <h3>Before: fixed placement</h3><img
+                            src="https://raw.githubusercontent.com/wongwh2002/CDE4301-Hotel-Hospitality/main/docs/interim/assets/ui/01-position-before.png"
+                            alt="Before placement" loading="lazy">
+                    </div>
+                    <div>
+                        <h3>After: face-relative placement</h3><img
+                            src="https://raw.githubusercontent.com/wongwh2002/CDE4301-Hotel-Hospitality/main/docs/interim/assets/ui/02-position-after.png"
+                            alt="After placement" loading="lazy">
+                    </div>
+                </div>
+            </div>
+            <div class="prototype-section">
+                <h2>Implementation status</h2>
+                <p><span class="pill">Implemented: temple activation</span><span class="pill">Implemented: face
+                        tracking</span><span class="pill">Implemented: recognition & demo cues</span><span
+                        class="pill">Planned: approved profile updates</span><span class="pill">Planned:
+                        conversation-based cue ranking</span></p>
+                <p>The complete guest statement → approved preference update → next employee's service action has not
+                    been validated. Real-world recognition error rates and hotel-staff usability remain unmeasured.</p>
+            </div><a class="button" href="report.html#prototype">Read full technical development →</a><a
+                class="button outline" style="color:#23413b;border-color:#b5c4b9" href="report.html#testing">View
+                evaluation results →</a>
+        </section>
+    </main>
+    <footer class="footer">CDE4301 · Innovation & Design Capstone · Team IS-432 · Interim assessment 2026<br><a
+            href="report.html#references">References</a> · <a href="report.html#evidence-notes">Appendices</a> · <a
+            href="https://github.com/wongwh2002/CDE4301-Hotel-Hospitality">Project repository</a></footer>
+    <script src="script.js"></script>
+</body>
+
+</html>
