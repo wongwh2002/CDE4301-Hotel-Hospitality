@@ -104,7 +104,7 @@ Section 2 translates this problem into functions, criteria, and boundaries for t
 <div><b>04 · Adapt</b>Staff make a suitable offer and confirm it.<small>Service benefit to evaluate</small></div>
 </div>
 
-## 2. Aim, scope, and requirements {#requirements}
+## 3. Aim, scope, and requirements 
 
 The design question is:
 
