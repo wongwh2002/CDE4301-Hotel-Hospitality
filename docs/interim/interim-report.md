@@ -221,7 +221,7 @@ Capture iterations use measurable tests: battery depletion, traffic, silence-tim
 <figcaption><strong>Figure 3.</strong> Intended capture workflow, before refining activation and processing allocation.</figcaption>
 </figure>
 
-#### 4.2.1 Temple-touch activation {#activation}
+#### 5.2.1 Temple-touch activation {#activation}
 
 Continuous capture requires less staff input but keeps processing active between encounters. Reported battery life was only slightly over an hour, insufficient for a hotel shift. Temple-touch activation trades a single tap for longer battery life. [P1](#p1)
 
@@ -244,7 +244,7 @@ The 20-minute battery experiment used a one-minute conversation every five minut
 
 Traffic fell by 75.9%; battery depletion fell by 19 percentage points, approximately 68% relative depletion. This measures battery-gauge change, not electrical power. [P1](#p1), [P7](#p7)
 
-#### 4.2.2 Selective server processing {#processing}
+#### 5.2.2 Selective server processing {#processing}
 
 On-device photo recognition averaged **1,927.9 ms**, longer than the proposed **1.0 s** end-to-end cue target. SCRFD and ArcFace recognition dominated the component path, motivating selective offloading. Camera handling, tracking, crop preparation, and rendering remain local; the laptop handles recognition and lookup. This targets **DR1** by keeping position updates responsive; a separate battery benefit remains unmeasured. [P3](#p3), [P5](#p5)
 
@@ -265,7 +265,7 @@ In a 15-probe warm photo test, Wi-Fi offloading averaged **1,350.6 ms**, about 3
 </figure>
 
 The offloaded mean remains above the proposed 1-second target, and the benchmark excludes camera, image preparation, and display. Only one CPU laptop was tested; a faster server or accelerated inference may help, but any gain needs complete-path testing (Section 6.2).
-#### 4.2.3 Independent preference-extraction testing {#preference-extraction}
+#### 5.2.3 Independent preference-extraction testing {#preference-extraction}
 
 Text extraction is tested separately for **DR4, preference continuity**; written transcripts are not connected to glasses audio. Two synthetic conversations contained three expected guest facts. Qwen and Gemma each matched two facts, with Qwen fastest at **67.2 seconds per transcript**. All models produced valid JSON, but Gemma misclassified a complaint and a safety question. These small tests provide examples for refinement, not general accuracy estimates. No result is written to a guest record; the full model comparison and checks are in Appendix D. [P1](#p1), [P13](#p13)
 
@@ -280,7 +280,7 @@ Display testing uses user feedback on placement, readability, and relevance. The
 <figcaption><strong>Figure 7.</strong> Identity-to-record-to-display flow; the placement iteration adds local position updates.</figcaption>
 </figure>
 
-#### 4.3.1 Positioning information beside the guest {#display-position}
+#### 5.3.1 Positioning information beside the guest {#display-position}
 
 Initially, cues occupied a fixed display position. User feedback and prototype validation prompted face-relative placement and central guest selection, aiming to reduce looking away from the guest and competing details from several visible faces. These iterations address **DR3, glanceability**. [P1](#p1), [P7](#p7)
 
@@ -296,7 +296,7 @@ Face coordinates also allow cropping before image preparation, removing a 2.2–
 <figcaption><strong>Figure 8.</strong> Generated UI comparison: local tracking brings the cue beside the guest; eye contact is unmeasured. <a href="#p12">P12</a></figcaption>
 </figure>
 
-#### 4.3.2 Replacing descriptions with concise icons {#display-content}
+#### 5.3.2 Replacing descriptions with concise icons {#display-content}
 
 Even beside the guest's face, long descriptions require staff to read while listening. To support **DR3**, the display instead shows a name and up to two icons. Preferences and allergy alerts must remain distinguishable. [P1](#p1)
 
@@ -319,7 +319,7 @@ The prototype shows at most two icons, puts allergy alerts first, and hides pers
 
 Concise information follows display guidance, but short symbols can still distract. User testing must check whether people understand the icons without coaching and use them without interrupting conversation. [R8](#r8), [R9](#r9)
 
-#### 4.3.3 Retrieving contextually relevant preferences {#contextual-retrieval}
+#### 5.3.3 Retrieving contextually relevant preferences {#contextual-retrieval}
 
 The next proposed iteration selects information to fit the moment. Face recognition determines **whose record** to retrieve; conversation and service context determine **which details** to show. Location, task, urgency, and validity could rank the candidates: during breakfast, for example, a checked drink preference should take precedence over an unrelated room arrangement.
 
