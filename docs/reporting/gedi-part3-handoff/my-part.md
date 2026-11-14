@@ -24,7 +24,7 @@ The goal is one useful, guest-confirmed detail from an early interaction, rather
 
 The criteria translate service behaviours into measurable requirements:
 
-- **DR1, on-time service support:** trigger-to-first-visible-cue latency, measured with failures included. The report uses a provisional 1.5-second p95 target.
+- **DR1, on-time service support:** the report adopts a proposed **<1 s** trigger-to-first-correct-visible-cue target. Measure target attainment and p50/p95; count late, missing, and incorrect cues. This is an engineering target, not an LQA timing rule.
 - **DR2, low-effort capture:** capture time, actions, correction effort, and disruption to conversation.
 - **DR3, glanceable interaction:** comprehension, glance duration, attention shifts, and interruption.
 - **DR4, preference continuity:** whether the correct approved detail reaches the next employee in time and is interpreted correctly.
