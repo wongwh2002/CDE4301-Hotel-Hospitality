@@ -1,68 +1,22 @@
-<!doctype html>
-<html lang="en">
-
-<head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <meta name="description"
-        content="CDE4301 Team IS-432 interim capstone: guest-context cues for personalised hotel service">
-    <title>About Us | CDE4301 Hospitality</title>
-    <link rel="stylesheet" href="style.css">
-</head>
-
-<body>
-    <header>
-        <nav class="nav"><a class="brand" href="index.html">CDE4301 / IS-432</a><button class="menu"
-                aria-label="Toggle navigation">Menu ☰</button>
-            <div class="navlinks"><a class="" href="index.html">Home</a><a class="active" href="about.html">About
-                    Us</a><a class="" href="report.html">Report</a><a class="" href="prototype.html">Prototype</a></div>
-        </nav>
-    </header>
-    <main>
-        <section class="page-head">
-            <div><span class="eyebrow">About us</span>
-                <h1 class="page-title">Designing for better service continuity.</h1>
-                <p>CDE4301 Innovation & Design Capstone · Team IS-432 · PARKROYAL club-lounge case setting</p>
-            </div>
-        </section>
-        <section class="container">
-            <h2 class="section-title">Our design question</h2>
-            <blockquote>How might we enable luxury-hotel staff to capture, share, and access relevant guest information
-                seamlessly, so they can deliver consistently personalised, high-quality service?</blockquote>
-            <p>Our Semester 1 work focuses on a proof of concept for the club-lounge food-and-drink service context. The
-                intent is to make emerging same-stay preferences available at the next encounter, with appropriate staff
-                confirmation and control.</p>
-            <h2 class="section-title">The team</h2>
-            <div class="team">
-                <div>
-                    <h3>Neha Rajan</h3>
-                    <p>Problem investigation and framing; hotel/business context, service quality and rationale for
-                        personalisation.</p>
-                </div>
-                <div>
-                    <h3>Nigel Yeo Tong Wei</h3>
-                    <p>Problem investigation and framing; current guest-information practices, first-time guest needs
-                        and design challenge.</p>
-                </div>
-                <div>
-                    <h3>Wong Weng Hong</h3>
-                    <p>Solution development; functional requirements, concept comparison and proposed staff/guest
-                        journey.</p>
-                </div>
-                <div>
-                    <h3>Tan Ping Hui</h3>
-                    <p>Solution development; technical implementation, prototype iterations, testing and next steps.</p>
-                </div>
-            </div>
-            <div class="notice">The team records permission to use the PARKROYAL lounge as a proof-of-concept setting.
-                Staff participation, real guest data and biometric testing require additional arrangements.</div><a
-                class="button" href="report.html#contributions">Read team contributions →</a>
-        </section>
-    </main>
-    <footer class="footer">CDE4301 · Innovation & Design Capstone · Team IS-432 · Interim assessment 2026<br><a
-            href="report.html#references">References</a> · <a href="report.html#evidence-notes">Appendices</a> · <a
-            href="https://github.com/wongwh2002/CDE4301-Hotel-Hospitality">Project repository</a></footer>
-    <script src="script.js"></script>
-</body>
-
-</html>
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="description" content="CDE4301 Team IS-432: Technology-Driven Personalization in Luxury Hospitality"><title>About Us | CDE4301 Hospitality</title><link rel="stylesheet" href="style.css">
+<style>
+/* Scoped About page additions: existing website styles remain unchanged. */
+.team-roster{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:clamp(14px,2vw,32px);max-width:1250px;margin:2rem auto 3rem;text-align:center}
+.member-card{min-width:0}
+.member-card img{display:block;width:100%;aspect-ratio:1;object-fit:cover;object-position:center 42%;border-radius:50%;background:#e9ebf0}
+.member-card h3{font-size:clamp(1.1rem,1.7vw,1.65rem);color:#0951b3;line-height:1.2;margin:1.1rem 0 .35rem}
+.member-card p{font-size:clamp(.95rem,1.35vw,1.35rem);color:#0951b3;line-height:1.5;margin:0}
+.member-card p span{display:block}
+@media(max-width:800px){.team-roster{grid-template-columns:repeat(2,minmax(0,1fr));row-gap:2.2rem}}
+@media(max-width:450px){.team-roster{grid-template-columns:1fr;max-width:290px}}
+</style></head><body>
+<header><nav class="nav"><a class="brand" href="index.html">CDE4301 / IS-432</a><button aria-label="Toggle navigation" class="menu">Menu ☰</button><div class="navlinks"><a href="index.html">Home</a><a class="active" href="about.html">About Us</a><a href="report.html">Report</a><a href="presentation.html">Presentation</a><a href="prototype.html">Prototype</a></div></nav></header>
+<main><section class="page-head"><div><span class="eyebrow">About Us</span><h1 class="page-title">Designing for better service continuity.</h1><p>CDE4301 Innovation &amp; Design Capstone · Team IS-432 · PARKROYAL club-lounge case setting</p></div></section>
+<section class="container"><h2 class="section-title">Our Design Question</h2><blockquote>How might we enable luxury-hotel staff to capture, share, and access relevant guest information seamlessly, so that they can deliver consistent, personalised, high-quality service?</blockquote><p>Our Semester 1 work focuses on a proof of concept for the club-lounge food-and-drink service context. The intent is to make emerging same-stay preferences available at the next encounter, with appropriate staff confirmation and control.</p>
+<h2 class="section-title">Meet Our Team</h2><div class="team-roster"><article class="member-card"><img src="assets/neha.svg" alt="Portrait of Neha Rajan" loading="lazy"><h3>Neha Rajan</h3><p>Engineering Science<span>+</span>Innovation &amp; Design</p></article>
+<article class="member-card"><img src="assets/weng-hong.svg" alt="Portrait of Wong Weng Hong" loading="lazy"><h3>Wong Weng Hong</h3><p>Computer Engineering<span>+</span>Innovation &amp; Design</p></article>
+<article class="member-card"><img src="assets/nigel.svg" alt="Portrait of Nigel Yeo Tong Wei" loading="lazy"><h3>Nigel Yeo Tong Wei</h3><p>Computer Engineering<span>+</span>Innovation &amp; Design</p></article>
+<article class="member-card"><img src="assets/ping-hui.svg" alt="Portrait of Tan Ping Hui" loading="lazy"><h3>Tan Ping Hui</h3><p>Computer Engineering<span>+</span>Innovation &amp; Design</p></article></div>
+<div class="notice">The team records permission to use the PARKROYAL lounge as a proof-of-concept setting. Staff participation, real guest data and biometric testing require additional arrangements.</div><a class="button" href="report.html#contributions">Read team contributions →</a></section></main>
+<footer class="footer">CDE4301 · Innovation &amp; Design Capstone · Team IS-432 · Interim assessment 2026<br><a href="report.html#references">References</a> · <a href="report.html#appendix-a">Appendices</a> · <a href="https://github.com/wongwh2002/CDE4301-Hotel-Hospitality">Project repository</a></footer><script src="script.js"></script></body></html>
